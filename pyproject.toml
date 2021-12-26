@@ -1,11 +1,16 @@
 [tool.poetry]
 name = "rss-to-email"
-version = "0..0.1"
+version = "0.0.1"
 description = "RSS feed to email server."
 authors = ["raokrutarth"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.7"
+requests = "^2.25.1"
+bs4 = "^0.0.1"
+lxml = "^4.6.3"
+untangle = "^1.1.1"
+xmltodict = "^0.12.0"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.790"

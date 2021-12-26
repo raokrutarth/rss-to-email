@@ -12,3 +12,11 @@ sends periodic emails to the configured destination address.
 - sql-lite & volume mount.
   - last access offset per resource.
 - APS scheduler.
+
+## Ideas
+
+- NLTK tag nouns and verbs.
+  - Stem and lem verbs.
+  - same document/email = linked.
+  - Use graphx library to find nouns linked 2/3 edges away.
+  - Use syn-nets to generalize verbs for better links.
