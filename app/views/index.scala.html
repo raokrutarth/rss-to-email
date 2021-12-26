@@ -1,5 +1,46 @@
-@()
+@(analysisRows: Array[AnalysisRow])
 
-@main("rss-to-email") {
-<h1>Home page of the rss to email app</h1>
+@main("RSS Analysis") {
+
+<section class="ftco-section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 text-center mb-5">
+        <h2 class="heading-section">News Analysis for Today</h2>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="table-wrap">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Entity</th>
+                <th>Entity Type</th>
+                <th>No. Samples</th>
+                <th>Sentiment Strength</th>
+                <th>Sentiment</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for(t <- analysisRows) {<tr>
+                <th scope="row">@t.entityName</th>
+                <td>@t.entityType</td>
+                <td>@t.numTexts</td>
+                <td>@t.aggregateConfidence</td>
+
+                @t.sentiment match {
+                case Some("negative") => {<td><a href="#" class="btn btn-danger">Negative</a></td>}
+                case Some("positive") => {<td><a href="#" class="btn btn-success">Positive</a></td>}
+                }
+                </tr>
+                }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 }

@@ -1,6 +1,6 @@
 package core
 
-import models.{Feed, FeedURL, FeedContent, Report}
+import models.{Feed, FeedURL, FeedContent, AnalysisRow}
 import play.api.Logger
 import javax.inject._
 import play.api.inject.ApplicationLifecycle
@@ -44,7 +44,7 @@ class Analysis @Inject() (lifecycle: ApplicationLifecycle) {
       .master("local")
       .config("spark.driver.memory", "100M")
       .getOrCreate()
-  spark.sparkContext.setLogLevel("WARN")
+  import spark.implicits._
 
   // https://nlp.johnsnowlabs.com/docs/en/pipelines#recognizeentitiesdl
   private val entityRecognitionPipeline =
@@ -56,10 +56,11 @@ class Analysis @Inject() (lifecycle: ApplicationLifecycle) {
     new PretrainedPipeline("analyze_sentiment", lang = "en")
 
   private val cleaningPipeline =
-    new RegexTokenizer() // removes tags from string and split into words
+    // removes html tags from string and splits into words
+    new RegexTokenizer()
       .setInputCol("rawText")
       .setOutputCol("normalized")
-      .setPattern("<[^>]+>|\\s+")
+      .setPattern("<[^>]+>|\\s+") // split by html tag or space
       .setToLowercase(false)
 
   private def getEntities(contentsDf: DataFrame): DataFrame = {
@@ -134,19 +135,15 @@ class Analysis @Inject() (lifecycle: ApplicationLifecycle) {
       .toDF("id", "rawText")
     if (shouldClean) {
       val cleanedContentsDf = cleaningPipeline.transform(rawContentsDf)
-      // cleaningPipeline.fit(rawContentsDf).transform(rawContentsDf)
-
       log.info(s"Cleaned ${cleanedContentsDf.count()} blocks of text.")
-      // cleanedContentsDf
-      //   .sample(0.25)
-      //   .select("id", "rawText", "normalized")
-      //   .show(false)
 
       val contentsDf =
-        cleanedContentsDf.select(
-          col("id"),
-          concat_ws(" ", col("normalized")).as("text")
-        )
+        cleanedContentsDf
+          .select(
+            col("id"),
+            concat_ws(" ", col("normalized")).as("text")
+          )
+          .filter("text != ''")
 
       contentsDf.sample(0.25).show(false)
       contentsDf
@@ -155,25 +152,58 @@ class Analysis @Inject() (lifecycle: ApplicationLifecycle) {
     }
   }
 
-  def generateReport(contents: Seq[FeedContent]): Option[Report] = {
-    import spark.implicits._
+  def generateReport(contents: Seq[FeedContent]): Array[AnalysisRow] = {
 
     log.info(s"Performing analysis for ${contents.size} articles.")
-    log.info(s"Connected to spark version ${spark.version}")
 
     val contentsDf = constructContentsDf(contents, true)
-    // val entitiesDf = getEntities(contentsDf)
-    // val sentimentDf = getSentiment(contentsDf)
-    // entitiesDf
-    //   .join(
-    //     sentimentDf,
-    //     sentimentDf("textId") === entitiesDf("textId"),
-    //     "inner"
-    //   )
-    //   .join(contentsDf, contentsDf("id") === sentimentDf("textId"))
-    //   .sample(0.5)
-    //   .show(false)
-    None
+    val entitiesDf = getEntities(contentsDf)
+    val sentimentDf = getSentiment(contentsDf)
+    val expandedDf = entitiesDf
+      .join(
+        sentimentDf,
+        sentimentDf("textId") === entitiesDf("textId"),
+        "inner"
+      )
+      // not the ideal join given the
+      .join(contentsDf, contentsDf("id") === sentimentDf("textId"))
+      .select(
+        sentimentDf("textId"),
+        col("entityName"),
+        col("entityType"),
+        col("sentiment"),
+        col("confidence"),
+        col("sentimentBlockLength"),
+        col("text")
+      )
+    expandedDf
+      .sample(0.5)
+      .show(false)
+
+    val resultDf = expandedDf
+      .groupBy("entityName", "entityType", "sentiment")
+      .agg(
+        collect_set("text").as("texts"),
+        countDistinct("text")
+          .as("numTexts"),
+        (sum("confidence") * sum("sentimentBlockLength"))
+          .as("aggregateConfidence")
+      )
+      .where("""
+        entityType != 'CARDINAL' 
+        and entityType != 'ORDINAL' 
+        and aggregateConfidence > 0
+      """)
+      .orderBy(col("numTexts").desc)
+      .na
+      .drop("any")
+
+    resultDf.show()
+
+    resultDf
+      .as[AnalysisRow]
+      .collect()
+    // .take(resultDf.count().toInt)
   }
 
   lifecycle.addStopHook { () =>

@@ -2,12 +2,10 @@ package controllers.v1
 
 import configuration.AppConfig
 import play.api._
-import play.api._
 import play.api.inject.SimpleModule
 import play.api.inject._
 import play.api.libs.concurrent.CustomExecutionContext
 import play.api.libs.json._
-import play.api.mvc._
 import play.api.mvc._
 import play.libs.Akka
 import scala.util.{Try, Success, Failure}
@@ -22,8 +20,9 @@ import models.FeedContent
 import java.time.LocalDate
 import akka.actor
 import play.api.Logger
-// import core.FeedValidator
+
 import core.{Scraper, Analysis}
+import models.AnalysisRow
 
 @Singleton
 class FeedsController @Inject() (
@@ -32,6 +31,25 @@ class FeedsController @Inject() (
 ) extends BaseController {
 
   val log: Logger = Logger(this.getClass())
+
+  def hp() = Action { implicit request: Request[AnyContent] =>
+    val allContents: Seq[Seq[FeedContent]] =
+      Seq(
+        "https://www.nasdaq.com/feed/rssoutbound",
+        "https://seekingalpha.com/market_currents.xml",
+        "https://seekingalpha.com/feed.xml"
+      )
+        .flatMap(u => Scraper.getContent(FeedURL(u)))
+
+    val analysisRows = analysis.generateReport(allContents.flatten)
+
+    log.info(s"Parsing ${analysisRows.size} rows into HTML template.")
+    Ok(
+      views.html.index(
+        analysisRows
+      )
+    ).as("text/html")
+  }
 
   def getReport() = Action(parse.json) { request =>
     (request.body \ "urls").asOpt[Seq[String]] match {

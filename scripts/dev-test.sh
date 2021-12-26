@@ -11,5 +11,5 @@ FEED_FILE="./app/resources/feeds-news.json"
 
 curl -X POST \
   -H 'Content-Type: application/json' \
-  -d '{"urls":["http://feeds.marketwatch.com/marketwatch/topstories/"]}' \
+  -d '{"urls":["https://www.thecipherbrief.com/feed"]}' \
   ${ADDR}/v1/rss/report

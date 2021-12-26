@@ -3,7 +3,6 @@
     "python.linting.mypyEnabled": false,
     "python.linting.enabled": true,
     "python.pythonPath": ".venv/bin/python",
-    "editor.formatOnSave": true,
     "python.formatting.provider": "black",
     "files.watcherExclude": {
         "**/target": true
@@ -16,5 +15,7 @@
     "metals.serverProperties": [
         "-Xmx1G",
         "-Xms64M"
-    ]
+    ],
+    "html.format.endWithNewline": true,
+    "editor.formatOnSave": true
 }

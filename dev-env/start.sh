@@ -7,7 +7,7 @@
 
 docker rm -f rss-dev || true
 
-docker build --file dev-env/Dockerfile -t rss-dev-img ./dev-env
+docker build --no-cache --file dev-env/Dockerfile -t rss-dev-img ./dev-env
 
 docker run \
     -d \

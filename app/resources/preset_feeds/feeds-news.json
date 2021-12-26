@@ -10,6 +10,7 @@
         "http://feeds.feedburner.com/zerohedge/feed",
         "http://thehill.com/rss/syndicator/19110",
         "http://thehill.com/taxonomy/term/1778/feed",
-        "https://nypost.com/feed"
+        "https://nypost.com/feed",
+        "https://snewsi.com/rss"
     ]
 }

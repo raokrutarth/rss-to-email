@@ -76,6 +76,10 @@ annual fees.
 - Scala/Java NLP librarier: <https://www.predictiveanalyticstoday.com/top-free-software-for-text-analysis-text-mining-text-analytics/>
 - monitoring <https://medium.com/i-love-my-local-farmer-engineering-blog/monitoring-serverless-java-applications-b0f15c487364>
 - proxy apis <https://rapidapi.com/collection/proxy>
+- mySQL on k8s cluster 
+  - <https://github.com/kubernetes/examples/tree/master/staging/storage/mysql-galera>
+  - <https://jekhokie.github.io/ubuntu/linux/python/docker/container/kubernetes/minikube/2018/09/05/kubernetes-part-2-python-flask-application-deployment.html>
+  - <https://kubernetes.io/docs/tutorials/stateful-application/mysql-wordpress-persistent-volume/#visit-your-new-wordpress-blog>
 - report ideas (see DS blogs and sites (kaggle)): 
   - <https://www.luminoso.com/>
   - <https://www.lexalytics.com/ssv>
@@ -87,8 +91,39 @@ annual fees.
 - account based:
   - send user-key and recovery key to email address.
   - if recovery key is used, assign new key and replace key in DB.
+redis: https://levelup.gitconnected.com/dockerizing-scala-redis-nginx-c97d067244d9
+spark docs: https://spark.apache.org/docs/latest/api/scala/org/apache/spark/index.html
+scala + play tutorials: https://www.youtube.com/watch?v=FqMDHsFNlxQ&list=PLLMXbkbDbVt8tBiGc1y69BZdG8at1D7ZF
 - Similar APIs:
   - <https://rapidapi.com/twinword/api/twinword-text-analysis-bundle/details>
   - <https://rapidapi.com/blog/sentiment-analysis-apis/>
 - ML module design idea: <https://www.kaggle.com/general/202189>
 - Top rss feed finder <https://eztoolset.com/>
+- Slick + PG tutorial <https://sysgears.com/articles/how-to-create-restful-api-with-scala-play-silhouette-and-slick/>
+- Report visualisation ideas <https://textvis.lnu.se/>
+- PII removal with regex <https://medium.com/spark-nlp/cleaning-and-extracting-content-from-html-xml-documents-using-spark-nlp-documentnormalizer-913d96b2ee34>
+- Twitter sentiment analysis <https://github.com/ReeceASharp/TwitterTweetScraper/blob/562f76691bac04f076bbae32b1825ea246ffabf8/src/main/scala/SparkNLP.scala>
+- Scala + Kafka <https://www.youtube.com/watch?v=k_Y5ieFHGbs>
+- Payment apis <https://www.entrepreneur.com/slideshow/300214>
+- rss feeds lists:
+  - <https://blog.feedspot.com/world_news_rss_feeds/>
+  - <https://blog.feedspot.com/category/>
+
+
+
+
+
+<!-- <td><a href="@r.url" class="btn btn-success">Progress</a></td> -->
+                <!-- <td><a href="#" class="btn btn-success">Progress</a></td> -->
+                <!-- <td><a href="#" class="btn btn-warning">Open</a></td> -->
+                <!-- <td><a href="#" class="btn btn-danger">On hold</a></td> -->
+                <!-- @for(r <- reportItems) { <tr>
+                <th scope="row">@r.url</th>
+                <td>@r.title</td>
+                <td>@r.body</td>
+                <td><a href="@r.url" class="btn btn-success">Progress</a></td>
+               <td><a href="#" class="btn btn-success">Progress</a></td> 
+              <td><a href="#" class="btn btn-warning">Open</a></td> 
+              <td><a href="#" class="btn btn-danger">On hold</a></td> 
+            </tr> 
+              } -->
