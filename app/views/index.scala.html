@@ -1,18 +1,57 @@
 @(analysisRows: Array[AnalysisRow])
 
 @main("RSS Analysis") {
+<div class="container">
+  <!-- <div class="row justify-content-center">
+    <div class="col-md-6 text-center mb-5">
+      <h2 class="heading-section">News Analysis for Today</h2>
+    </div>
+  </div> -->
 
-<section class="ftco-section">
   <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-6 text-center mb-5">
-        <h2 class="heading-section">News Analysis for Today</h2>
+    <div class="jumbotron text-white jumbotron-image shadow"
+      style="background-image: url(https://images.unsplash.com/photo-1552152974-19b9caf99137?fit=crop&w=1350&q=80);">
+      <h1>News Entity Metrics</h1>
+      <p>Get sentiment, No. of mentions and other relevant metrics
+        for entities mentioned in the news.
+      </p>
+    </div>
+  </div>
+
+
+  <div class="row" id="show-feeds">
+    <div class="col-md-12">
+      <p>
+        <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false"
+          aria-controls="collapseExample">
+          Link with href
+        </a>
+      </p>
+      <div class="collapse" id="collapseExample">
+        <div class="card card-body">
+
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">Cras justo odio</li>
+            <li class="list-group-item">Dapibus ac facilisis in</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+          </ul>
+
+        </div>
       </div>
     </div>
-    <div class="row">
-      <div class="col-md-12">
-        <div class="table-wrap">
-          <table class="table table-striped">
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table table-bordered table-dark table-striped">
             <thead>
               <tr>
                 <th>Entity</th>
@@ -30,7 +69,7 @@
                 <td>@t.aggregateConfidence</td>
 
                 @t.sentiment match {
-                case Some("negative") => {<td><a href="#" class="btn btn-danger">Negative</a></td>}
+                case Some("negative") => {<td><button type="button" class="btn btn-danger">Negative</button></td>}
                 case Some("positive") => {<td><a href="#" class="btn btn-success">Positive</a></td>}
                 }
                 </tr>
@@ -41,6 +80,5 @@
       </div>
     </div>
   </div>
-</section>
 
-}
+  }

@@ -108,22 +108,19 @@ scala + play tutorials: https://www.youtube.com/watch?v=FqMDHsFNlxQ&list=PLLMXbk
 - rss feeds lists:
   - <https://blog.feedspot.com/world_news_rss_feeds/>
   - <https://blog.feedspot.com/category/>
+- Dashboard html templates: <https://flatlogic.com/blog/top-material-react-admin-dashboards/>
+- dark theme UI toggle:
+  - <https://codepen.io/ravencolevol/pen/NWWXaBB>
+  - <https://codepen.io/j_holtslander/pen/MRbpLX>
+  - search e.x. "bootstrap dark theme coderpen"
+  - <https://medium.com/front-end-field-guide/automatic-dark-mode-for-your-website-b446d8a3b8a5>
+- material design example apps:
+  - <https://glitch.com/@material/material-studies/play/fortnightly>
+  - <https://material.io/resources>
+  - <https://glitch.com/@material/material-starter-kits>
+  - <https://github.com/material-components/material-web>
+  - With login <https://glitch.com/~material-example-app-shrine>
 
-
-
-
-
-<!-- <td><a href="@r.url" class="btn btn-success">Progress</a></td> -->
-                <!-- <td><a href="#" class="btn btn-success">Progress</a></td> -->
-                <!-- <td><a href="#" class="btn btn-warning">Open</a></td> -->
-                <!-- <td><a href="#" class="btn btn-danger">On hold</a></td> -->
-                <!-- @for(r <- reportItems) { <tr>
-                <th scope="row">@r.url</th>
-                <td>@r.title</td>
-                <td>@r.body</td>
-                <td><a href="@r.url" class="btn btn-success">Progress</a></td>
-               <td><a href="#" class="btn btn-success">Progress</a></td> 
-              <td><a href="#" class="btn btn-warning">Open</a></td> 
-              <td><a href="#" class="btn btn-danger">On hold</a></td> 
-            </tr> 
-              } -->
+- example bootstrap page from scratch <https://www.w3schools.com/bootstrap/bootstrap_theme_company.asp>
+- bootstrap dark theme css <https://bootstrap.themes.guide/darkster/>
+- popover for links from buttons<https://getbootstrap.com/docs/4.0/components/popovers/>

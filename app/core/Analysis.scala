@@ -41,7 +41,7 @@ class Analysis @Inject() (lifecycle: ApplicationLifecycle) {
       )
       .config("spark.kryoserializer.buffer.max", "100M")
       .config("spark.executor.memory", "500M")
-      .master("local")
+      .master("local[*]")
       .config("spark.driver.memory", "100M")
       .getOrCreate()
   import spark.implicits._
@@ -128,9 +128,10 @@ class Analysis @Inject() (lifecycle: ApplicationLifecycle) {
       case (c: FeedContent, idx: Int) =>
         (idx + contents.size + 1, c.body)
     }
+
     val rawContentsDf = spark
       .createDataFrame(
-        allTitles ++ allDescriptions
+        spark.sparkContext.parallelize(allTitles ++ allDescriptions)
       )
       .toDF("id", "rawText")
     if (shouldClean) {
@@ -145,7 +146,7 @@ class Analysis @Inject() (lifecycle: ApplicationLifecycle) {
           )
           .filter("text != ''")
 
-      contentsDf.sample(0.25).show(false)
+      contentsDf.sample(0.25).show()
       contentsDf
     } else {
       rawContentsDf.select(col("id"), col("rawText").as("text"))
@@ -178,12 +179,12 @@ class Analysis @Inject() (lifecycle: ApplicationLifecycle) {
       )
     expandedDf
       .sample(0.5)
-      .show(false)
+      .show()
 
     val resultDf = expandedDf
       .groupBy("entityName", "entityType", "sentiment")
       .agg(
-        collect_set("text").as("texts"),
+        // collect_set("text").as("texts"),
         countDistinct("text")
           .as("numTexts"),
         (sum("confidence") * sum("sentimentBlockLength"))
@@ -199,11 +200,9 @@ class Analysis @Inject() (lifecycle: ApplicationLifecycle) {
       .drop("any")
 
     resultDf.show()
-
     resultDf
       .as[AnalysisRow]
       .collect()
-    // .take(resultDf.count().toInt)
   }
 
   lifecycle.addStopHook { () =>

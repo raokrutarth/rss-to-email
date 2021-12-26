@@ -33,20 +33,50 @@ class FeedsController @Inject() (
   val log: Logger = Logger(this.getClass())
 
   def hp() = Action { implicit request: Request[AnyContent] =>
-    val allContents: Seq[Seq[FeedContent]] =
-      Seq(
-        "https://www.nasdaq.com/feed/rssoutbound",
-        "https://seekingalpha.com/market_currents.xml",
-        "https://seekingalpha.com/feed.xml"
-      )
-        .flatMap(u => Scraper.getContent(FeedURL(u)))
+    // val allContents: Seq[Seq[FeedContent]] =
+    //   Seq(
+    //     "http://rss.cnn.com/rss/cnn_topstories.rss"
+    //     // "http://rss.cnn.com/rss/cnn_world.rss",
+    //     // "http://rss.cnn.com/rss/cnn_us.rss",
+    //     // "http://rss.cnn.com/rss/cnn_latest.rss",
+    //     // "https://rss.politico.com/congress.xml",
+    //     // "http://rss.politico.com/politics.xml",
+    //     // "https://feeds.a.dj.com/rss/RSSWorldNews.xml",
+    //     // "http://feeds.feedburner.com/zerohedge/feed",
+    //     // "http://thehill.com/rss/syndicator/19110",
+    //     // "http://thehill.com/taxonomy/term/1778/feed",
+    //     // "https://nypost.com/feed",
+    //     // "https://snewsi.com/rss"
+    //     // "https://www.reddit.com/r/StockMarket/.rss"
+    //   )
+    //     .flatMap(u => Scraper.getContent(FeedURL(u)))
 
-    val analysisRows = analysis.generateReport(allContents.flatten)
+    // val reportDf = analysis.generateReport(allContents.flatten)
+    // val analysisRows = reportDf
 
-    log.info(s"Parsing ${analysisRows.size} rows into HTML template.")
+    // log.info(s"Parsing ${analysisRows.size} rows into HTML template.")
+
+    // TODO progress bar for sentiment scale
+    // https://www.w3schools.com/bootstrap/bootstrap_progressbars.asp
     Ok(
       views.html.index(
-        analysisRows
+        // analysisRows
+        Array(
+          AnalysisRow(
+            Some("et"),
+            Some("ORD"),
+            Some("negative"),
+            Some(0),
+            Some(0)
+          ),
+          AnalysisRow(
+            Some("et3333333"),
+            Some("ORD"),
+            Some("positive"),
+            Some(100000),
+            Some(0.999)
+          )
+        )
       )
     ).as("text/html")
   }
