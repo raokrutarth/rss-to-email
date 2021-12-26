@@ -6,6 +6,7 @@ import play.api.mvc._
 import play.api.cache.Cached
 import com.typesafe.scalalogging.Logger
 import fyi.newssnips.webapp.core._
+import scala.util._
 
 @Singleton
 class HomeController @Inject() (

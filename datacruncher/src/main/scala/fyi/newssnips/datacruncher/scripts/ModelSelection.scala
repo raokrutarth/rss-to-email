@@ -200,7 +200,7 @@ object SentimentLoadDistillBert {
           new Tokenizer()
             .setInputCols("document")
             .setOutputCol("token"),
-          DistilBertForTokenClassification
+          DistilBertForSequenceClassification
             .loadSavedModel(
               "distilbert-base-uncased-finetuned-sst-2-english/saved_model/1",
               Init.spark
@@ -238,7 +238,7 @@ object SentimentLoadBert {
           new Tokenizer()
             .setInputCols("document")
             .setOutputCol("token"),
-          BertForTokenClassification
+          BertForSequenceClassification
             .loadSavedModel(
               "M-FAC/bert-mini-finetuned-sst2/saved_model/1",
               Init.spark
@@ -288,7 +288,12 @@ object SentimentLoadRoberta {
             .setOutputCol("token"),
           RoBertaForTokenClassification
             .loadSavedModel(
-              "cardiffnlp/twitter-roberta-base-emotion/saved_model/1",
+              /*
+                0	negative
+                1	neutral
+                2	positive
+               */
+              "cardiffnlp/twitter-roberta-base-sentiment/saved_model/1",
               Init.spark
             )
             .setInputCols(Array("document", "token"))

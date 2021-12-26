@@ -13,7 +13,7 @@ libraryDependencies += "org.apache.spark" %% "spark-sql"   % sparkVersion
 libraryDependencies += "org.apache.spark" %% "spark-mllib" % sparkVersion
 // libraryDependencies += "org.apache.spark" %% "spark-ml" % sparkVersion
 // https://mvnrepository.com/artifact/com.johnsnowlabs.nlp/spark-nlp
-libraryDependencies += "com.johnsnowlabs.nlp" %% "spark-nlp" % "3.3.2"
+libraryDependencies += "com.johnsnowlabs.nlp" %% "spark-nlp" % "3.3.3"
 libraryDependencies += "com.typesafe"          % "config"    % "1.4.1"
 
 libraryDependencies += "ch.qos.logback"              % "logback-classic" % "1.2.3"
@@ -33,11 +33,11 @@ scalafmtOnCompile := true
 scalafixOnCompile := true
 
 // export JAVA_OPTS="-XX:+AggressiveHeap -Xms512M -Xmx6048M"
-// export JAVA_OPTS="-Xms1024M -Xmx7048M -XX:+UseG1GC"
+// export JAVA_OPTS="-Xms1024M -Xmx7048M -XX:+UseG1GC -XX:+UseStringDeduplication"
 lazy val root = (project in file(".")).settings(
   javaOptions ++= Seq(
     "-Xms512M",
-    "-Xmx4048M",
+    "-Xmx6048M",
     "-XX:+AggressiveHeap"
   )
 )

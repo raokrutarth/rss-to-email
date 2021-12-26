@@ -17,6 +17,9 @@ import fyi.newssnips.models.Feed
 import fyi.newssnips.datastore.Cache
 import org.apache.spark.storage.StorageLevel
 import fyi.newssnips.datacruncher.datastore.SparkPostgres
+import fyi.newssnips.datacruncher.scripts.ModelExpriments
+import fyi.newssnips.datacruncher.scripts.ModelStore
+import configuration.AppConfig
 
 object AnalysisCycle {
   private val log = Logger("app." + this.getClass().toString())
@@ -29,6 +32,7 @@ object AnalysisCycle {
         "spark.serializer",
         "org.apache.spark.serializer.KryoSerializer"
       )
+      .config("spark.sql.broadcastTimeout", 1200)
       .master("local[*]")
       .getOrCreate()
 
@@ -118,6 +122,9 @@ object AnalysisCycle {
     )
     val categoryMetadata = DbConstants.categoryToDbMetadata(categoryId)
 
+    // se only one feed in developemnt/test mode
+    if (AppConfig.settings.inProd) urls else urls.take(2)
+
     val categoryFeeds: Seq[Feed] = urls.flatMap { u =>
       // TODO group urls by host/first8-chars and reduce sleep time.
       Thread.sleep(726) // sleep to avoid rate limiting
@@ -204,12 +211,27 @@ object AnalysisCycle {
   }
   cache.flushCache()
   cache.cleanup()
+  spark.stop()
+}
+
+object ScratchCode {
+  Scraper.getApiFeed()
 }
 
 object Main extends App {
   val log = Logger("app." + this.getClass().toString())
-  log.info("Running datacruncher.")
-  AnalysisCycle
-  // ModelStore.storeCycle()
-  log.info("Analysis cycle finished.")
+
+  val usage = "$ [expriment|cycle|scratch]"
+  log.info(s"Running datacruncher with args: ${this.args.mkString(", ")}")
+  val mode = args(0)
+
+  mode match {
+    case "expriment"   => ModelExpriments.sentiment()
+    case "cycle"       => AnalysisCycle
+    case "scratch"     => ScratchCode
+    case "model_store" => ModelStore.storeCycle()
+    case _             => log.error(s"$mode is an invalid mode.")
+  }
+
+  log.info("datacruncher execution finished.")
 }

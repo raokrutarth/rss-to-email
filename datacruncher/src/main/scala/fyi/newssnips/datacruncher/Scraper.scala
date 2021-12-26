@@ -9,6 +9,7 @@ import configuration.AppConfig
 import scala.util.{Failure, Success, Try}
 import com.typesafe.scalalogging.Logger
 import fyi.newssnips.shared.DateTimeUtils
+import play.api.libs.json._
 
 object Scraper {
   private val httpClient =
@@ -28,7 +29,7 @@ object Scraper {
       "user-agent",
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1.2 Safari/605.1.15"
     )
-    request.setHeader("Accept", "application/rss+xml")
+    request.setHeader("Accept", "application/rss")
     val response    = httpClient.execute(request)
     val status_code = response.getStatusLine().getStatusCode()
 
@@ -42,6 +43,32 @@ object Scraper {
         throw new IllegalArgumentException(
           s"Invalid response status code $status_code"
         )
+    }
+  }
+
+  def getApiFeed(categoryId: String = "general"): Option[Feed] = {
+    // https://newsapi.org/docs/endpoints/top-headlines
+    // TODO need to better pick scraper utility.
+    val request = new HttpGet(
+      s"https://newsapi.org/v2/top-headlines?country=us&category=${categoryId}&pageSize=100"
+    )
+    request.setHeader(
+      "X-Api-Key",
+      AppConfig.settings.newsApi.apiKey
+    )
+    val response    = httpClient.execute(request)
+    val status_code = response.getStatusLine().getStatusCode()
+
+    status_code match {
+      case 200 =>
+        val payload = Json.parse(EntityUtils.toString(response.getEntity()))
+        log.info(s"first article: ${payload \\ "title"}")
+        None
+      case _ =>
+        log.error(
+          s"Unable to fetch content from news API with status code $status_code"
+        )
+        None
     }
   }
 

@@ -3,14 +3,13 @@ package fyi.newssnips.webapp.core
 import com.typesafe.scalalogging.Logger
 import configuration.AppConfig
 import java.sql.{DriverManager, ResultSet}
-import scala.util.Try
 import fyi.newssnips.shared.DbConstants
-import scala.util.Success
-import scala.util.Failure
+import scala.util._
 import fyi.newssnips.shared._
 import java.sql.{Connection, Statement}
 import com.zaxxer.hikari._
 import fyi.newssnips.models._
+import java.sql.PreparedStatement
 
 // http://edulify.github.io/play-hikaricp.edulify.com/
 object Postgres {
@@ -57,41 +56,70 @@ object Postgres {
     }
   }
 
-  def getAnalysisRows(categoryMetadata: CategoryDbMetadata): Try[Array[AnalysisRow]] = Try {
+  /** Loads rows (if any) for the given read query into an array. Careful of memory overflow.
+    *
+    * @param query
+    *   The string query
+    * @param queryArgs
+    *   Function that takes in a prepared statement and sets the variables in the query using the
+    *   .set methods. Default is a NO-OP.
+    * @param parser
+    *   converts a row to the needed case class object.
+    * @return
+    *   array of rows
+    */
+  def getRows[A: ClassManifest](
+      query: String,
+      queryArgs: PreparedStatement => Unit = _ => (),
+      parser: ResultSet => A
+  ): Try[Array[A]] = Try {
     val conn = connectionPool.getConnection
     try {
-      val rows = conn
-        .createStatement(
-          ResultSet.TYPE_FORWARD_ONLY,
-          ResultSet.CONCUR_READ_ONLY
-        )
-        .executeQuery(
-          s"""
-          SELECT * FROM ${categoryMetadata.analysisTableName}
-          ORDER BY "totalNumTexts" DESC;
-          """
-        )
+      val statement = conn
+        .prepareStatement(query)
+      queryArgs(statement)
+      val res = statement.executeQuery()
 
-      var analysisRows = Array[AnalysisRow]()
-      while (rows.next) {
-        analysisRows = analysisRows :+ AnalysisRow(
-          entityName = rows.getString("entityName"),
-          entityType = rows.getString("entityType"),
-          negativeMentions = rows.getLong("negativeMentions"),
-          positiveMentions = rows.getLong("positiveMentions"),
-          totalNumTexts = rows.getLong("totalNumTexts"),
-          positiveTextIds = None,
-          negativeTextIds = None
-        )
+      var rows = Array[A]()
+      while (res.next) {
+        rows = rows :+ parser(res)
       }
-      log.info(s"Fetched analysis table with ${analysisRows.size} rows.")
-      analysisRows
+      log.info(s"Fetched ${rows.size} row(s) for query ${query}")
+      rows
     } catch {
       case e: Exception =>
         throw e
     } finally {
       conn.close()
     }
+  }
+
+  def getAnalysisRows(
+      categoryMetadata: CategoryDbMetadata,
+      limit: Int = 100,
+      offset: Int = 0
+  ): Try[Array[AnalysisRow]] = {
+    val q = s"""
+      SELECT * FROM ${categoryMetadata.analysisTableName}
+      ORDER BY "totalNumTexts" DESC 
+      LIMIT ? OFFSET ?;
+    """
+    val parser = (r: ResultSet) => {
+      AnalysisRow(
+        entityName = r.getString("entityName"),
+        entityType = r.getString("entityType"),
+        negativeMentions = r.getLong("negativeMentions"),
+        positiveMentions = r.getLong("positiveMentions"),
+        totalNumTexts = r.getLong("totalNumTexts"),
+        positiveTextIds = None,
+        negativeTextIds = None
+      )
+    }
+    val queryArgs = (p: PreparedStatement) => {
+      p.setInt(1, limit)
+      p.setInt(2, offset)
+    }
+    getRows[AnalysisRow](q, queryArgs, parser)
   }
 
   def getFeedsRows(categoryMetadata: CategoryDbMetadata): Try[Array[FeedRow]] = Try {
@@ -142,7 +170,7 @@ object Postgres {
     log.info(s"Fetching texts for ${logIdentifier}")
 
     val conn = connectionPool.getConnection
-    val analysisIdsCol = sentiment.trim match {
+    val analysisIdsCol = sentiment.trim.toLowerCase match {
       case "negative" | "neg" => "negativeTextIds"
       case "positive" | "pos" => "positiveTextIds"
       case _                  => "UNKNOWN"

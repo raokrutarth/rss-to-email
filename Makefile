@@ -95,16 +95,13 @@ wa-deploy:
 	
 	$(GCLD) "gcloud run deploy webapp \
 		--image $(GCP_WA_IMAGE) \
-		--memory 2Gi \
-		--cpu 2 \
-		--allow-unauthenticated \
-		--max-instances=1 \
-		--min-instances=0"
+		--allow-unauthenticated"
 	
-	$(GCLD) "gcloud beta run services update webapp --no-cpu-throttling"
+	make -s wa-scale-update
 
 wa-scale-update:
-	$(GCLD) "gcloud run services update webapp --min-instances=0 --max-instances=1"
+	$(GCLD) "gcloud run services update webapp --min-instances=1 --max-instances=2"
+	$(GCLD) "gcloud beta run services update webapp --cpu-throttling"
 
 # https://cloud.google.com/run/docs/mapping-custom-domains
 # check on https://console.cloud.google.com/run/domains?project=newssnips

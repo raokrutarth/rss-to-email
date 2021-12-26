@@ -12,7 +12,7 @@ import com.johnsnowlabs.nlp.base._
 import org.apache.spark.sql.SparkSession
 import com.johnsnowlabs.nlp.base._
 import org.apache.spark.sql.functions._
-
+import org.apache.spark.sql.types._
 import com.johnsnowlabs.nlp.base._
 import org.apache.spark.sql.SparkSession
 import com.johnsnowlabs.nlp.base._
@@ -52,7 +52,31 @@ class Analysis(spark: SparkSession) {
   private def getEntities(contentsDf: DataFrame): DataFrame = {
     val transformed = entityRecognitionPipeline.transform(contentsDf)
     log.info(s"Extracted entities from blocks of text.")
-
+    val typesToSkip = Seq("CARDINAL", "ORDINAL", "PERCENT", "WORK_OF_ART")
+    val entitiesToSkip = Seq(
+      // hardcoded for now. move to file later.
+      "tyler durden",
+      "today",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thrusday",
+      "friday",
+      "saturday",
+      "sunday",
+      "today's",
+      "toto",
+      "week's",
+      "hollywood in toto",
+      "jason moser",
+      "ron gross",
+      "andy cross",
+      "emily flippen",
+      "matt argersinger",
+      "jim mueller",
+      "tom gardner"
+      // remove https://fool.libsyn.com/michael-lewis-returns
+    )
     // Every ROW contains the text with an array of entities and
     // corresponding array of maps that contain the tags for each entity.
     // to get all entities and their tags, need to explode each array column.
@@ -72,6 +96,9 @@ class Analysis(spark: SparkSession) {
           .as("entityName"),
         col("entity.metadata.entity").as("entityType")
       )
+      .filter(!col("entityType").isInCollection(typesToSkip))
+      .filter(!lower(col("entityName")).isInCollection(entitiesToSkip))
+
     log.info(s"Extracted entities and their types.")
     DfUtils.showSample(entitiesDf)
     entitiesDf
@@ -94,7 +121,10 @@ class Analysis(spark: SparkSession) {
       ) // remove junk/trivial text blocks
       .select(
         col("text_id"),
-        col("sentiment.result").as("sentiment")
+        col("sentiment.result").as("sentiment"),
+        array_max(
+          map_values($"sentiment.metadata").cast(ArrayType(DoubleType))
+        ).as("confidence")
       )
       .withColumn(
         "sentiment",
@@ -136,10 +166,8 @@ class Analysis(spark: SparkSession) {
     log.info(
       s"Constructed intermediate result of entities & sentiments."
     )
-    val typesToSkip = Seq("CARDINAL", "ORDINAL", "PERCENT", "WORK_OF_ART")
 
     val resultDf = expandedDf
-      .filter(!col("entityType").isInCollection(typesToSkip))
       .groupBy("entityName", "entityType")
       .agg(
         // collect relevant texts
@@ -153,7 +181,6 @@ class Analysis(spark: SparkSession) {
       // get sentiment counts
       .withColumn("negativeMentions", size(col("negativeTextIds")))
       .withColumn("positiveMentions", size(col("positiveTextIds")))
-      // .orderBy(col("totalNumTexts").desc)
       .na
       .drop("any")
 

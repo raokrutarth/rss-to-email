@@ -93,6 +93,7 @@ RUN wget https://dlcdn.apache.org/spark/spark-3.1.2/spark-3.1.2-bin-hadoop3.2.tg
 RUN tar xvf spark.tgz && rm -rf ${SPARK_HOME}/* && mv spark-3.1.2-bin-hadoop3.2/* $SPARK_HOME && rm -rf spark.tgz
 
 USER ${NB_UID}
+ENV TF_CPP_MIN_LOG_LEVEL=2
 
 RUN set -x && \
   fix-permissions "${HOME}"

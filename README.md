@@ -77,6 +77,7 @@ annual fees.
 - Scala/Java NLP librarier: <https://www.predictiveanalyticstoday.com/top-free-software-for-text-analysis-text-mining-text-analytics/>
 - monitoring <https://medium.com/i-love-my-local-farmer-engineering-blog/monitoring-serverless-java-applications-b0f15c487364>
 - proxy apis <https://rapidapi.com/collection/proxy>
+- basic session, login and authentication in code: https://pedrorijo.com/blog/scala-play-auth/
 - mySQL on k8s cluster 
   - <https://github.com/kubernetes/examples/tree/master/staging/storage/mysql-galera>
   - <https://jekhokie.github.io/ubuntu/linux/python/docker/container/kubernetes/minikube/2018/09/05/kubernetes-part-2-python-flask-application-deployment.html>

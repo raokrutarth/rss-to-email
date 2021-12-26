@@ -13,6 +13,10 @@ GET /v1/category/:categoryId                                  controllers.v1.Fee
 
 GET /v1/:categoryId/mentions/:entityName/:entityType/:sentiment  controllers.v1.FeedsController.mentions(categoryId: String, entityName: String, entityType: String, sentiment: String)
 
+GET /v1/newsletter/signup  controllers.v1.CommsController.newsletterSignupGet()
+POST /v1/newsletter/signup  controllers.v1.CommsController.newsletterSignupPost()
+GET /v1/newsletter/verify  controllers.v1.CommsController.newsletterVerifyGet(token: String)
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 

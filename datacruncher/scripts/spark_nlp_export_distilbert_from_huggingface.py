@@ -49,9 +49,9 @@ def format_model_dirs(model_name: str, model):
     - In addition to vocabs, we also need `labels` and their `ids` which is saved inside the model's config. We will save this inside `labels.txt`
     """
 
-    asset_path = f'{model_name}/saved_model/1/assets'
+    asset_path = f'models/{model_name}/saved_model/1/assets'
     # !cp {MODEL_NAME}_tokenizer/vocab.txt {asset_path}/
-    copyfile(f"{model_name}_tokenizer/vocab.txt", f"{asset_path}/vocab.txt")
+    copyfile(f"models/{model_name}_tokenizer/vocab.txt", f"{asset_path}/vocab.txt")
 
     # get label2id dictionary 
     labels = model.config.label2id
@@ -70,22 +70,22 @@ def format_model_dirs(model_name: str, model):
 def download_distillbert(model_name: str):
     # ! rm -rf {MODEL_NAME}
     tokenizer = DistilBertTokenizer.from_pretrained(model_name)
-    tokenizer.save_pretrained('./{}_tokenizer/'.format(model_name))
+    tokenizer.save_pretrained('models/{}_tokenizer/'.format(model_name))
 
     # Add from_pt=True since there is no TF weights available for this model
     # from_pt=True will convert the pytorch model to tf model
 
-    model = TFDistilBertForTokenClassification.from_pretrained(model_name, from_pt=True)
-    model.save_pretrained("./{}".format(model_name), saved_model=True)
+    model = TFDistilBertForSequenceClassification.from_pretrained(model_name, from_pt=True)
+    model.save_pretrained("models/{}".format(model_name), saved_model=True)
 
-    format_model_dirs(model_name)
+    format_model_dirs(model_name, model)
 
 def download_bert(model_name: str):
     tokenizer = BertTokenizer.from_pretrained(model_name)
-    tokenizer.save_pretrained('./{}_tokenizer/'.format(model_name))
+    tokenizer.save_pretrained('models/{}_tokenizer/'.format(model_name))
 
-    model = TFBertForTokenClassification.from_pretrained(model_name, from_pt=True)
-    model.save_pretrained("./{}".format(model_name), saved_model=True)
+    model = TFBertForSequenceClassification.from_pretrained(model_name, from_pt=True)
+    model.save_pretrained("models/{}".format(model_name), saved_model=True)
 
     format_model_dirs(model_name, model)
 
@@ -140,8 +140,9 @@ def download_xmlroberta(model_name: str):
         f.write('\n'.join(labels))
 
 if __name__ == "__main__":
-    model_name = "cardiffnlp/twitter-roberta-base-emotion"
+    model_name = "distilbert-base-uncased-finetuned-sst-2-english"
+    download_distillbert(model_name)
     # download_xmlroberta(model_name)
     # download_bert(model_name)
-    download_roberta(model_name)
+    # download_roberta(model_name)
     # move(curr_dir, resources_dir)

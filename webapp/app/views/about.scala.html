@@ -6,19 +6,22 @@
     <div class="col-md-12 px-0">
       <h1 class="font-italic">About</h1>
       <p class="lead">
-        Browse news in a new way. Identify the topics you care about and
-        leverege machine learning to reduce noise so you can stay informed
-        of the trending topics, the position taken by the media on these
-        topics and why.
+        Stay informed without the negativity.
+
       </p>
       <p>
-        NewsSnips is way to stay up-to-date on the <strong>trends</strong> of the news cycle
-        without getting sucked into it. The platform summarizes the content from the sources
-        into metrics so you can spend your valuable time on topics useful to you.
+        What consumes our attention shapes our opinions and views. Our opinions
+        and views
+        shape our mental health (and actions). Factors well beyond taps on a
+        screen. Allow NewsSnips to filter out scaremongering and sensationalism.
+      </p>
+      <p>
+        Choose where you spend you attention.
       </p>
       <p class="lead mb-0">
         <a role="button" class="btn btn-primary" href="/v1/home">Show Me</a>
-        <a role="button"  class="btn btn-secondary" href="#faq" class="text-white font-weight-bold">I Have Questions</a>
+        <a role="button" class="btn btn-secondary" href="#faq"
+          class="text-white font-weight-bold">I Have Questions</a>
       </p>
     </div>
   </div>
@@ -58,57 +61,72 @@
     <!-- START THE FEATURETTES -->
 
     <hr class="featurette-divider">
-
-    <div class="row featurette">
-
-      <div class="col-md-7">
-        <h2 class="featurette-heading">Sources. <span class="text-muted">See where we gathered the data from.</span></h2>
-        <p class="lead">
-          RSS feeds provided by major news sources such as <a href="https://www.cnn.com/">CNN</a>,
-          <a href="https://www.foxnews.com/">Fox news</a> and <a href="https://www.wsj.com/">the WSJ</a>.
-        </p>
-        <p class="lead">
-          We also leverage sites like <a href="https://www.reddit.com/r/ListOfSubreddits/wiki/listofsubreddits/">Reddit</a> where
-          the member count and moderation appears appropriate for relevant content.
-        </p>
-      </div>
-
-      <div class="col-md-5">
-        <img class="featurette-image img-fluid mx-auto shadow-lg" style="width: 500px; height: 500px;"
-          data-holder-rendered="true" src="https://newssnips-fyi.s3.us-west-1.amazonaws.com/public/images/sources.png">
-      </div>
-    </div>
-
-    <hr class="featurette-divider">
-
     <div class="row featurette">
       <div class="col-md-7 order-md-2">
-        <h2 class="featurette-heading">Mention Categories. <span class="text-muted">See the positive/negative skewness of each topic's mentions.</span>
+        <h2 class="featurette-heading">Mention Categories. <span
+            class="text-muted">See the positive/negative sentiment
+            skew per topic.</span>
         </h2>
         <p class="lead">
-          Number of mentions of each topic in the category across all the sources. Positive and negative as
-          analysed with <a href="https://www.johnsnowlabs.com/detect-sentiment-emotion/">machine learning</a>. 
-          Click the numbers to see each mention.
+          Tap the number of mentions in the sentiment category to see the
+          <a href="https://www.johnsnowlabs.com/detect-sentiment-emotion/"
+            target="_blank"> sentiment assignment </a>.
+        </p>
+        <p class="lead">Sentiment assignment gives you the power to focus
+          on the positives while also giving your a prospective on the scale of
+          negative mentions on a trending topic.
         </p>
       </div>
       <div class="col-md-5 order-md-1">
-        <img class="featurette-image img-fluid mx-auto shadow-lg" style="width: 500px; height: 500px;"
-          src="https://newssnips-fyi.s3.us-west-1.amazonaws.com/public/images/mentions.png" data-holder-rendered="true">
+        <img class="featurette-image img-fluid mx-auto shadow-lg"
+          style="width: 500px; height: 500px;"
+          src="https://newssnips-fyi.s3.us-west-1.amazonaws.com/public/images/mentions.png"
+          data-holder-rendered="true">
       </div>
     </div>
 
     <hr class="featurette-divider">
-
     <div class="row featurette">
       <div class="col-md-7">
-        <h2 class="featurette-heading">Details behind the numbers. <span class="text-muted">See each mention at the sentence level.</span>
+        <h2 class="featurette-heading">Sources. <span class="text-muted">See
+            where we gathered the data.</span>
         </h2>
         <p class="lead">
-          Zoom in to each mention category to see each sentence and its original article/post.
+          NewsSnips ingests feeds by major news sources such as <a
+            href="https://www.cnn.com/">CNN</a>,
+          <a href="https://www.foxnews.com/">Fox news</a> and <a
+            href="https://www.wsj.com/">the WSJ</a>.
+        </p>
+        <p class="lead">
+          We also leverage social media platforms like <a
+            href="https://www.reddit.com/">Reddit</a>. More sources coming
+          soon to provide a comprehensive view of the news landscape. If you’d
+          like to suggest a source, please use the
+          feedback option.
+        </p>
+      </div>
+
+      <div class="col-md-5">
+        <img class="featurette-image img-fluid mx-auto shadow-lg"
+          style="width: 500px; height: 500px;" data-holder-rendered="true"
+          src="https://newssnips-fyi.s3.us-west-1.amazonaws.com/public/images/sources.png">
+      </div>
+    </div>
+
+    <hr class="featurette-divider">
+    <div class="row featurette">
+      <div class="col-md-7">
+        <h2 class="featurette-heading">Details behind the numbers. <span
+            class="text-muted">See each mention for a dive deeper.</span>
+        </h2>
+        <p class="lead">
+          Zoom in to each mention category to see each sentence and its original
+          article/post.
         </p>
       </div>
       <div class="col-md-5">
-        <img class="featurette-image img-fluid mx-auto shadow-lg p-3" style="width: 500px; height: 500px;"
+        <img class="featurette-image img-fluid mx-auto shadow-lg p-3"
+          style="width: 500px; height: 500px;"
           src="https://newssnips-fyi.s3.us-west-1.amazonaws.com/public/images/mentions-zoom.png"
           data-holder-rendered="true">
       </div>
@@ -127,7 +145,8 @@
         <!-- Section Heading-->
         <div class="text-center">
           <h3>Frequently Asked Questions</h3>
-          <p>If your question is not answered, feel free to use the feedback link at the bottom of the page.</p>
+          <p>If your question is not answered, feel free to use the feedback
+            link at the bottom of the page.</p>
         </div>
       </div>
     </div>
@@ -137,13 +156,17 @@
         <div class="accordion faq-accordian" id="faqAccordion">
           <div class="card border-0 ">
             <div class="card-header" id="headingOne">
-              <h6 class="mb-0 collapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true"
-                aria-controls="collapseOne">Why does this site exist?<span class="lni-chevron-up"></span></h6>
+              <h6 class="mb-0 collapsed" data-toggle="collapse"
+                data-target="#collapseOne" aria-expanded="true"
+                aria-controls="collapseOne">Why does NewsSnips exist?<span
+                  class="lni-chevron-up"></span></h6>
             </div>
-            <div class="collapse" id="collapseOne" aria-labelledby="headingOne" data-parent="#faqAccordion">
+            <div class="collapse" id="collapseOne" aria-labelledby="headingOne"
+              data-parent="#faqAccordion">
               <div class="card-body">
                 <p>
-                  There is mounting evidence that the volume of information being consumed by
+                  There is mounting evidence that the volume of information
+                  being consumed by
                   the average user is
                   <a target="_blank" class="link-light"
                     href="https://www.google.com/search?q=global+social+media+screen+time+usage+report">increasing</a>.
@@ -153,76 +176,100 @@
 
                 </p>
                 <p>
-                  The result is a population that is increasingly exepriencing information overload
-                  as argued by <a target="_blank" href="https://amzn.to/2ZNUo4v" class="link-light">The Shallows</a>,
-                  <a target="_blank" href="https://amzn.to/3BJAchw">Amusing Ourselves to Death</a>
-                  and <a target="_blank" href="https://amzn.to/3mIR9Er">Irresistible.</a>
+                  The result is a population that is increasingly exepriencing
+                  information overload
+                  as argued by <a target="_blank" href="https://amzn.to/2ZNUo4v"
+                    class="link-light">The Shallows</a>,
+                  <a target="_blank" href="https://amzn.to/3BJAchw">Amusing
+                    Ourselves to Death</a>
+                  and <a target="_blank"
+                    href="https://amzn.to/3mIR9Er">Irresistible.</a>
 
                 </p>
                 <p>
-                  We want to counter these effects by making news and information media in general more digestable
-                  so consumers of information can <strong>stay informed</strong> with the help of modern data ingestion
-                  technology.
+                  We want to counter these effects by making news and
+                  information media in general more digestible so consumers of
+                  information can stay informed with the help of modern data
+                  ingestion technology.
                 </p>
               </div>
             </div>
           </div>
           <div class="card border-0 ">
             <div class="card-header" id="headingTwo">
-              <h6 class="mb-0 collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true"
-                aria-controls="collapseTwo">Why is the total mentions count less than positive + negative mentions?<span
+              <h6 class="mb-0 collapsed" data-toggle="collapse"
+                data-target="#collapseTwo" aria-expanded="true"
+                aria-controls="collapseTwo">Why is the total mentions count less
+                than positive + negative mentions?<span
                   class="lni-chevron-up"></span></h6>
             </div>
-            <div class="collapse" id="collapseTwo" aria-labelledby="headingTwo" data-parent="#faqAccordion">
+            <div class="collapse" id="collapseTwo" aria-labelledby="headingTwo"
+              data-parent="#faqAccordion">
               <div class="card-body">
-                <p>Occasionally, the system is unable to determine if a statement is strictly positive/negative. In that
-                  case,
-                  the statement is added to both sentient categories for completeness.</p>
+                <p>
+                  Occasionally, the system is unable to determine if a
+                  headline/statement is strictly positive/negative. In that
+                  case, the
+                  statement is added to both sentiment categories for
+                  completeness.
+                </p>
               </div>
             </div>
           </div>
           <div class="card border-0 ">
             <div class="card-header" id="heading3">
-              <h6 class="mb-0 collapsed" data-toggle="collapse" data-target="#collapse3" aria-expanded="true"
-                aria-controls="collapse3">How do you handle bias?<span class="lni-chevron-up"></span></h6>
+              <h6 class="mb-0 collapsed" data-toggle="collapse"
+                data-target="#collapse3" aria-expanded="true"
+                aria-controls="collapse3">How do you handle bias?<span
+                  class="lni-chevron-up"></span></h6>
             </div>
-            <div class="collapse" id="collapse3" aria-labelledby="heading3" data-parent="#faqAccordion">
+            <div class="collapse" id="collapse3" aria-labelledby="heading3"
+              data-parent="#faqAccordion">
               <div class="card-body">
                 <p>
-                  Although it is easy to determine if there is a large positive/negative reporting skew on certain
-                  topics on newssnips, the labeling of a specific mention largely depends on the data used to
-                  train the open source ML model. A factor outside our control as users of those published models.
-                  In the future, we hope to be able to train our own models to reduce implicit labeling bias much as
+                  The sentiment assignment of a specific mention largely depends
+                  on the data used to train the open source machine learning
+                  model. A factor outside our control as users of those
+                  published models. In the future, we hope to be able to train
+                  our own models to reduce implicit labeling bias much as
                   possible.
+
                 </p>
               </div>
             </div>
           </div>
           <div class="card border-0 ">
             <div class="card-header" id="heading4">
-              <h6 class="mb-0 collapsed" data-toggle="collapse" data-target="#collapse4" aria-expanded="true"
-                aria-controls="collapse4">What are topic types?<span class="lni-chevron-up"></span></h6>
+              <h6 class="mb-0 collapsed" data-toggle="collapse"
+                data-target="#collapse4" aria-expanded="true"
+                aria-controls="collapse4">What are topic types?<span
+                  class="lni-chevron-up"></span></h6>
             </div>
-            <div class="collapse" id="collapse4" aria-labelledby="heading4" data-parent="#faqAccordion">
+            <div class="collapse" id="collapse4" aria-labelledby="heading4"
+              data-parent="#faqAccordion">
               <div class="card-body">
                 <p>
-                  For example, the system attempts to distinguish between Apple the company and the fruit
-                  using seperate topic types. Hovering the mouse over the topic type will provide a description
-                  of the type.
+                  For example, the system attempts to distinguish between Apple
+                  the company and the fruit using separate topic types. Hovering
+                  the mouse over the topic type will provide a description of
+                  the type.
                 </p>
               </div>
             </div>
           </div>
           <div class="card border-0 ">
             <div class="card-header" id="heading4">
-              <h6 class="mb-0 collapsed" data-toggle="collapse" data-target="#collapse5" aria-expanded="true"
-                aria-controls="collapse5">What are sources?<span class="lni-chevron-up"></span></h6>
+              <h6 class="mb-0 collapsed" data-toggle="collapse"
+                data-target="#collapse5" aria-expanded="true"
+                aria-controls="collapse5">What are sources?<span
+                  class="lni-chevron-up"></span></h6>
             </div>
-            <div class="collapse" id="collapse5" aria-labelledby="heading5" data-parent="#faqAccordion">
+            <div class="collapse" id="collapse5" aria-labelledby="heading5"
+              data-parent="#faqAccordion">
               <div class="card-body">
                 <p>
-                  The links visible when you click the "sources" button above the topics represent
-                  the RSS feed used to gather the raw data.
+                  The links visible when you click the "Sources" button above
+                  the topics represent the source of text/headlines.
                 </p>
               </div>
             </div>

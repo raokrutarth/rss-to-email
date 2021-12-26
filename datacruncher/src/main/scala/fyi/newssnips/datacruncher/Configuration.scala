@@ -8,6 +8,8 @@ import org.apache.http.client.config.RequestConfig
 import java.io.FileOutputStream
 import com.typesafe.scalalogging.Logger
 import java.util.Base64
+import java.nio.file.Files
+import java.nio.file.Paths
 
 // https://github.com/alexandru/scala-best-practices/blob/master/sections/
 /* 3-architecture.md#35-must-not-use-parameterless-configfactoryload-or-access-a-config-object-directly */
@@ -28,11 +30,16 @@ case class AppConfig(
     // when set via env var, intermediate dataframes
     // are sampled during cycle for debugging.
     sampleDfs: Boolean,
-    modelsPath: String
+    modelsPath: String,
+    newsApi: NewsApiConfig
 )
 
 case class PostgresConfig(
     connStr: String
+)
+
+case class NewsApiConfig(
+    apiKey: String
 )
 
 case class DatastaxConfig(
@@ -154,6 +161,9 @@ object AppConfig {
       sendgrid = SendgridConfig(
         apiKey = config.getString("secrets.sendgrid.apiKey")
       ),
+      newsApi = NewsApiConfig(
+        config.getString("secrets.data_sources.news_api.api_key")
+      ),
       pg = getPostgresConfig(config),
       runtimeEnv = runtime,
       inProd = if (runtime.equals("docker")) {
@@ -165,7 +175,12 @@ object AppConfig {
       redis = extractRedisConfig(config),
       sampleDfs =
         if (Properties.envOrNone("SAMPLE_DFS").isEmpty) false else true,
-      modelsPath = if (runtime.equals("docker")) "/etc/models" else "models"
+      modelsPath = {
+        val dirInContainer = "/etc/models"
+        if (Files.isDirectory(Paths.get(dirInContainer))) {
+          dirInContainer
+        } else "models"
+      }
     )
   }
 }

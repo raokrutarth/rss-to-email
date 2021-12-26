@@ -4,8 +4,8 @@ BUILD_TAG=${1:-"newssnips-webapp-dev:$(date +%m-%d-%Y)"}
 
 # run the build command to create the
 # executable in the dev-env container
-# docker exec rss-dev \
-#     bash -c "pushd /home/dev/work/webapp && /home/dev/.local/share/coursier/bin/sbt Docker/stage"
+docker exec rss-dev \
+    bash -c "pushd /home/dev/work/webapp && /home/dev/.local/share/coursier/bin/sbt Docker/stage"
 
 docker build \
     -t "${BUILD_TAG}" \

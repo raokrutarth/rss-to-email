@@ -1,0 +1,65 @@
+@import controllers.v1.{SignupData, Frequency}
+@import play.api.mvc._
+@import play.api.data.Forms._
+@import play.api.data.Form
+@import helper._
+
+@(form: Form[SignupData], postUrl: Call)(implicit request: RequestHeader, flash: Flash, messagesProvider: MessagesProvider)
+
+@siteTemplate("Newsletter") {
+
+    <div class="container-sm">
+        <p>
+            Get the top topics directly to you inbox.
+        </p>
+
+        @helper.form(action = postUrl) {
+            @CSRF.formField                   
+            <div class="form-group">
+                <input type="email" 
+                    class="form-control" 
+                    id='@{form("email").id}' 
+                    name='@{form("email").label}'
+                    aria-describedby="emailHelp" 
+                    placeholder="Enter email"
+                >
+                
+                @* 
+                https://www.playframework.com/documentation/2.8.x/ScalaSessionFlash#Flash-scope
+                sent during redrect to specify failure/success
+                *@
+                @flash.get("message") match {
+                    case Some(message) => {
+                        <small id="emailHelp" class="text-success form-text">
+                        @message
+                        </small>
+                    }
+                    case _ => {
+                        <small id="emailHelp" class="form-text text-muted">
+                            A verification email will be sent to this address.
+                        </small>
+                    }
+                }
+            </div>
+            
+            <div class="form-group">
+                <label for='@{form("frequency").id}'>Frequency</label>
+                <select id='@{form("frequency").id}' name='@{form("frequency").label}' class="form-control">
+                    @for(f <- Frequency.values.toSeq){
+                        <option>@f.toString</option>
+                    }   
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+    
+            @if(form.hasErrors) {
+                @for(error <- form.errors){
+                    <p class="text-danger">
+                        Invalid @error.key
+                    </p>
+                }
+            }
+        }
+    </div>
+
+}

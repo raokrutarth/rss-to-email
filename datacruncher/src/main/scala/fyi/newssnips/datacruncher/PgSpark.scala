@@ -6,7 +6,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql._
 
 import configuration.AppConfig
-import java.sql.{DriverManager, ResultSet}
+import java.sql.DriverManager
 import java.util.Properties
 import org.apache.spark.sql.{SaveMode, SparkSession}
 import scala.util.Properties
@@ -18,36 +18,9 @@ class SparkPostgres(spark: SparkSession) {
 
   private val keySpace    = DbConstants.keySpace
   private val KVTableName = DbConstants.KVTableName
-
+  classOf[org.postgresql.Driver]
   val connectionProps = new Properties()
   connectionProps.setProperty("driver", "org.postgresql.Driver")
-
-  import spark.implicits._
-
-  def queryCheck() = {
-    println("Postgres connector")
-    classOf[org.postgresql.Driver]
-    val conn =
-      DriverManager.getConnection(AppConfig.settings.pg.connStr)
-    try {
-      val stm = conn.createStatement(
-        ResultSet.TYPE_FORWARD_ONLY,
-        ResultSet.CONCUR_READ_ONLY
-      )
-
-      val rs =
-        stm.executeQuery(
-          "SELECT * from users JOIN user_other_details ON users.name = user_other_details.name;"
-        )
-
-      while (rs.next) {
-        println(rs.getString("name") + "---" + rs.getString("address"))
-      }
-    } finally {
-      conn.close()
-      spark.close()
-    }
-  }
 
   private def init() = {
     val conn =
@@ -58,7 +31,7 @@ class SparkPostgres(spark: SparkSession) {
       CREATE SCHEMA IF NOT EXISTS ${keySpace};
       """)
       statement.executeUpdate(s"""
-    CREATE TABLE IF NOT EXISTS ${keySpace}.key_value_udepqrn4g8s (
+    CREATE TABLE IF NOT EXISTS ${KVTableName} (
       key text PRIMARY KEY,
       value text 
     );
@@ -77,8 +50,10 @@ class SparkPostgres(spark: SparkSession) {
       log.info(
         s"Saving dataframe as table ${keySpace}.$tableName containing ${df.count()} row(s)."
       )
-      df.write
+      df.repartition(2)
+        .write
         .mode(SaveMode.Overwrite)
+        .option("numPartitions", 2)
         .jdbc(
           AppConfig.settings.pg.connStr,
           s"${keySpace}.${tableName}",
@@ -88,11 +63,13 @@ class SparkPostgres(spark: SparkSession) {
 
   def getDataframe(tableName: String): Try[DataFrame] = Try {
     log.info(s"Fetching dataframe in table ${keySpace}.${tableName}.")
-    val df = spark.read.jdbc(
-      AppConfig.settings.pg.connStr,
-      s"${keySpace}.${tableName}",
-      connectionProps
-    )
+    val df = spark.read
+      .option("numPartitions", 2)
+      .jdbc(
+        AppConfig.settings.pg.connStr,
+        s"${keySpace}.${tableName}",
+        connectionProps
+      )
     df
   }
 
@@ -112,39 +89,55 @@ class SparkPostgres(spark: SparkSession) {
   }
 
   def upsertKV(key: String, value: String): Try[Unit] = Try {
-    Seq((key -> value))
-      .toDF("key", "value")
-      .write
-      .mode(SaveMode.Append)
-      .jdbc(AppConfig.settings.pg.connStr, KVTableName, connectionProps)
+    val conn =
+      DriverManager.getConnection(AppConfig.settings.pg.connStr)
+    try {
+      val statement = conn
+        .prepareStatement(
+          s"""
+          INSERT INTO $KVTableName (key, value)
+          VALUES(?, ?)
+          ON CONFLICT (key) DO 
+            UPDATE SET value = ?;
+         """
+        )
+      statement.setString(1, key)
+      statement.setString(2, value)
+      statement.setString(3, value)
+      statement.executeUpdate()
+    } finally {
+      conn.close()
+    }
   }
 
   def getKV(key: String): Try[String] = Try {
-    spark.read
-      .jdbc(
-        AppConfig.settings.pg.connStr,
-        KVTableName,
-        connectionProps
-      )
-      .filter(s"key = '$key'")
-      .collect()
-      .map(r => r(1))
-      .head
-      .asInstanceOf[String]
+    val conn =
+      DriverManager.getConnection(AppConfig.settings.pg.connStr)
+    try {
+      val statement = conn
+        .prepareStatement(
+          s"""
+          SELECT value FROM $KVTableName WHERE key = ?;
+         """
+        )
+      statement.setString(1, key)
+      val rs = statement.executeQuery()
+      rs.getString("value")
+    } finally {
+      conn.close()
+    }
   }
 
   def deleteKV(key: String): Try[Unit] = Try {
     val conn =
       DriverManager.getConnection(AppConfig.settings.pg.connStr)
     try {
-      conn
-        .createStatement()
-        .executeUpdate(
-          s"""
-      DELETE FROM $KVTableName
-      WHERE key = '$key';
-    """
+      val statement = conn
+        .prepareStatement(
+          s"DELETE FROM $KVTableName WHERE key = ?;"
         )
+      statement.setString(1, key)
+      statement.executeUpdate()
     } finally {
       conn.close()
     }

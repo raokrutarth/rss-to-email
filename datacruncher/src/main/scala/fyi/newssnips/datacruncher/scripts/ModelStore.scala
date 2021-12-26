@@ -53,30 +53,34 @@ object ModelStore {
 
     log.info(s"Saving models to ${modelsDir.toString()}")
 
-    savePipeline(
-      new Pipeline()
-        .setStages(
-          Array(
-            new DocumentAssembler()
-              .setInputCol("textBlock")
-              .setOutputCol("document"),
-            SentenceDetectorDLModel
-              .pretrained("sentence_detector_dl", "en")
-              .setInputCols(Array("document"))
-              .setOutputCol("sentence")
+    def storeSmall() = {
+      savePipeline(
+        new Pipeline()
+          .setStages(
+            Array(
+              new DocumentAssembler()
+                .setInputCol("textBlock")
+                .setOutputCol("document"),
+              SentenceDetectorDLModel
+                .pretrained("sentence_detector_dl", "en")
+                .setInputCols(Array("document"))
+                .setOutputCol("sentence")
+            )
           )
-        )
-        .fit(Seq[String]().toDF("textBlock")),
-      cleanupPipelinePath
-    )
+          .fit(Seq[String]().toDF("textBlock")),
+        cleanupPipelinePath
+      )
 
-    savePipeline(
-      new PretrainedPipeline(
-        "onto_recognize_entities_electra_small",
-        lang = "en"
-      ).model,
-      nerModelPath
-    )
+      savePipeline(
+        new PretrainedPipeline(
+          "onto_recognize_entities_electra_small",
+          lang = "en"
+        ).model,
+        nerModelPath
+      )
+
+    }
+    storeSmall()
 
     savePipeline(
       new Pipeline()
@@ -88,7 +92,7 @@ object ModelStore {
             new Tokenizer()
               .setInputCols("document")
               .setOutputCol("token"),
-            DistilBertForTokenClassification
+            DistilBertForSequenceClassification
               .loadSavedModel(
                 "models/distilbert-base-uncased-finetuned-sst-2-english/saved_model/1",
                 Init.spark
@@ -96,7 +100,8 @@ object ModelStore {
               .setInputCols(Array("document", "token"))
               .setOutputCol("sentiment")
               .setCaseSensitive(false)
-              .setMaxSentenceLength(256)
+              .setMaxSentenceLength(512)
+              .setCoalesceSentences(true)
           )
         )
         .fit(Seq[String]().toDF("text")),
