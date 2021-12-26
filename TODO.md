@@ -1,15 +1,9 @@
 # TODO
 
-## both
-
-- table column names to shared.
 
 ## wa
-- add context column.
-- PG read apis.
-  - connection pooling.
-  - redo page data fetcher.
 - slimmer docker image and dockerfile.
+  - test with docker run.
 
 ## dc
 
@@ -17,9 +11,10 @@
 - Add news API to scraper.
 - Hardcoded books links for each category.
 - description exceptions:
-  - remove zeroedge. invalid text skil description load on zerohedge.com.
+  - remove zeroedge. invalid text skill description load on zerohedge.com.
   - mfool description has too many reporter names.
   - feed url class that has descriptionClean flag.
+  - set category of feed URL in class.
 - Precomputing texts for top x topics in each category and add to cache.
 - Percentile total count filter. 
 - site total count vs. neg count, 
@@ -27,6 +22,8 @@
 
 ## non-urgent
 
+- add context column.
+- table column names to shared.
 - dynamic entity book url scraper.
 - YouTube tutorial video.
 - add roadmap section. e.g. filtering feeds.

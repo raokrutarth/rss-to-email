@@ -10,7 +10,7 @@ import org.apache.spark.ml.feature.RegexTokenizer
 import org.apache.spark.ml.Pipeline
 
 import com.typesafe.scalalogging.Logger
-import fyi.newssnips.shared.DfUtils
+import fyi.newssnips.datacruncher.utils.DfUtils
 import fyi.newssnips.datacruncher.scripts.ModelStore
 import org.apache.spark.ml.PipelineModel
 

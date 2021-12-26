@@ -67,7 +67,7 @@
               @for(t <- analysisDf) {<tr>
                 <th scope="row" style="font-style: italic;" data-toggle="popover" data-trigger="focus click hover"
                   data-placement="top auto"
-                  title='@t.entityType (@{EntityTypeDescriptions.descriptions getOrElse(t.entityType.get, "")})'>
+                  title='@t.entityType (@{EntityTypeDescriptions.descriptions getOrElse(t.entityType, "")})'>
                   @t.entityName
                 </th>
                 <td>@t.totalNumTexts</td>
@@ -79,8 +79,6 @@
                     href="/v1/@categroyId/mentions/@t.entityName/@t.entityType/negative"
                     class="btn btn-outline-danger">@t.negativeMentions</a>
                 </td>
-
-                <!-- <td>@t.aggregateConfidence</td> -->
                 </tr>
                 }
             </tbody>

@@ -11,7 +11,7 @@ import com.johnsnowlabs.nlp.LightPipeline
 import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
 import com.typesafe.scalalogging.Logger
 import fyi.newssnips.shared.PerformanceUtils
-import fyi.newssnips.shared.DfUtils
+import fyi.newssnips.datacruncher.utils.DfUtils
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 

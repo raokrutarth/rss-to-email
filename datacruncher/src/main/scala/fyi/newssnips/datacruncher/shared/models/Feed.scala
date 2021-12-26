@@ -43,3 +43,8 @@ case class FeedRow(
     title: String,
     last_scraped: String
 )
+
+case class TextsPageRow(
+    text: String,
+    url: String
+)

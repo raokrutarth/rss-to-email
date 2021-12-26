@@ -1,0 +1,12 @@
+FROM openjdk:11.0.13-buster
+
+WORKDIR /opt/docker
+COPY --chown=daemon:root opt /opt
+
+EXPOSE 9000
+USER daemon
+ENV RUNTIME_ENV "docker"
+ENV JAVA_OPTS="-Xms100M -Xmx512M -XX:+UseG1GC"
+ENTRYPOINT ["/opt/docker/bin/newssnips-webapp"]
+CMD []
+

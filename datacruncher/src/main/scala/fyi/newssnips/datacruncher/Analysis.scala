@@ -7,7 +7,7 @@ import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 
 import com.typesafe.scalalogging.Logger
-import fyi.newssnips.shared.DfUtils
+import fyi.newssnips.datacruncher.utils.DfUtils
 import com.johnsnowlabs.nlp.base._
 import org.apache.spark.sql.SparkSession
 import com.johnsnowlabs.nlp.base._

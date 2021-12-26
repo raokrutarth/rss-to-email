@@ -6,7 +6,7 @@ import scala.util.Properties
 import java.io.FileOutputStream
 import java.util.Base64
 import scala.io.Source
-import play.api.Logger
+import com.typesafe.scalalogging.Logger
 
 // https://github.com/alexandru/scala-best-practices/blob/master/sections/
 /* 3-architecture.md#35-must-not-use-parameterless-configfactoryload-or-access-a-config-object-directly */
@@ -44,6 +44,7 @@ case class RedisConfig(
 )
 
 object AppConfig {
+  // System.setProperty("logback.configurationFile", "/home/dev/work/webapp/conf/logback.xml")
   val log: Logger = Logger("app." + this.getClass().toString())
 
   // no way to mount files in heroku so convert the
@@ -86,7 +87,7 @@ object AppConfig {
         zipPath
       case _ =>
         // in dev/test. use existing secrets file.
-        log.info("Using local DB connection bundle.")
+        log.debug("Using local DB connection bundle.")
         "/home/dev/work/datastax-db-secrets.zip"
     }
   }
@@ -96,12 +97,22 @@ object AppConfig {
     val password = config.getString("secrets.database.yugabyte.password")
     val host     = config.getString("secrets.database.yugabyte.host")
     val port     = config.getString("secrets.database.yugabyte.port")
-    val certPath = "/home/dev/work/datacruncher/yugabyte_db_cert.crt"
-    val db       = "newssnips"
+    val certPath = Properties.envOrNone("YB_CERT_B64") match {
+      case Some(b64) =>
+        val certPath = "/tmp/yb_pg_cert.crt"
+        val os       = new FileOutputStream(certPath)
+        os.write(Base64.getDecoder.decode(b64).toArray)
+        os.close()
+        log.info(s"Created db cert filefrom B64 at $certPath")
+        certPath
+      case _ => "/home/dev/work/yugabyte_db_cert.crt"
+    }
+    val db = "newssnips"
 
     PostgresConfig(
       s"jdbc:postgresql://${host}:${port}" +
-        s"/${db}?user=${user}&password=${password}&ssl=true&sslmode=verify-full&sslrootcert=${certPath}"
+        s"/${db}?user=${user}&password=${password}&ssl=true" +
+        s"&sslmode=verify-full&sslrootcert=${certPath}"
     )
   }
 

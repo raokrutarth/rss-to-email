@@ -4,7 +4,8 @@ import javax.inject.Inject
 import javax.inject._
 import play.api.mvc._
 import play.api.cache.Cached
-import fyi.newssnips.webapp.core.Postgres
+import com.typesafe.scalalogging.Logger
+import fyi.newssnips.webapp.core._
 
 @Singleton
 class HomeController @Inject() (
@@ -12,10 +13,10 @@ class HomeController @Inject() (
     cached: Cached
 ) extends BaseController {
 
+  val log = Logger("app." + this.getClass().toString())
+
   def index() = Action {
-    Postgres.queryCheck()
-    // Redirect("/about")
-    Ok("ok")
+    Redirect("/about")
   }
 
   def about() = cached.status(_ => "aboutPage", status = 200) {

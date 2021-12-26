@@ -112,11 +112,7 @@ object AnalysisCycle {
     )
   )
 
-  val categoryToUrls2: Map[String, Seq[String]] = Map(
-    "home" -> Seq("https://feeds.a.dj.com/rss/RSSWorldNews.xml")
-  )
-
-  for ((categoryId, urls) <- categoryToUrls2) {
+  for ((categoryId, urls) <- categoryToUrls) {
     log.info(
       s"Generating feeds for category $categoryId with ${urls.size} URL(s)."
     )

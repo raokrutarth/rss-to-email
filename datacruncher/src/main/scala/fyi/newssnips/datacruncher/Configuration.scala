@@ -121,7 +121,7 @@ object AppConfig {
     val password = config.getString("secrets.database.yugabyte.password")
     val host     = config.getString("secrets.database.yugabyte.host")
     val port     = config.getString("secrets.database.yugabyte.port")
-    val certPath = "/home/dev/work/datacruncher/yugabyte_db_cert.crt"
+    val certPath = "/home/dev/work/yugabyte_db_cert.crt"
     val db       = "newssnips"
 
     PostgresConfig(

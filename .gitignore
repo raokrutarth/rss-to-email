@@ -1,6 +1,7 @@
 **/secrets.conf
 *secrets*
 logs/
+yugabyte_db_cert.crt
 
 # bloop and metals
 .bloop

@@ -16,10 +16,10 @@ import fyi.newssnips.shared.DbConstants
 class SparkPostgres(spark: SparkSession) {
   val log = Logger("app." + this.getClass().toString())
 
-  private val keySpace = DbConstants.keySpace
+  private val keySpace    = DbConstants.keySpace
   private val KVTableName = DbConstants.KVTableName
 
-  val connectionProps     = new Properties()
+  val connectionProps = new Properties()
   connectionProps.setProperty("driver", "org.postgresql.Driver")
 
   import spark.implicits._
