@@ -1,0 +1,10 @@
+---
+  swagger: "2.0"
+  info: 
+    title: "rss-to-email API"
+    description: "Backend to convert rss feeds to email newsletters"
+  consumes:
+    - application/json
+  produces: 
+    - application/json
+

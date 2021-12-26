@@ -7,5 +7,14 @@
     "python.formatting.provider": "black",
     "files.watcherExclude": {
         "**/target": true
-    }
+    },
+    "metals.ammoniteJvmProperties": [
+        "-Xmx1G"
+    ],
+    "metals.showInferredType": true,
+    "editor.tabSize": 2,
+    "metals.serverProperties": [
+        "-Xmx1G",
+        "-Xms64M"
+    ]
 }

@@ -10,5 +10,9 @@
     {
         "url": "https://seekingalpha.com/market_currents.xml",
         "description": "SA current markets."
+    },
+    {
+        "url": "http://feeds.feedburner.com/TradingVolatility",
+        "description": "market signals"
     }
 ]

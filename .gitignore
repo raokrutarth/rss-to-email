@@ -1,7 +1,4 @@
-.secrets.yaml
-.secrets.yml
-settings.yaml
-settings.yml
+**/secrets.conf
 logs/
 
 # bloop and metals

@@ -18,7 +18,7 @@ docker run \
 
 docker update \
     --memory=2.5G \
-    --cpus=1.75 \
+    --cpus=1.5 \
     rss-dev
 
 if [[ -v RUN ]]; then

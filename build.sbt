@@ -1,19 +1,21 @@
+scalaVersion := "2.12.10"
 name := """rss-to-email"""
 organization := "com.kr"
-
 version := "1.0"
-
-scalacOptions += "-Wunused:imports"
-
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
-
-scalaVersion := "2.12.10"
 
 libraryDependencies += guice
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test
 
 val sparkVersion = "3.1.2"
 libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion
+
+libraryDependencies += "com.typesafe" % "config" % "1.4.1"
+// libraryDependencies += "org.webjars" % "swagger-ui" % "3.43.0"
+lazy val root = (project in file(".")).enablePlugins(
+  PlayScala
+// SwaggerPlugin
+)
+// swaggerDomainNameSpaces := Seq("models")
 
 // https://sbt-native-packager.readthedocs.io/en/latest/formats/docker.html#requirements
 // https://medium.com/jeroen-rosenberg/lightweight-docker-containers-for-scala-apps-11b99cf1a666

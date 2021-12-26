@@ -1,41 +1,36 @@
 package controllers
 
-import javax.inject._
+import configuration.AppConfig
 import play.api._
-import play.api.mvc._
-
-import org.apache.spark.sql._
-import org.apache.spark.sql.types._
-import org.apache.spark.sql.expressions.scalalang.typed
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions._
-import javax.inject.Inject
-import javax.inject.Named
-import akka.actor.ActorRef
-import akka.actor.Actor
-import akka.actor.ActorSystem
-import scala.concurrent.ExecutionContext
-import scala.concurrent.duration._
+import play.api._
 import play.api.inject.SimpleModule
 import play.api.inject._
-import javax.inject.Inject
-import akka.actor.ActorSystem
 import play.api.libs.concurrent.CustomExecutionContext
-import java.io._
-import java.lang.Runnable
-import play.libs.Akka
-import play.api._
+import play.api.libs.json.JsPath
+import play.api.libs.json.JsValue
+import play.api.mvc._
 import play.api.mvc._
 import play.libs.Akka
-import akka.actor._
-import scala.concurrent.duration._
-import play.api.libs.json.JsValue
-import play.api.libs.json.JsPath
+import scala.util.{Try, Success, Failure}
+import java.io._
+import java.lang.Runnable
+import javax.inject.Inject
+import javax.inject.Named
+import javax.inject._
+import datastore.DocumentStore
+import models.FeedURL
+import models.Feed
+import models.FeedContent
+import java.time.LocalDate
+import akka.actor
+import play.api.Logger
 
 @Singleton
 class RSSController @Inject() (
-    val controllerComponents: ControllerComponents
+    val controllerComponents: ControllerComponents,
+    val db: DocumentStore
 ) extends BaseController {
+  val logger: Logger = Logger(this.getClass())
 
   def triggerReport(lookback: String) = Action {
     implicit request: Request[AnyContent] =>
@@ -48,8 +43,20 @@ class RSSController @Inject() (
       - find ratio of negative to positive headings.
       - find ratio of negative to positive content.
       - send report to email and return OK
+        - report contains new articles with links.
        */
-      Ok(s"lookback: $lookback trigger not yet implemented")
+      val insertRes = db.upsertFeed(Feed(FeedURL("abc-test.com"), None, None))
+      logger.info(s"Upsert returned $insertRes")
+
+      val dbUrl: Try[Seq[FeedURL]] = db.getFeedURLs()
+      dbUrl match {
+        case Success(urls) =>
+          Ok(
+            s"lookback: $lookback got urls $urls"
+          )
+        case Failure(exception) =>
+          InternalServerError("Unable to get URLs for current user")
+      }
   }
 
   def listURLs() = Action { implicit request: Request[AnyContent] =>

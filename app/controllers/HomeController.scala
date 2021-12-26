@@ -9,11 +9,6 @@ import javax.inject._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.concurrent.duration._
-
-import akka.actor.Actor
-import akka.actor.ActorRef
-import akka.actor.ActorSystem
-import akka.actor._
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql._
 import org.apache.spark.sql.expressions.scalalang.typed
@@ -28,6 +23,7 @@ import play.api.mvc._
 import play.api.mvc._
 import play.libs.Akka
 
+import configuration.AppConfig
 // redis: https://levelup.gitconnected.com/dockerizing-scala-redis-nginx-c97d067244d9
 // spark docs: https://spark.apache.org/docs/latest/api/scala/org/apache/spark/index.html
 // scala + play tutorials: https://www.youtube.com/watch?v=FqMDHsFNlxQ&list=PLLMXbkbDbVt8tBiGc1y69BZdG8at1D7ZF

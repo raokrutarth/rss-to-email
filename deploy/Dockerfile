@@ -91,4 +91,5 @@ EXPOSE 9000
 COPY --chown=${NB_USER}:root opt /opt
 
 USER ${NB_UID}
+ENV RUNTIME_ENV "docker"
 ENTRYPOINT ["/opt/docker/bin/rss-to-email"]
