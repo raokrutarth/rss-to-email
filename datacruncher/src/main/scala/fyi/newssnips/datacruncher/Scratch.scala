@@ -83,6 +83,8 @@ object ScratchCode {
         .master("local[*]")
         .getOrCreate()
     import spark.implicits._
+    log.info("Running manual text normalize tests.")
+    val enUdf = NerHelper.entityNameNormalizeUdf
     val df = Seq(
       "EU",
       "u.k",
@@ -97,10 +99,13 @@ object ScratchCode {
       "U.S.A",
       " the orbit"
     ).toDF("text")
-      .withColumn("normalized", initcap(col("text")))
+      .withColumn("initCap", initcap(col("text")))
+      .withColumn("eName", enUdf(col("text")))
+      .withColumn("trimPunct", regexp_replace(col("text"), "(\\W+$|^\\W+)", ""))
     df.show(false)
     spark.stop
   }
+  checkCaseFix()
 
   def negOverride() = {
     val spark: SparkSession =
@@ -135,5 +140,5 @@ object ScratchCode {
     spark.stop
   }
 
-  log.info("scratch ran.")
+  log.info("scratch finished execution.")
 }

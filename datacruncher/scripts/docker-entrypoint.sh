@@ -1,11 +1,15 @@
 #!/bin/bash -e
 
-# Max cpu usage threshold (percent)
+# container entrypoint that periodically runs the
+# dc update cycle when the server resources are 
+# idle to avoid disrupting other projects on dev machine.
+
+# Max total cpu usage threshold for a cycle to begin (percent, 0-100)
 cpu_threshold='20'
-# Minimum free memory threshold (MB)
+# Minimum free memory threshold for a cycle to begin (MB)
 mem_threshold='8000'
-# max 15m CPU load avg
-load_avg_threshold="2"
+# max 15m rounded CPU load avg
+load_avg_threshold="1"
 
 cpu_load_avg_low () {
   # 15 min
@@ -38,18 +42,18 @@ mem_is_idle () {
   mem_free=`free -m | grep "Mem" | awk '{print $4+$6}'`
   echo "[+] Current free memory: $mem_free MB"
   if [ $mem_free -ge $mem_threshold  ]; then
-      return 0 # true
+    return 0 # true
   else
-      return 1 # false
+    return 1 # false
   fi
 }
 
 server_is_idle () {
   if cpu_load_avg_low && cpu_is_idle && mem_is_idle ; then
-    echo "idle"
+    echo "[+] Server is idle."
     return 0 # true
   else
-    echo "no idle"
+    echo "[-] Server not idle."
     return 1
   fi
 }
@@ -64,5 +68,6 @@ while true; do
   echo "[+] Running dc."
   /opt/docker/bin/datacruncher cycle
 
+  echo "[+] dc execution finished. Sleeping until next cycle window."
   sleep 8h
 done

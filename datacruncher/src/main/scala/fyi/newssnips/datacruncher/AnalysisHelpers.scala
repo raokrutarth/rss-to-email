@@ -11,12 +11,8 @@ object NerHelper {
       case "Uk" | "U.k"         => "United Kingdom"
       case "Eu" | "E.u"         => "European Union"
       case "Covid-19" | "Covid" => "COVID"
-      case "Cdc"                => "CDC"
       case "Un" | "U.n"         => "United Nations"
       case "Nato"               => "North Atlantic Treaty Organization"
-      case "Sec"                => "Securities and Exchange Commission"
-      case "Irs"                => "Internal Revenue Service"
-      case "Nfl"                => "NFL"
       case "Biden"              => "Joe Biden"
       case "Tesla" | "TSLA"     => "Tesla Inc"
       case en if en.startsWith("The ") =>
@@ -31,6 +27,8 @@ object NerHelper {
         normalizeEntityName(
           en.slice(0, en.lastIndexOf("’s"))
         )
+      case en if (en.length() <= 3) =>
+        en.toUpperCase()
       case _ => en
     }
   }
