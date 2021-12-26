@@ -7,15 +7,15 @@ import play.api.mvc.Security.AuthenticatedBuilder
 import scala.concurrent.ExecutionContext
 import javax.inject.Inject
 import java.security.MessageDigest
-import configuration.AppConfig
+import fyi.newssnips.webapp.config.AppConfig
 
 case class User(value: String)     extends AnyVal
 case class Password(value: String) extends AnyVal
 case class Credentials(user: User, password: Password)
 
 object AuthenticationHelpers {
-  val adminUsername = AppConfig.settings.adminAuth.username.getBytes()
-  val adminPwd      = AppConfig.settings.adminAuth.password.getBytes()
+  val adminUsername = AppConfig.settings.shared.adminHttpAuth.username.getBytes()
+  val adminPwd      = AppConfig.settings.shared.adminHttpAuth.password.getBytes()
 
   private def parseAuthHeader(authHeader: String): Option[Credentials] = {
     authHeader.split("""\s""") match {

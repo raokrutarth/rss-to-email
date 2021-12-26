@@ -9,7 +9,6 @@ import fyi.newssnips.core._
 import play.api.inject.ApplicationLifecycle
 import scala.concurrent.Future
 import fyi.newssnips.datastore.Cache
-import fyi.newssnips.webapp.core.db._
 
 @Singleton
 class HomeController @Inject() (
@@ -24,7 +23,7 @@ class HomeController @Inject() (
 
   def index() = Action { _ =>
     // TODO take query args like ref and put in cassandra.
-    Redirect("/about")
+    Redirect("/v1/home")
   }
 
   def adminDash() = auth { request =>
@@ -45,7 +44,6 @@ class HomeController @Inject() (
     Future.successful {
       log.warn("Running custom application EOL hook.")
       cache.cleanup()
-      Postgres.cleanup()
     }
   }
 }

@@ -3,7 +3,7 @@ package fyi.newssnips.core
 import com.sendgrid
 import com.sendgrid._
 import scala.util._
-import configuration.AppConfig
+import fyi.newssnips.webapp.config.AppConfig
 import sendgrid.helpers.mail.objects._
 import sendgrid.helpers.mail._
 import com.typesafe.scalalogging.Logger

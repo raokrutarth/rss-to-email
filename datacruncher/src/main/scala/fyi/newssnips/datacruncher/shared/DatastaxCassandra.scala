@@ -9,7 +9,7 @@
 // import com.datastax.spark.connector.cql.CassandraConnector
 
 // import javax.inject._
-// import configuration.AppConfig
+// import  fyi.newssnips.webapp.config.AppConfig
 
 // @Singleton
 // object DatastaxCassandra {

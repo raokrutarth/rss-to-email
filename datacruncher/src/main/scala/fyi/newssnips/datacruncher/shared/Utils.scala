@@ -4,7 +4,7 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.ZoneId
-import configuration.AppConfig
+import fyi.newssnips.shared.config.SharedConfig
 import com.typesafe.scalalogging.Logger
 import java.lang.Runtime
 
@@ -22,7 +22,7 @@ object PerformanceUtils {
 // wrapper around date time utils so
 // library used can be changed as needed.
 object DateTimeUtils {
-  private val tz = ZoneId.of(AppConfig.settings.timezone)
+  private val tz = ZoneId.of(SharedConfig.config.timezone)
   private val displayDateFormatter =
     DateTimeFormatter
       .ofLocalizedDateTime(FormatStyle.MEDIUM)

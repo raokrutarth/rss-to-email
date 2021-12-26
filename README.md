@@ -53,6 +53,12 @@ annual fees.
 
 - Find saas boilerplate: <https://github.com/saasforge/open-source-saas-boilerpate>
 
+### launch checklist
+
+- intro video.
+- move home to /
+
+
 ### Resources
 
 - Scala talks (see other years) <https://scaladays.org/2019/lausanne/schedule>
@@ -182,4 +188,9 @@ scala + play tutorials: https://www.youtube.com/watch?v=FqMDHsFNlxQ&list=PLLMXbk
   - `https://github.com/nulab/play2-oauth2-provider`
   - `https://www.playframework.com/documentation/2.8.x/ScalaActionsComposition#Authentication`
   - `https://github.com/AlexITC/crypto-coin-alerts/blob/develop/alerts-server/app/com/alexitc/coinalerts/services/JWTAuthenticatorService.scala`
-  
+
+- rss URL finder
+  - `http://www.aaronsw.com/2002/feedfinder/`
+
+- rdb errors:
+  - m [36mc.zaxxer.hikari.pool.ProxyConnection [0;39m [35m[0;39m HikariPool-1 - Connection org.postgresql.jdbc.PgConnection@53c37d2 marked as broken because of SQLSTATE(08006), ErrorCode(0)

@@ -1,6 +1,12 @@
 #!/bin/bash -e
 
-SECRETS_PATH=${1:-"webapp/secrets.conf"}
-DB_CERT_PATH=${2:-"yugabyte_db_cert.crt"}
+# prints out the comma seperated env vars that 
+# need to be set in the gcp config update command.
 
-printf "SECRETS_B64=$(base64 -w0 ${SECRETS_PATH}),YB_CERT_B64=$(base64 -w0 ${DB_CERT_PATH})"
+SECRETS_PATH="webapp/secrets.conf"
+PG_CERT_PATH="cockroachdb_db.crt"
+SHARED_SECRETS_PATH="shared.secrets.conf"
+
+printf "SECRETS_B64=$(base64 -w0 ${SECRETS_PATH}),"
+printf "SHARED_SECRETS_B64=$(base64 -w0 ${SHARED_SECRETS_PATH}),"
+printf "PG_CERT_B64=$(base64 -w0 ${PG_CERT_PATH})"

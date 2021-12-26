@@ -11,17 +11,17 @@ import fyi.newssnips.core.PageDataFetcher
 import play.api.cache.Cached
 import play.twirl.api.Html
 import fyi.newssnips.datastore.Cache
-import configuration.AppConfig
+import fyi.newssnips.webapp.config.AppConfig
 
 @Singleton
 class FeedsController @Inject() (
     val controllerComponents: ControllerComponents,
     cached: Cached,
-    cache: Cache
+    cache: Cache,
+    dal: PageDataFetcher
 ) extends BaseController {
 
   private val log: Logger = Logger("app." + this.getClass().toString())
-  private val dataFetcher = new PageDataFetcher()
   private val errResp = InternalServerError(
     views.html.siteTemplate("Error")(
       Html(
@@ -33,7 +33,7 @@ class FeedsController @Inject() (
     )
   ).as("text/html")
 
-  val pageCacheTimeSec: Int = if (AppConfig.settings.inProd) 30 else 5
+  val pageCacheTimeSec: Int = if (AppConfig.settings.shared.inProd) 30 else 5
 
   def home() = cached.status(_ => "homeAnalysisPage", status = 200, pageCacheTimeSec) {
     Action { implicit request: Request[AnyContent] =>
@@ -42,7 +42,7 @@ class FeedsController @Inject() (
         s"Received home page request from client ${request.remoteAddress}. " +
           s"Using db metadata ${dbMetadata.toString()}"
       )
-      dataFetcher.getCategoryAnalysisPage(cache, dbMetadata) match {
+      dal.getCategoryAnalysisPage(cache, dbMetadata) match {
         case Success(data) =>
           log.info(
             s"Parsing ${data.analysisRows.size} analysis row(s) and " +
@@ -78,7 +78,7 @@ class FeedsController @Inject() (
             log.info(
               s"Using db metadata ${dbMetadata.toString()} for category $categoryId."
             )
-            dataFetcher.getCategoryAnalysisPage(cache, dbMetadata) match {
+            dal.getCategoryAnalysisPage(cache, dbMetadata) match {
               case Success(data) =>
                 log.info(
                   s"Parsing ${data.analysisRows.size} analysis row(s) and ${data.sourceFeeds.size} feed(s) into HTML template."
@@ -115,7 +115,7 @@ class FeedsController @Inject() (
         )
         DbConstants.categoryToDbMetadata get categoryId match {
           case Some(dbMetadata) =>
-            dataFetcher.getTextsPage(dbMetadata, entityName, entityType, sentiment) match {
+            dal.getTextsPage(dbMetadata, entityName, entityType, sentiment) match {
               case Success(pageData) =>
                 Ok(
                   views.html.textsPage(pageData.rows, entityName, entityType, sentiment)

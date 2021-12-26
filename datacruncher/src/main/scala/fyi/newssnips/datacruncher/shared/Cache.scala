@@ -4,7 +4,7 @@ import com.typesafe.scalalogging.Logger
 import scala.util.Try
 
 import javax.inject._
-import configuration.AppConfig
+import fyi.newssnips.shared.config.SharedConfig
 import _root_.redis.clients.jedis.JedisPool
 import _root_.redis.clients.jedis.Jedis
 import scala.collection.JavaConverters._
@@ -21,12 +21,12 @@ class Cache() {
   // add play redis cache https://www.baeldung.com/scala/play-caching and store arrays.
 
   private val keyspace: String =
-    if (AppConfig.settings.inProd) "prod." else "dev."
+    if (SharedConfig.config.inProd) "prod." else "dev."
 
   // https://www.javadoc.io/doc/redis.clients/jedis/3.7.0/redis/clients/jedis/Jedis.html
   val redisPool = {
     log.info("Initiating cache connection pool.")
-    new JedisPool(AppConfig.settings.redis.url)
+    new JedisPool(SharedConfig.config.redis.url)
   }
 
   // https://github.com/redis/jedis/issues/2708
@@ -51,7 +51,7 @@ class Cache() {
 
   def flushCache() = Try {
     val r = redisPool.getResource()
-    log.info(s"Removeing all keys in cache for keyspace ${keyspace}")
+    log.info(s"Removing all keys in cache for keyspace ${keyspace}")
     r.keys(keyspace + "*").asScala.map(k => r.del(k))
   }
 

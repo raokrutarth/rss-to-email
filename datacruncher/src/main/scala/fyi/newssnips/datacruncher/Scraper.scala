@@ -29,7 +29,10 @@ object Scraper {
       "user-agent",
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1.2 Safari/605.1.15"
     )
-    request.setHeader("Accept", "application/rss")
+    request.setHeader(
+      "Accept",
+      "application/rss+xml, text/xml, application/xml, application/rdf+xml, application/atom+xml"
+    )
     val response    = httpClient.execute(request)
     val status_code = response.getStatusLine().getStatusCode()
 

@@ -24,7 +24,7 @@ class SparkPostgres(spark: SparkSession) {
 
   private def init() = {
     val conn =
-      DriverManager.getConnection(AppConfig.settings.pg.connStr)
+      DriverManager.getConnection(AppConfig.settings.shared.pg.jdbcUrl)
     try {
       val statement = conn.createStatement()
       statement.executeUpdate(s"""
@@ -50,12 +50,12 @@ class SparkPostgres(spark: SparkSession) {
       log.info(
         s"Saving dataframe as table ${keySpace}.$tableName containing ${df.count()} row(s)."
       )
-      df.repartition(2)
-        .write
+      df.write
         .mode(SaveMode.Overwrite)
         .option("numPartitions", 2)
+        .option("rewriteBatchedInserts", true)
         .jdbc(
-          AppConfig.settings.pg.connStr,
+          AppConfig.settings.shared.pg.jdbcUrl,
           s"${keySpace}.${tableName}",
           connectionProps
         )
@@ -66,7 +66,7 @@ class SparkPostgres(spark: SparkSession) {
     val df = spark.read
       .option("numPartitions", 2)
       .jdbc(
-        AppConfig.settings.pg.connStr,
+        AppConfig.settings.shared.pg.jdbcUrl,
         s"${keySpace}.${tableName}",
         connectionProps
       )
@@ -76,7 +76,7 @@ class SparkPostgres(spark: SparkSession) {
   def deleteDataframe(tableName: String): Try[Unit] = Try {
     log.info(s"Deleting dataframe with table name ${keySpace}.${tableName}")
     val conn =
-      DriverManager.getConnection(AppConfig.settings.pg.connStr)
+      DriverManager.getConnection(AppConfig.settings.shared.pg.jdbcUrl)
     try {
       conn
         .createStatement()
@@ -90,7 +90,7 @@ class SparkPostgres(spark: SparkSession) {
 
   def upsertKV(key: String, value: String): Try[Unit] = Try {
     val conn =
-      DriverManager.getConnection(AppConfig.settings.pg.connStr)
+      DriverManager.getConnection(AppConfig.settings.shared.pg.jdbcUrl)
     try {
       val statement = conn
         .prepareStatement(
@@ -112,7 +112,7 @@ class SparkPostgres(spark: SparkSession) {
 
   def getKV(key: String): Try[String] = Try {
     val conn =
-      DriverManager.getConnection(AppConfig.settings.pg.connStr)
+      DriverManager.getConnection(AppConfig.settings.shared.pg.jdbcUrl)
     try {
       val statement = conn
         .prepareStatement(
@@ -130,7 +130,7 @@ class SparkPostgres(spark: SparkSession) {
 
   def deleteKV(key: String): Try[Unit] = Try {
     val conn =
-      DriverManager.getConnection(AppConfig.settings.pg.connStr)
+      DriverManager.getConnection(AppConfig.settings.shared.pg.jdbcUrl)
     try {
       val statement = conn
         .prepareStatement(

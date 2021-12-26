@@ -10,7 +10,7 @@ import scala.concurrent.{Future, blocking}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.concurrent.duration._
-import configuration.AppConfig
+import fyi.newssnips.webapp.config.AppConfig
 import fyi.newssnips.datastore.Cache
 import play.api.libs.json._
 import fyi.newssnips.webapp.core.dal._
@@ -26,12 +26,10 @@ case class EntityTextsPageData(
 )
 
 @Singleton
-class PageDataFetcher() {
+class PageDataFetcher @Inject() (dal: PgAccess, db: Postgres)() {
   private val log: Logger = Logger("app." + this.getClass().toString())
-  lazy val dal            = PgAccess
-
   // redis + db read timeout for dataframes
-  private val dataStoreWaitTime = if (AppConfig.settings.inProd) { 5.second }
+  private val dataStoreWaitTime = if (AppConfig.settings.shared.inProd) { 5.second }
   else 15.seconds
 
   implicit val feedRowFormat     = Json.format[FeedRow]
@@ -48,7 +46,7 @@ class PageDataFetcher() {
 
       val analysisTry    = dal.getAnalysisRows(categoryMetadata)
       val feedsTry       = dal.getFeedsRows(categoryMetadata)
-      val lastUpdatedTry = Postgres.getKv(categoryMetadata.lastUpdateKey)
+      val lastUpdatedTry = db.getKv(categoryMetadata.lastUpdateKey)
 
       (analysisTry, feedsTry, lastUpdatedTry) match {
         case (Success(a), Success(f), Success(l)) =>

@@ -2,9 +2,10 @@ KCTL ?= minikube kubectl --
 NS ?= rte-ns
 
 HRK_APP ?= --app newssnips
+TIME_NOW := $(shell date +%Hh-%b-%d-%Y)
 
-DC_BUILD_TAG ?= "newssnips-datacruncher:$$(date +%Hh-%b-%d-%Y)"
-WA_BUILD_TAG ?= "newssnips-webapp:$$(date +%Hh-%b-%d-%Y)"
+DC_BUILD_TAG ?= "newssnips-datacruncher:$(TIME_NOW)"
+WA_BUILD_TAG ?= "newssnips-webapp:$(TIME_NOW)"
 
 GCLD = docker run --rm -ti \
 	-v /home/zee/.gcp:/root/.config/gcloud \
@@ -13,7 +14,7 @@ GCLD = docker run --rm -ti \
 	gcr.io/google.com/cloudsdktool/cloud-sdk \
 	bash -c
 
-GCP_WA_IMAGE="us-west1-docker.pkg.dev/newssnips/newssnips/webapp:$$(date +%Hh-%b-%d-%Y)"
+GCP_WA_IMAGE="us-west1-docker.pkg.dev/newssnips/newssnips/webapp:$(TIME_NOW)"
 
 init-minikube:
 	minikube start \
@@ -88,23 +89,26 @@ wa-status:
 	$(GCLD) "gcloud run services list"
 	$(GCLD) "gcloud run services describe webapp"
 
-# https://cloud.google.com/sdk/gcloud/reference/run/services/update
-wa-deploy:
+wa-build:
 	./scripts/build-webapp.sh $(WA_BUILD_TAG)
 	docker tag $(WA_BUILD_TAG) $(GCP_WA_IMAGE)
 
+wa-push-and-launch:
 	$(GCLD) "gcloud auth configure-docker us-west1-docker.pkg.dev --quiet \
-		&& docker push $(GCP_WA_IMAGE)"
+	&& docker push $(GCP_WA_IMAGE)"
 	
 	$(GCLD) "gcloud run deploy webapp \
 		--image $(GCP_WA_IMAGE) \
 		--allow-unauthenticated"
-	
-	make -s wa-scale-update
+
+# https://cloud.google.com/sdk/gcloud/reference/run/services/update
+wa-deploy: wa-build wa-push-and-launch
 
 wa-scale-update:
-	$(GCLD) "gcloud run services update webapp --min-instances=1 --max-instances=2"
-	$(GCLD) "gcloud beta run services update webapp --cpu-throttling"
+	$(GCLD) "gcloud run services update webapp \
+		--cpu=4 --memory=2Gi \
+		--min-instances=1 --max-instances=1"
+	$(GCLD) "gcloud beta run services update webapp --no-cpu-throttling"
 
 # https://cloud.google.com/run/docs/mapping-custom-domains
 # check on https://console.cloud.google.com/run/domains?project=newssnips

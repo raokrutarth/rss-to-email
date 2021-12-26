@@ -2,16 +2,14 @@
 
 
 ## both
-
+- music background video.
+- launch checklist.
 - shared config class.
 
 ## wa
 
-- generic db layer get function which takes RS convertor function.
-- newsletter signup form.
-  - redis verify endpoint.
 - reddit & blog post.
-- pagination.
+- entity search functionality.
 
 ## dc
 
@@ -27,9 +25,9 @@
 
 ## non-urgent
 
+- paginated analysis page view.
 - Add news API to scraper. (not a lot of data, needs scraper router).
 - Precomputing texts for top x topics in each category and add to cache.
-- music background video.
 - add context column.
 - table column names to shared.
 - dynamic entity book url scraper.

@@ -1,7 +1,7 @@
 package fyi.newssnips.webapp.core.db
 
 import com.typesafe.scalalogging.Logger
-import configuration.AppConfig
+import fyi.newssnips.webapp.config.AppConfig
 import java.sql.ResultSet
 import fyi.newssnips.shared.DbConstants
 import scala.util._
@@ -9,9 +9,15 @@ import fyi.newssnips.shared._
 import com.zaxxer.hikari._
 import java.sql.PreparedStatement
 import scala.reflect.ClassTag
+import javax.inject._
+import play.api.inject.ApplicationLifecycle
+import scala.concurrent._
 
 // http://edulify.github.io/play-hikaricp.edulify.com/
-object Postgres {
+@Singleton
+class Postgres @Inject() (
+    lifecycle: ApplicationLifecycle
+) {
   val log = Logger("app." + this.getClass().toString())
 
   private val keySpace    = DbConstants.keySpace
@@ -20,13 +26,23 @@ object Postgres {
     log.info("Initiating PG connection pool.")
 
     val c = new HikariConfig()
-    c.setJdbcUrl(AppConfig.settings.pg.connStr)
-    c.setMaximumPoolSize(3)
+    c.setJdbcUrl(AppConfig.settings.shared.pg.jdbcUrl)
+    c.setMaximumPoolSize(5)
     c.setAutoCommit(true)
-    c.setDriverClassName("org.postgresql.Driver")
+    // c.setDriverClassName("org.postgresql.Driver")
     c.setSchema(keySpace)
+    c.setKeepaliveTime(30 * 1000) // 30s
+    c.setLeakDetectionThreshold(2000)
+    c.setMaxLifetime(45 * 1000)
+    c.setIdleTimeout(10 * 1000)
     new HikariDataSource(c)
   }
+  lifecycle.addStopHook(() =>
+    Future.successful {
+      log.warn("Shutting down database connection pool.")
+      connectionPool.close()
+    }
+  )
 
   classOf[org.postgresql.Driver]
 
@@ -139,10 +155,5 @@ object Postgres {
     } finally {
       conn.close()
     }
-  }
-
-  def cleanup() = {
-    log.warn("Shutting down pg connection pool.")
-    connectionPool.close()
   }
 }

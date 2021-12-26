@@ -7,8 +7,10 @@ import fyi.newssnips.shared._
 import fyi.newssnips.models._
 import java.sql.PreparedStatement
 import fyi.newssnips.webapp.core.db.Postgres
+import javax.inject._
 
-object PgAccess {
+@Singleton
+class PgAccess @Inject() (db: Postgres) {
   val log = Logger("app." + this.getClass().toString())
 
   def getAnalysisRows(
@@ -17,7 +19,11 @@ object PgAccess {
       offset: Int = 0
   ): Try[Array[AnalysisRow]] = {
     val q = s"""
-      SELECT * FROM ${categoryMetadata.analysisTableName}
+      SELECT 
+        "entityName", "entityType", 
+        "negativeMentions", "positiveMentions", 
+        "totalNumTexts"
+      FROM ${categoryMetadata.analysisTableName}
       ORDER BY "totalNumTexts" DESC 
       LIMIT ? OFFSET ?;
     """
@@ -36,7 +42,7 @@ object PgAccess {
       p.setInt(1, limit)
       p.setInt(2, offset)
     }
-    Postgres.getRows[AnalysisRow](q, queryArgs, parser)
+    db.getRows[AnalysisRow](q, queryArgs, parser)
   }
 
   def getFeedsRows(categoryMetadata: CategoryDbMetadata): Try[Array[FeedRow]] = {
@@ -50,7 +56,7 @@ object PgAccess {
         last_scraped = r.getString("last_scraped")
       )
     }
-    Postgres.getRows[FeedRow](query = q, parser = parser)
+    db.getRows[FeedRow](query = q, parser = parser)
   }
 
   def getTexts(
@@ -108,6 +114,6 @@ object PgAccess {
         url = r.getString("url")
       )
     }
-    Postgres.getRows[TextsPageRow](query = q, parser = parser, queryArgs = queryArgs)
+    db.getRows[TextsPageRow](query = q, parser = parser, queryArgs = queryArgs)
   }
 }

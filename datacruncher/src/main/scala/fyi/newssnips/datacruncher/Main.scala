@@ -67,9 +67,20 @@ object AnalysisCycle {
       "https://www.yahoo.com/news/rss",
       "https://www.rt.com/rss/news/",
       "https://www.investing.com/rss/news.rss",
+      "https://api.axios.com/feed/",
+      "https://www.washingtontimes.com/rss/headlines/news/",
+      "https://www.washingtontimes.com/rss/headlines/news/world/",
+      "https://slate.com/feeds/all.rss",
+      "https://www.ft.com/world?format=rss",
+      "https://www.ft.com/home-beta?format=rss",
+      "https://www.chicagotribune.com/arcio/rss/category/news/breaking/",
+      "https://www.aljazeera.com/xml/rss/all.xml",
+      "https://cms.qz.com/feed/"
     ),
     "markets" -> Seq(
       "http://feeds.marketwatch.com/marketwatch/realtimeheadlines/",
+      "https://www.ft.com/markets?format=rss",
+      "https://slate.com/feeds/business.rss",
       "https://finance.yahoo.com/news/rss",
       "https://www.nasdaq.com/feed/rssoutbound",
       "https://seekingalpha.com/market_currents.xml",
@@ -83,10 +94,16 @@ object AnalysisCycle {
       "http://feeds.marketwatch.com/marketwatch/topstories/",
       "https://www.investing.com/rss/investing_news.rss",
       "https://www.investing.com/rss/stock.rss",
+      "https://www.washingtonexaminer.com/tag/economy.rss",
+      "https://www.washingtontimes.com/rss/headlines/news/business-economy/",
+      "http://feeds.benzinga.com/benzinga/best-of-benzinga",
+      "https://www.benzinga.com/top-stories/feed",
+      "https://www.benzinga.com/economics/feed",
+      "https://www.marketscreener.com/rss/FeedNews.php",
 
       // https://tradingeconomics.com/rss/ (see other useful)
-      "https://tradingeconomics.com/rss/news.aspx",
-      "https://tradingeconomics.com/united-states/rss",
+      // "https://tradingeconomics.com/rss/news.aspx", (generic headline for every country. e.g. GDP)
+      // "https://tradingeconomics.com/united-states/rss",
 
       // "https://fool.libsyn.com/rss",
       "https://www.cnbc.com/id/20409666/device/rss/rss.html?x=1",
@@ -103,7 +120,18 @@ object AnalysisCycle {
       "https://www.memeorandum.com/feed.xml",
       "https://www.reddit.com/r/politics/.rss",
       "https://www.reddit.com/r/NeutralPolitics/.rss",
-      "https://news.yahoo.com/rss/politics"
+      "https://news.yahoo.com/rss/politics",
+      "https://www.washingtonexaminer.com/tag/politics.rss",
+      "https://www.nationalreview.com/feed/",
+      "https://fivethirtyeight.com/politics/feed/",
+      "https://www.politifact.com/rss/all/",
+      "https://www.politifact.com/rss/factchecks/",
+      "https://www.washingtontimes.com/rss/headlines/news/politics/",
+      "https://slate.com/feeds/news-and-politics.rss",
+      "https://www.rollingstone.com/politics/feed/",
+      "https://www.chicagotribune.com/arcio/rss/category/politics/",
+      "http://feeds.feedburner.com/realclearpolitics/qlMj",
+      "https://www.benzinga.com/topic/government/feed"
     ),
     "entertainment" -> Seq(
       "https://www.buzzfeed.com/celebrity.xml",
@@ -115,12 +143,20 @@ object AnalysisCycle {
       "https://hollywoodlife.com/feed/",
       "https://mtonews.com/.rss/full/",
       "http://feeds.feedburner.com/variety/headlines",
-      "https://www.reddit.com/r/entertainment/.rss",
       "https://www.reddit.com/r/celebrities/.rss",
       "https://www.reddit.com/r/entertainment/.rss",
       "https://www.wesmirch.com/feed.xml",
       "https://mediagazer.com/feed.xml",
-      "https://www.yahoo.com/entertainment/rss"
+      "https://www.yahoo.com/entertainment/rss",
+      "https://www.rollingstone.com/music/feed/",
+      "https://www.rollingstone.com/tv/feed/",
+      "https://www.rollingstone.com/movies/feed/",
+      "https://www.chicagotribune.com/arcio/rss/category/entertainment/",
+      "https://www.hollywoodreporter.com/t/awards/feed/",
+      "https://www.hollywoodreporter.com/c/news/feed/",
+      "https://www.hollywoodreporter.com/c/movies/feed/",
+      "https://www.hollywoodreporter.com/c/tv/feed/",
+      "https://www.hollywoodreporter.com/t/international/feed/"
     )
   )
 
@@ -131,9 +167,11 @@ object AnalysisCycle {
     val categoryMetadata = DbConstants.categoryToDbMetadata(categoryId)
 
     // se only one feed in developemnt/test mode
-    if (AppConfig.settings.inProd) urls else urls.take(2)
+    val cycleUrls =
+      if (AppConfig.settings.shared.inProd) urls.distinct
+      else urls.distinct.take(2)
 
-    val categoryFeeds: Seq[Feed] = urls.flatMap { u =>
+    val categoryFeeds: Seq[Feed] = cycleUrls.flatMap { u =>
       // TODO group urls by host/first8-chars and reduce sleep time.
       Thread.sleep(726) // sleep to avoid rate limiting
       Scraper.getAndParseFeed(FeedURL(u))
@@ -223,7 +261,39 @@ object AnalysisCycle {
 }
 
 object ScratchCode {
-  Scraper.getApiFeed()
+  val spark: SparkSession =
+    SparkSession
+      .builder()
+      .appName("newssnips.fyi")
+      .config(
+        "spark.serializer",
+        "org.apache.spark.serializer.KryoSerializer"
+      )
+      .master("local[*]")
+      .getOrCreate()
+
+  import spark.implicits._
+
+  val origDf = Seq(
+    ("U.S.", "abc1", 1),
+    ("U.S", "abc99", 1),
+    ("General Electric", "abc2", 1),
+    ("GE", "abc3", 1),
+    ("the U.S.", "abc4", 1),
+    ("US", "abc5", 1),
+    ("Unites States", "iio", 6)
+  ).toDF("entityName", "entityType", "count")
+
+  origDf.show(false)
+
+  origDf
+    .withColumn(
+      "entityName",
+      NerHelper.entityNameNormalizeUdf(col("entityName"))
+    )
+    .show(false)
+
+  spark.stop
 }
 
 object Main extends App {
@@ -234,11 +304,15 @@ object Main extends App {
   val mode = args(0)
 
   mode match {
-    case "expriment"   => ModelExpriments.sentiment()
-    case "cycle"       => AnalysisCycle
+    case "expriment" => ModelExpriments.sentiment()
+    case "cycle"     =>
+      // https://flurdy.com/docs/scalainit/startscala.html
+      AnalysisCycle
     case "scratch"     => ScratchCode
     case "model_store" => ModelStore.storeCycle()
-    case _             => log.error(s"$mode is an invalid mode.")
+    case _ =>
+      log.error(s"$mode is an invalid mode.")
+      sys.exit(1)
   }
 
   log.info("datacruncher execution finished.")

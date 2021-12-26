@@ -15,7 +15,7 @@
 // // https://medium.com/rahasak/cassandra-scala-client-d50ebd5a9723
 // // https://github.com/magro/play2-scala-cassandra-sample
 
-// import configuration.AppConfig
+// import  fyi.newssnips.webapp.config.AppConfig
 
 // import java.nio.file.Paths
 // // import com.datastax.driver.core.Cluster

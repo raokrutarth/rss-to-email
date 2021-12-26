@@ -3,7 +3,6 @@ package controllers.v1
 import play.api._
 import play.api.mvc._
 import scala.util.Success
-import javax.inject.Inject
 import javax.inject._
 import com.typesafe.scalalogging.Logger
 import play.twirl.api.Html
@@ -15,7 +14,7 @@ import play.api.mvc._
 import fyi.newssnips.webapp.models._
 import java.util.UUID
 import fyi.newssnips.core.Mailer
-import configuration.AppConfig
+import fyi.newssnips.webapp.config.AppConfig
 import play.api.libs.json._
 import scala.util.Failure
 import scala.concurrent.{Future, blocking}
@@ -25,7 +24,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 @Singleton
 class CommsController @Inject() (
     val cc: ControllerComponents,
-    cache: Cache
+    cache: Cache,
+    dal: NewsletterDal
 ) extends AbstractController(cc)
     with play.api.i18n.I18nSupport {
   // https://pedrorijo.com/blog/play-forms/
@@ -94,7 +94,7 @@ class CommsController @Inject() (
       var successMessage = s"Verification email sent to ${sd.email}."
       var emailSubject   = "Welcome to the NewsSnips.fyi Newsletter"
       var isSignup       = true
-      val exists         = NewsletterDal.subscriberExists(sd.email)
+      val exists         = dal.subscriberExists(sd.email)
       if (exists.isSuccess && exists.get) {
         successMessage =
           s"New verification email sent to ${sd.email}. Please click to save changes."
@@ -139,7 +139,7 @@ class CommsController @Inject() (
         val sd = Json.parse(sdJson).as[SignupData]
 
         // TODO add to db
-        if (NewsletterDal.upsertSubscriber(sd).isSuccess) {
+        if (dal.upsertSubscriber(sd).isSuccess) {
           log.info(s"db save successful.")
           // early manual delete
           Future {

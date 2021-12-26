@@ -7,10 +7,11 @@ import java.sql.PreparedStatement
 import fyi.newssnips.webapp.core.db.Postgres
 import fyi.newssnips.webapp.models._
 import play.api.libs.json.Json
+import javax.inject._
 
-object NewsletterDal {
+@Singleton
+class NewsletterDal @Inject() (db: Postgres) {
   val log                 = Logger("app." + this.getClass().toString())
-  val db                  = Postgres
   val subscriberTableName = "newsletter_subscribers"
 
   def getDueSubscribers(): Try[Array[SubscriberRow]] = {
