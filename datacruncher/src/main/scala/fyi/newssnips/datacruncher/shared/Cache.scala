@@ -6,6 +6,7 @@ import scala.util.Try
 import javax.inject._
 import configuration.AppConfig
 import _root_.redis.clients.jedis.JedisPool
+import scala.collection.JavaConverters._
 
 // TODO: move to play redis cache for simpler APIs
 // https://github.com/KarelCemus/play-redis/issues/251
@@ -39,7 +40,9 @@ class Cache() {
   }
 
   def flushCache() = Try {
-    redisPool.getResource().flushAll()
+    val r = redisPool.getResource()
+    log.info(s"Removeing all keys in cache for keyspace ${keyspace}")
+    r.keys(keyspace + "*").asScala.map(k => r.del(k))
   }
 
   def cleanup() = {

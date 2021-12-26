@@ -6,21 +6,20 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 
-import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
-import com.johnsnowlabs.nlp.LightPipeline
-
 import com.typesafe.scalalogging.Logger
 import fyi.newssnips.shared.DfUtils
-import com.johnsnowlabs.nlp.annotator._
 import com.johnsnowlabs.nlp.base._
-import org.apache.spark.ml.Pipeline
 import org.apache.spark.sql.SparkSession
-import com.johnsnowlabs.nlp.annotator._
 import com.johnsnowlabs.nlp.base._
-import com.johnsnowlabs.nlp.DocumentAssembler
+import org.apache.spark.sql.functions._
+
+import com.johnsnowlabs.nlp.base._
+import org.apache.spark.sql.SparkSession
+import com.johnsnowlabs.nlp.base._
 import org.apache.spark.sql.functions._
 import com.johnsnowlabs.nlp.LightPipeline
-import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
+import org.apache.spark.ml.PipelineModel
+import fyi.newssnips.datacruncher.scripts.ModelStore
 
 @Singleton
 class Analysis(spark: SparkSession) {
@@ -30,39 +29,18 @@ class Analysis(spark: SparkSession) {
   // https://nlp.johnsnowlabs.com/docs/en/pipelines#recognizeentitiesdl
   // https://nlp.johnsnowlabs.com/demo
 
-  log.info("Initalizing analysis pipelines.")
-  log.info("Initalizing sentiment pipeline.")
-  
-  private lazy val sentimentPipeline =
-    new LightPipeline(
-      new Pipeline()
-        .setStages(
-          Array(
-            new DocumentAssembler()
-              .setInputCol("text")
-              .setOutputCol("document"),
-            new Tokenizer()
-              .setInputCols("document")
-              .setOutputCol("token"),
-            BertForSequenceClassification
-              .pretrained("bert_sequence_classifier_finbert", "en")
-              .setInputCols("document", "token")
-              .setOutputCol("sentiment")
-              .setCaseSensitive(true)
-              .setMaxSentenceLength(512)
-          )
-        )
-        .fit(Seq[String]().toDF("text"))
-    )
+  private val sentimentPipelineSocial = {
+    log.info("Initalizing sentiment pipeline.")
+    PipelineModel.read.load(ModelStore.sentimentModelPath.toString())
+  }
 
-  log.info("Initalizing entity pipeline.")
-  private lazy val entityRecognitionPipeline =
+  private val entityRecognitionPipeline = {
+    log.info("Initalizing NER pipeline.")
+
     new LightPipeline(
-      new PretrainedPipeline(
-        "onto_recognize_entities_electra_base",
-        lang = "en"
-      ).model
+      PipelineModel.read.load(ModelStore.nerModelPath.toString())
     )
+  }
 
   // TODO use it to remove stop words from entity names
   // private val stopWordsPipeline = new StopWordsRemover()
@@ -99,35 +77,42 @@ class Analysis(spark: SparkSession) {
     entitiesDf
   }
 
-  private def getSentiment(contentsDf: DataFrame): DataFrame = {
+  private def getSentiment(
+      contentsDf: DataFrame
+  ): DataFrame = {
     val transformed =
-      sentimentPipeline.transform(contentsDf)
-    log.info(s"Extracted sentiment from blocks of text.")
-    transformed.printSchema()
-    transformed.show(false)
+      sentimentPipelineSocial.transform(contentsDf)
+    log.info(s"Extracting sentiment from blocks of text.")
 
     val sentimentDf = transformed
       .select(
         col("text_id"),
         explode(col("sentiment")).as("sentiment")
       )
+      .filter(
+        (col("sentiment.end") - col("sentiment.begin")) > 4
+      ) // remove junk/trivial text blocks
       .select(
         col("text_id"),
-        col("sentiment.result").as("sentiment"),
-        element_at(col("sentiment.metadata"), col("sentiment.result"))
-          .as("confidence"),
-        (col("sentiment.end") - col("sentiment.begin"))
-          .as("sentimentBlockLength")
+        col("sentiment.result").as("sentiment")
       )
-    log.info(s"Extracted sentiment blocks.")
-    sentimentDf.show(false)
-    DfUtils.showSample(sentimentDf, 5f)
-    sys.exit(1)
+      .withColumn(
+        "sentiment",
+        expr(
+          "CASE WHEN sentiment = 'POSITIVE' THEN 'pos' " +
+            "WHEN sentiment = 'NEGATIVE' THEN 'neg' " +
+            "ELSE sentiment END"
+        )
+      )
 
+    log.info(s"Extracted sentiment blocks.")
+    DfUtils.showSample(sentimentDf, truncate = 300)
     sentimentDf
   }
 
-  def generateReport(contentsDf: DataFrame): Option[DataFrame] = {
+  def generateReport(
+      contentsDf: DataFrame
+  ): Option[DataFrame] = {
 
     log.info(s"Performing analysis on ${contentsDf.count()} mentions.")
 
@@ -139,63 +124,42 @@ class Analysis(spark: SparkSession) {
         sentimentDf,
         Seq("text_id")
       )
-      .alias("entities_and_sentiments_df")
-      .join(
-        contentsDf,
-        Seq("text_id")
-      )
+      // inner join with contents DF here to get raw text
       .select(
-        col("entities_and_sentiments_df.text_id"),
+        entitiesDf("text_id"),
         col("entityName"),
         col("entityType"),
-        col("sentiment"),
-        col("confidence"),
-        col("sentimentBlockLength"),
-        col("text")
+        col("sentiment")
+        // col("confidence")
       )
 
     log.info(
-      s"Constructed expanded result of entities, sentiments " +
-        "and their accompnying texts."
+      s"Constructed intermediate result of entities & sentiments."
     )
-    DfUtils.showSample(expandedDf)
-
-    val negCondition = col("sentiment") === "negative"
-    val posCondition = col("sentiment") === "positive"
-    val typesToSkip  = Seq("CARDINAL", "ORDINAL", "PERCENT", "WORK_OF_ART")
+    val typesToSkip = Seq("CARDINAL", "ORDINAL", "PERCENT", "WORK_OF_ART")
 
     val resultDf = expandedDf
+      .filter(!col("entityType").isInCollection(typesToSkip))
       .groupBy("entityName", "entityType")
       .agg(
-        // get sentiment counts
-        sum(when(negCondition, 1).otherwise(0)).as("negativeMentions"),
-        sum(when(posCondition, 1).otherwise(0)).as("positiveMentions"),
         // collect relevant texts
-        collect_set(when(posCondition, $"text_id")).as("positiveTextIds"),
-        collect_set(when(negCondition, $"text_id")).as("negativeTextIds"),
+        collect_set(when(col("sentiment") === "pos", $"text_id"))
+          .as("positiveTextIds"),
+        collect_set(when(col("sentiment") === "neg", $"text_id"))
+          .as("negativeTextIds"),
         // count total mentions
-        countDistinct("text_id").as("totalNumTexts"),
-        // get approximate confidence of sentiment labeling.
-        (sum("confidence") * sum("sentimentBlockLength"))
-          .as("aggregateConfidence")
+        countDistinct("text_id").as("totalNumTexts")
       )
-      .filter(!col("entityType").isInCollection(typesToSkip))
-      .where("""
-        aggregateConfidence > 0
-      """)
-      .orderBy(col("totalNumTexts").desc)
+      // get sentiment counts
+      .withColumn("negativeMentions", size(col("negativeTextIds")))
+      .withColumn("positiveMentions", size(col("positiveTextIds")))
+      // .orderBy(col("totalNumTexts").desc)
       .na
       .drop("any")
 
-    log.info(s"Analysis report constructed.")
+    log.info(s"Analysis report query constructed.")
+
     DfUtils.showSample(resultDf)
     Some(resultDf)
   }
-
-  // lifecycle.addStopHook { () =>
-  //   Future.successful {
-  //     log.info("Analytics engine end hook called")
-  //     // spark.stop()
-  //   }
-  // }
 }

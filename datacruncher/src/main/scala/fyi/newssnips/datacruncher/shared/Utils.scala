@@ -1,29 +1,41 @@
 package fyi.newssnips.shared
 
-import org.apache.spark.sql._
+// import org.apache.spark.sql._
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.ZoneId
 import configuration.AppConfig
 import com.typesafe.scalalogging.Logger
+import java.lang.Runtime
 
-object DfUtils {
+// object DfUtils {
+//   private val log: Logger = Logger("app." + this.getClass().toString())
+
+//   /** Log n random values from the dataframe if the envorinment variable for df sampeling is
+//     * enabled. Can reduce performance.
+//     */
+//   def showSample(
+//       df: DataFrame,
+//       n: Float = 5f,
+//       truncate: Int = 30, // num chars
+//       overrideEnv: Boolean = false
+//   ): Unit = {
+//     if (AppConfig.settings.sampleDfs || overrideEnv) {
+//       log.info(s"Sampling dataframe with ${df.count()} rows.")
+//       df.sample(n / math.max(n, df.count())).show(20, truncate = truncate)
+//     }
+//   }
+// }
+
+object PerformanceUtils {
   private val log: Logger = Logger("app." + this.getClass().toString())
 
-  /** Log n random values from the dataframe if the envorinment variable for df
-    * sampeling is enabled. Can reduce performance.
-    */
-  def showSample(
-      df: DataFrame,
-      n: Float = 5f,
-      truncate: Boolean = true
-  ): Unit = {
-    if (AppConfig.settings.sampleDfs) {
-      log.info(s"Sampling dataframe with ${df.count()} rows.")
-      df.sample(n / math.max(n, df.count())).show(truncate)
-    }
-
+  val mb = 1024 * 1024
+  def logMem() = {
+    val runtime = Runtime.getRuntime
+    log.info("Memory usage: " + (runtime.totalMemory - runtime.freeMemory) / mb)
+    log.info("Free memory: " + runtime.freeMemory / mb)
   }
 }
 

@@ -19,7 +19,7 @@ docker run \
   rss-dev-img:v2
 
 docker update \
-  --memory=6G \
+  --memory=8Gi \
   --cpus=4 \
   rss-dev
 

@@ -9,39 +9,31 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.ml.feature.RegexTokenizer
 import org.apache.spark.ml.Pipeline
 
-import com.johnsnowlabs.nlp.DocumentAssembler
-
-import com.johnsnowlabs.nlp.annotators.sentence_detector_dl.SentenceDetectorDLModel
 import com.typesafe.scalalogging.Logger
 import fyi.newssnips.shared.DfUtils
+import fyi.newssnips.datacruncher.scripts.ModelStore
+import org.apache.spark.ml.PipelineModel
 
 @Singleton
 class DataPrep(spark: SparkSession) {
   import spark.implicits._
   private val log: Logger = Logger("app." + this.getClass().toString())
 
-  private val cleaningPipeline = new Pipeline().setStages(
-    Array(
-      // removes html tags from string and splits into words
-      new RegexTokenizer()
-        .setInputCol("rawText")
-        .setOutputCol("normalized")
-        .setPattern("<[^>]+>|\\s+") // split by html tag or space
-        .setToLowercase(false)
+  private val cleaningPipeline = new Pipeline()
+    .setStages(
+      Array(
+        // removes html tags from string and splits into words
+        new RegexTokenizer()
+          .setInputCol("rawText")
+          .setOutputCol("normalized")
+          .setPattern("<[^>]+>|\\s+") // split by html tag or space
+          .setToLowercase(false)
+      )
     )
-  )
+    .fit(Seq[String]().toDF("rawText"))
 
-  private val sentencePipeline = new Pipeline().setStages(
-    Array(
-      new DocumentAssembler()
-        .setInputCol("textBlock")
-        .setOutputCol("document"),
-      SentenceDetectorDLModel
-        .pretrained("sentence_detector_dl", "en")
-        .setInputCols(Array("document"))
-        .setOutputCol("sentence")
-    )
-  )
+  private val sentencePipeline =
+    PipelineModel.read.load(ModelStore.cleanupPipelinePath.toString())
 
   def constructContentsDf(
       contents: Seq[FeedContent]
@@ -53,17 +45,14 @@ class DataPrep(spark: SparkSession) {
     log.info(s"Identified blocks of description.")
 
     val cleanedDescriptionsDf = cleaningPipeline
-      .fit(descriptionsDf)
       .transform(descriptionsDf)
       .dropDuplicates("url")
       .select(
         concat_ws(" ", col("normalized")).as("textBlock"),
         col("url")
       )
-    log.debug("Cleaned descriptions.")
 
     val descriptionSentencesDf = sentencePipeline
-      .fit(cleanedDescriptionsDf)
       .transform(cleanedDescriptionsDf)
       .select(
         // expand array of sentences to individual rows
@@ -80,7 +69,6 @@ class DataPrep(spark: SparkSession) {
       .toDF("url", "rawText")
 
     val cleanTitlesDf = cleaningPipeline
-      .fit(titlesDf)
       .transform(titlesDf)
       .dropDuplicates("url")
       .select(
@@ -103,7 +91,6 @@ class DataPrep(spark: SparkSession) {
           col("url")
         )
         .filter("text != ''")
-        .dropDuplicates("text")
 
     log.info(
       s"Extracted sentences from titles and descriptions."
@@ -128,7 +115,7 @@ class DataPrep(spark: SparkSession) {
       )
 
     log.info(s"Extracted unique URLs.")
-    DfUtils.showSample(df = urlDf, truncate = false)
+    DfUtils.showSample(df = urlDf)
 
     val slimContentsDf = contentsDf
       .alias("cnt_df")

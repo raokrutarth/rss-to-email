@@ -11,12 +11,15 @@ RUN tar xvf spark.tgz && \
 WORKDIR /opt/docker
 
 COPY --chown=daemon:root opt /opt
+# COPY --chown=daemon:root 2/opt /opt
+# COPY --chown=daemon:root 4/opt /opt
+
 EXPOSE 9000
 USER daemon
 ENV RUNTIME_ENV "docker"
 ARG BINARY_FILE
 ENV BINARY_FILE=${BINARY_FILE}
-ENV JAVA_OPTS="-Xms100M -Xmx512M -XX:+UseG1GC"
+# ENV JAVA_OPTS="-Xms100M -Xmx512M -XX:+UseG1GC"
 ENTRYPOINT ${BINARY_FILE}
 CMD []
 

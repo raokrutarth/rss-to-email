@@ -4,7 +4,6 @@ import com.typesafe.config.ConfigFactory
 import com.typesafe.config.Config
 import scala.util.Properties
 import java.io.FileOutputStream
-import org.apache.http.client.config.RequestConfig
 import java.util.Base64
 import scala.io.Source
 import play.api.Logger
@@ -17,12 +16,15 @@ case class AppConfig(
     redis: RedisConfig,
     runtimeEnv: String,
     inProd: Boolean,
-    httpClientConfig: RequestConfig,
     sampleDfs: Boolean, // when enabled, prints the intermediate DFs (slow)
 
     // timezone of app from
     // https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/ZoneId.html
-    timezone: String
+    timezone: String,
+    pg: PostgresConfig
+)
+case class PostgresConfig(
+    connStr: String
 )
 
 case class DatastaxConfig(
@@ -89,6 +91,20 @@ object AppConfig {
     }
   }
 
+  private def getPostgresConfig(config: Config): PostgresConfig = {
+    val user     = config.getString("secrets.database.yugabyte.user")
+    val password = config.getString("secrets.database.yugabyte.password")
+    val host     = config.getString("secrets.database.yugabyte.host")
+    val port     = config.getString("secrets.database.yugabyte.port")
+    val certPath = "/home/dev/work/datacruncher/yugabyte_db_cert.crt"
+    val db       = "newssnips"
+
+    PostgresConfig(
+      s"jdbc:postgresql://${host}:${port}" +
+        s"/${db}?user=${user}&password=${password}&ssl=true&sslmode=verify-full&sslrootcert=${certPath}"
+    )
+  }
+
   private def extractRedisConfig(config: Config): RedisConfig = {
     // convert the redis connection URL provided by heroku to
     // it's individual parts to feed into spark config.
@@ -111,14 +127,6 @@ object AppConfig {
   def load(config: Config): AppConfig = {
     val runtime: String = Properties.envOrElse("RUNTIME_ENV", "development")
 
-    val timeout = 10
-    val requestConfig = RequestConfig
-      .custom()
-      .setConnectTimeout(timeout * 1000)
-      .setConnectionRequestTimeout(timeout * 1000)
-      .setSocketTimeout(timeout * 1000)
-      .build()
-
     AppConfig(
       database = DatastaxConfig(
         url = config.getString("secrets.database.datastaxAstra.url"),
@@ -129,10 +137,10 @@ object AppConfig {
       ),
       runtimeEnv = runtime,
       inProd = if (runtime.equals("docker")) true else false,
-      httpClientConfig = requestConfig,
       redis = extractRedisConfig(config),
       sampleDfs = if (Properties.envOrNone("SAMPLE_DFS").isEmpty) false else true,
-      timezone = Properties.envOrElse("TZ", "America/Los_Angeles")
+      timezone = Properties.envOrElse("TZ", "America/Los_Angeles"),
+      pg = getPostgresConfig(config)
     )
   }
 }

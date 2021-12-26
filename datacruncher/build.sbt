@@ -22,15 +22,18 @@ libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging"   % "3.9.
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.2"
 
 libraryDependencies += "com.datastax.spark" % "spark-cassandra-connector_2.12" % "3.1.0"
+libraryDependencies += "org.postgresql" % "postgresql" % "42.3.1"
+
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.1" % "test"
 libraryDependencies +=  "redis.clients" % "jedis" % "3.7.0"
 
+scalacOptions += "-Ywarn-unused"
 scalafmtOnCompile := true
 scalafixOnCompile := true
-scalacOptions += "-Ywarn-unused"
 
-// export JAVA_OPTS="-XX:+AggressiveHeap -Xms512M -Xmx8048M"
+// export JAVA_OPTS="-XX:+AggressiveHeap -Xms512M -Xmx6048M"
+// export JAVA_OPTS="-Xms1024M -Xmx7048M -XX:+UseG1GC"
 lazy val root = (project in file(".")).settings(
   javaOptions ++= Seq(
     "-Xms512M",
@@ -44,6 +47,7 @@ lazy val root = (project in file(".")).settings(
 // https://medium.com/jeroen-rosenberg/lightweight-docker-containers-for-scala-apps-11b99cf1a666
 // https://dvirf1.github.io/play-tutorial/posts/dockerize-the-app/enablePlugins(JavaAppPackaging)
 enablePlugins(DockerPlugin)
+enablePlugins(JavaAppPackaging)
 
 import com.typesafe.sbt.packager.docker.DockerChmodType
 import com.typesafe.sbt.packager.docker.DockerPermissionStrategy

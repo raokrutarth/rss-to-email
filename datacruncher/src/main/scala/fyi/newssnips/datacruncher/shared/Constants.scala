@@ -1,15 +1,19 @@
 package fyi.newssnips.shared
+import configuration.AppConfig
 
 case class CategoryDbMetadata(
     name: String,
-    analysisTableName: String, // table name of sentiment and count of mentions
-    textsTableName: String,    // table name of raw texts for the category
+    analysisTableName: String,    // table name of sentiment and count of mentions
+    textsTableName: String,       // table name of raw texts for the category
     sourceFeedsTableName: String, // table name of rss feed URLs
     articleUrlsTableName: String, // table name of links to article/post of sentence
-    lastUpdateKey: String // key of the last updated in KV table
+    lastUpdateKey: String         // key of the last updated in KV table
 )
 
 object DbConstants {
+  val keySpace    = if (AppConfig.settings.inProd) "prod" else "dev"
+  val KVTableName = s"${keySpace}.key_value_udepqrn4g8s"
+
   val categoryToDbMetadata: Map[String, CategoryDbMetadata] =
     Seq("home", "markets", "politics", "entertainment")
       .map(category =>

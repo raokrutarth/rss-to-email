@@ -19,6 +19,7 @@ case class AppConfig(
     inProd: Boolean,
     httpClientConfig: RequestConfig,
     redis: RedisConfig,
+    pg: PostgresConfig,
 
     // timezone of app from
     /* https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/ZoneId.html */
@@ -26,7 +27,12 @@ case class AppConfig(
 
     // when set via env var, intermediate dataframes
     // are sampled during cycle for debugging.
-    sampleDfs: Boolean
+    sampleDfs: Boolean,
+    modelsPath: String
+)
+
+case class PostgresConfig(
+    connStr: String
 )
 
 case class DatastaxConfig(
@@ -110,6 +116,20 @@ object AppConfig {
     )
   }
 
+  private def getPostgresConfig(config: Config): PostgresConfig = {
+    val user     = config.getString("secrets.database.yugabyte.user")
+    val password = config.getString("secrets.database.yugabyte.password")
+    val host     = config.getString("secrets.database.yugabyte.host")
+    val port     = config.getString("secrets.database.yugabyte.port")
+    val certPath = "/home/dev/work/datacruncher/yugabyte_db_cert.crt"
+    val db       = "newssnips"
+
+    PostgresConfig(
+      s"jdbc:postgresql://${host}:${port}" +
+        s"/${db}?user=${user}&password=${password}&ssl=true&sslmode=verify-full&sslrootcert=${certPath}"
+    )
+  }
+
   /** Load from a given Typesafe Config object */
   def load(config: Config): AppConfig = {
     val runtime: String = Properties.envOrElse("RUNTIME_ENV", "development")
@@ -134,6 +154,7 @@ object AppConfig {
       sendgrid = SendgridConfig(
         apiKey = config.getString("secrets.sendgrid.apiKey")
       ),
+      pg = getPostgresConfig(config),
       runtimeEnv = runtime,
       inProd = if (runtime.equals("docker")) {
         log.warn("Running in production mode.")
@@ -143,7 +164,8 @@ object AppConfig {
       timezone = Properties.envOrElse("TZ", "America/Los_Angeles"),
       redis = extractRedisConfig(config),
       sampleDfs =
-        if (Properties.envOrNone("SAMPLE_DFS").isEmpty) false else true
+        if (Properties.envOrNone("SAMPLE_DFS").isEmpty) false else true,
+      modelsPath = if (runtime.equals("docker")) "/etc/models" else "models"
     )
   }
 }

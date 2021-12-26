@@ -4,7 +4,6 @@ import com.typesafe.scalalogging.Logger
 import org.apache.spark.sql._
 import fyi.newssnips.models.FeedURL
 import fyi.newssnips.datacruncher.core.Scraper
-import fyi.newssnips.datastore.DatastaxCassandra
 
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
@@ -16,18 +15,33 @@ import fyi.newssnips.datacruncher.core.Analysis
 
 import fyi.newssnips.models.Feed
 import fyi.newssnips.datastore.Cache
+import org.apache.spark.storage.StorageLevel
+import fyi.newssnips.datacruncher.datastore.SparkPostgres
 
 object AnalysisCycle {
   private val log = Logger("app." + this.getClass().toString())
 
-  private val db = DatastaxCassandra
-  import db.spark.implicits._
+  lazy val spark: SparkSession =
+    SparkSession
+      .builder()
+      .appName("newssnips.fyi")
+      .config(
+        "spark.serializer",
+        "org.apache.spark.serializer.KryoSerializer"
+      )
+      .master("local[*]")
+      .getOrCreate()
+
+  import spark.implicits._
+
+  private val db = new SparkPostgres(spark)
+
   private val cache = new Cache()
 
-  private val analysis = new Analysis(db.spark)
+  private val analysis = new Analysis(spark)
   log.info("Initalized analysis module.")
 
-  private val dataPrep = new DataPrep(db.spark)
+  private val dataPrep = new DataPrep(spark)
   log.info("Initalized dataprep module.")
 
   private val booksFinderUdf = udf(ContextFinder.findBooks)
@@ -129,17 +143,19 @@ object AnalysisCycle {
     val fatContentsDf       = dataPrep.constructContentsDf(categoryContents)
     val (urlDf, contentsDf) = dataPrep.seperateLinksFromContents(fatContentsDf)
 
-    contentsDf.cache()
     // metadata if the report generation is successful. (df, tableName, idCol)
-    val toSave: Seq[(DataFrame, String, String)] = Seq(
-      (feedsDf, categoryMetadata.sourceFeedsTableName, "feed_id"),
-      (urlDf, categoryMetadata.articleUrlsTableName, "link_id"),
-      (contentsDf, categoryMetadata.textsTableName, "text_id")
+    val toSave: Seq[(DataFrame, String)] = Seq(
+      (feedsDf, categoryMetadata.sourceFeedsTableName),
+      (urlDf, categoryMetadata.articleUrlsTableName),
+      (contentsDf, categoryMetadata.textsTableName)
     )
+    contentsDf.persist(StorageLevel.DISK_ONLY)
 
-    analysis.generateReport(contentsDf) match {
+    val reportDf = analysis.generateReport(contentsDf)
+
+    reportDf match {
       case Some(df) =>
-        log.info("Fetching context paterials for all entities in report.")
+        log.info("Fetching context products for all entities in report.")
 
         val resDf = df
           .withColumn(
@@ -148,26 +164,22 @@ object AnalysisCycle {
           )
 
         log.info(s"Final analysis report for $categoryId:")
+        resDf.persist(StorageLevel.DISK_ONLY)
         resDf.show() // critical dataframe to see before saving
 
         db.putDataframe(
           categoryMetadata.analysisTableName,
-          resDf,
-          col("entityName"),
-          col("entityType")
+          resDf
         ) match {
           case Failure(s) =>
             log.error(s"Failed to store analysis. Reason: $s")
           case _ =>
+            resDf.unpersist()
             log.info(
               s"${categoryMetadata.analysisTableName} rows saved successfully. Saving analysis metadata."
             )
-            toSave.foreach { case (df, tableName, idCol) =>
-              db.putDataframe(
-                tableName,
-                df,
-                col(idCol)
-              ) match {
+            toSave.foreach { case (df, tableName) =>
+              db.putDataframe(tableName, df) match {
                 case Failure(exception) =>
                   log.error(
                     s"Failed to save table $tableName with error $exception"
@@ -196,13 +208,12 @@ object AnalysisCycle {
   }
   cache.flushCache()
   cache.cleanup()
-  db.cleanup()
 }
 
 object Main extends App {
   val log = Logger("app." + this.getClass().toString())
-  log.info("Running analysis cycle.")
+  log.info("Running datacruncher.")
   AnalysisCycle
-  // Sentiment1
+  // ModelStore.storeCycle()
   log.info("Analysis cycle finished.")
 }
