@@ -96,28 +96,51 @@ class Analysis(spark: SparkSession) {
       sentimentPipelineSocial.transform(contentsDf)
     log.info(s"Extracting sentiment from blocks of text.")
 
+    val negOverrides    = ManualOverrides.negativePhrases
+    val overrideTextcol = lower(col("text"))
+
     val sentimentDf = transformed
-      .select(
-        col("text_id"),
+      .withColumn(
+        "sentiment",
         explode(col("sentiment")).as("sentiment")
       )
       .filter(
         (col("sentiment.end") - col("sentiment.begin")) > 4
       ) // remove junk/trivial text blocks
-      .select(
-        col("text_id"),
-        col("sentiment.result").as("sentiment"),
+      .withColumn(
+        "confidence",
         array_max(
           map_values($"sentiment.metadata").cast(ArrayType(DoubleType))
-        ).as("confidence")
+        )
+      )
+      .withColumn(
+        "sentiment",
+        col("sentiment.result")
       )
       .withColumn(
         "sentiment",
         expr(
-          "CASE WHEN sentiment = 'POSITIVE' THEN 'pos' " +
-            "WHEN sentiment = 'NEGATIVE' THEN 'neg' " +
-            "ELSE sentiment END"
+          """ 
+            CASE 
+              WHEN lower(sentiment) like 'p%' THEN 'pos'
+              WHEN lower(sentiment) like 'n%' THEN 'neg'
+              ELSE lower(sentiment) 
+            END
+          """
         )
+      )
+      .withColumn(
+        "sentiment",
+        when(
+          // manual overrides for texts with known negative sentiment.
+          negOverrides.map(overrideTextcol.contains).reduce(_ || _),
+          "neg"
+        )
+          .otherwise(col("sentiment"))
+      )
+      .select(
+        col("text_id"),
+        col("sentiment")
       )
 
     log.info(s"Extracted sentiment blocks.")

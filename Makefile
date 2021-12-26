@@ -16,6 +16,8 @@ GCLD = docker run --rm -ti \
 
 GCP_WA_IMAGE="us-west1-docker.pkg.dev/newssnips/newssnips/webapp:$(TIME_NOW)"
 
+DC_CONTAINER_NAME ?= "rss-dc"
+
 init-minikube:
 	minikube start \
 		--driver=docker \
@@ -48,22 +50,6 @@ heroku-redis:
 
 redis-config-show:
 	heroku config:get $(HRK_APP) REDIS_URL
-
-# start:
-# 	$(KCTL) apply -f deploy/rte-ns.yaml
-# 	$(KCTL) apply -f deploy/app.yaml
-
-# stop:
-# 	$(KCTL) delete namespace $(NS)
-
-# status:
-# 	$(KCTL) -n $(NS) get deployments
-# 	$(KCTL) -n $(NS) get pods
-
-# $(KCTL) -n $(NS) rollout restart deployment rss-to-email-dep
-
-# test-app:
-# 	set -x && curl "$$(minikube service --url -n $(NS) rss-to-email-svc)"
 
 # stores the creds in host and sets project.
 gcp-init:
@@ -120,9 +106,24 @@ domain-mapping:
 	# $(GCLD) "gcloud domains verify newssnips.fyi"
 	# $(GCLD) "gcloud beta run domain-mappings create --service webapp --domain newssnips.fyi"
 
+
+stop-dc:
+	docker rm -f $(DC_CONTAINER_NAME) || true
+
 redeploy-dc:
-	./scripts/build.sh $(DC_BUILD_TAG)
-	docker tag $(DC_BUILD_TAG) registry.heroku.com/sentipeg/web
-	docker push registry.heroku.com/sentipeg/web
-	heroku container:release web $(HRK_APP)
-	make -s app-logs
+	./scripts/build-datacruncher.sh $(DC_BUILD_TAG)
+	
+	docker rm -f $(DC_CONTAINER_NAME) || true
+	docker run -it \
+		--detach \
+    --name $(DC_CONTAINER_NAME) \
+    -e SECRETS_FILE_PATH=/etc/secrets.conf \
+		-v "/home/zee/sharp/rss-to-email/datacruncher/secrets.conf":/etc/secrets.conf:ro \
+    -e SHARED_SECRETS_FILE_PATH=/etc/shared.secrets.conf \
+    -v "/home/zee/sharp/rss-to-email/shared.secrets.conf":/etc/shared.secrets.conf:ro \
+    -e PG_CERT_PATH=/etc/pg.crt \
+    -v "/home/zee/sharp/rss-to-email/cockroachdb_db.crt":/etc/pg.crt:ro \
+    -v "/home/zee/sharp/rss-to-email/datacruncher/models":/etc/models:ro \
+    $(DC_BUILD_TAG)
+	
+	docker update --memory=8Gi --cpus=6 $(DC_CONTAINER_NAME)

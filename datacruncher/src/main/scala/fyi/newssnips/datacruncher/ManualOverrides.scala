@@ -42,4 +42,21 @@ object ManualOverrides {
     // remove https://fool.libsyn.com/michael-lewis-returns
   )
 
+  val negativePhrases = Seq(
+    "preyed",
+    "dies",
+    "dead",
+    "death",
+    "assault",
+    "kills",
+    "killed",
+    "cases rise",
+    "cases surge",
+    "spreads rapidly",
+    "equities plunge",
+    "stocks plunge",
+    "equities nosedive",
+    "hospitalizations rise"
+  )
+
 }

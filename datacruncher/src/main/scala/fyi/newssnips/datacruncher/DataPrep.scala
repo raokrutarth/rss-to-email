@@ -20,7 +20,8 @@ object DataPrepHelpers {
   def normalizeTitle(url: String, title: String): String = {
     if (url.contains("news.google.com")) {
       // google news titles contain the publisher at the end seperated by -
-      val sepIdx = Seq(title.lastIndexOf("-"), title.lastIndexOf("|")).sorted.reverse.head
+      val sepIdx =
+        Seq(title.lastIndexOf("-"), title.lastIndexOf("|")).sorted.reverse.head
       if (sepIdx > -1) {
         title.slice(0, sepIdx)
       } else {
@@ -29,7 +30,6 @@ object DataPrepHelpers {
         )
         title
       }
-
     } else {
       title
     }

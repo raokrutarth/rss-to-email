@@ -8,17 +8,17 @@ object NerHelper {
     en match {
       case "Us" | "U.s" | "U.s.a" | "Usa" | "United States Of America" =>
         "United States"
-      case "Uk" | "U.k"     => "United Kingdom"
-      case "Eu" | "E.u"     => "European Union"
-      case "Covid-19" | "Covid"      => "COVID"
-      case "Cdc"            => "CDC"
-      case "Un" | "U.n"            => "United Nations"
-      case "Nato" => "North Atlantic Treaty Organization"
-      case "Sec" => "Securities and Exchange Commission"
-      case "Irs" => "Internal Revenue Service"
-      case "Nfl"            => "NFL"
-      case "Biden"          => "Joe Biden"
-      case "Tesla" | "TSLA" => "Tesla Inc"
+      case "Uk" | "U.k"         => "United Kingdom"
+      case "Eu" | "E.u"         => "European Union"
+      case "Covid-19" | "Covid" => "COVID"
+      case "Cdc"                => "CDC"
+      case "Un" | "U.n"         => "United Nations"
+      case "Nato"               => "North Atlantic Treaty Organization"
+      case "Sec"                => "Securities and Exchange Commission"
+      case "Irs"                => "Internal Revenue Service"
+      case "Nfl"                => "NFL"
+      case "Biden"              => "Joe Biden"
+      case "Tesla" | "TSLA"     => "Tesla Inc"
       case en if en.startsWith("The ") =>
         normalizeEntityName(
           en.replaceFirst("(The\\s*|the\\s*)", "")

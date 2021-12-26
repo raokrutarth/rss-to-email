@@ -101,9 +101,8 @@ object ScratchCode {
     df.show(false)
     spark.stop
   }
-  checkCaseFix()
 
-  def sp() = {
+  def negOverride() = {
     val spark: SparkSession =
       SparkSession
         .builder()
@@ -115,7 +114,26 @@ object ScratchCode {
         .master("local[*]")
         .getOrCreate()
 
+    import spark.implicits._
+    val negTexts = ManualOverrides.negativePhrases
+    // val q        = s"""lower('text') contains ${negTexts.mkString(" OR ")}"""
+    val df = Seq(
+      (
+        "COVID-19 Hospitalizations rise in California amid omicron surge",
+        "pos"
+      ),
+      ("Actor GH Tubby dies at age 45.", "pos"),
+      ("Scooters are nice.", "pos")
+    ).toDF("text", "sentiment")
+      .withColumn(
+        "sentimentOvr",
+        when(negTexts.map(lower(col("text")).contains).reduce(_ || _), "neg")
+          .otherwise(col("sentiment"))
+      )
+
+    df.show(false)
     spark.stop
   }
 
+  log.info("scratch ran.")
 }
