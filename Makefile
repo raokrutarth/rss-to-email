@@ -97,16 +97,19 @@ wa-push-and-launch:
 	$(GCLD) "gcloud auth configure-docker us-west1-docker.pkg.dev --quiet \
 	&& docker push $(GCP_WA_IMAGE)"
 	
+	./webapp/scripts/gcp-config-str.sh > gcp.secrets.env
 	$(GCLD) "gcloud run deploy webapp \
 		--image $(GCP_WA_IMAGE) \
-		--allow-unauthenticated"
+		--allow-unauthenticated \
+		--set-env-vars=$$(cat gcp.secrets.env)"
+	rm -rf gcp.secrets.env
 
 # https://cloud.google.com/sdk/gcloud/reference/run/services/update
 wa-deploy: wa-build wa-push-and-launch
 
 wa-scale-update:
 	$(GCLD) "gcloud run services update webapp \
-		--cpu=4 --memory=2Gi \
+		--cpu=2 --memory=1Gi \
 		--min-instances=1 --max-instances=1"
 	$(GCLD) "gcloud beta run services update webapp --no-cpu-throttling"
 

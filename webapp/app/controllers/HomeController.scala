@@ -26,6 +26,15 @@ class HomeController @Inject() (
     Redirect("/v1/home")
   }
 
+  def robotsTxt() = Action { _ =>
+    // TODO add sitemap.
+    Ok("""
+    User-agent: *
+    Allow: /
+    Disallow: */mentions/*
+    """).as("text/plain")
+  }
+
   def adminDash() = auth { request =>
     log.info(s"Admin ${request.user} accessed the admin dashboard.")
     NotImplemented("WIP")

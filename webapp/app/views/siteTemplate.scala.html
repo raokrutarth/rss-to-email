@@ -6,38 +6,51 @@
 <head>
     @* Here's where we render the page title `String`. *@
     <title>@title</title>
+    <meta name="description"
+        content="Browse news with mental health in mind. NewsSnips filters the negativity out of your news feed.">
+
     <link rel="shortcut icon" type="image/png"
         href='https://newssnips-fyi.s3.us-west-1.amazonaws.com/public/images/favicon.png'>
 
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" media="screen" type='text/css' href='@routes.Assets.versioned("stylesheets/main.css")'>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" media="screen" type='text/css'
+        href='@routes.Assets.versioned("stylesheets/main.css")'>
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@@4.6.1/dist/css/bootstrap.min.css"
-        integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@@4.6.1/dist/css/bootstrap.min.css"
+        integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn"
+        crossorigin="anonymous">
 </head>
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <a class="navbar-brand" href="/">
-            <img src='https://newssnips-fyi.s3.us-west-1.amazonaws.com/public/images/favicon-highres.png' width="30"
-                height="30" class="d-inline-block align-top" alt="">
+            <img src='https://newssnips-fyi.s3.us-west-1.amazonaws.com/public/images/favicon-highres.png'
+                width="30" height="30" class="d-inline-block align-top" alt="">
             NewsSnips.fyi
         </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
-            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup"
+            aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
                 <a class="nav-item nav-link" href="/v1/home">Home</a>
-                <a class="nav-item nav-link" href="/v1/category/markets">Markets</a>
-                <a class="nav-item nav-link" href="/v1/category/politics">Politics</a>
-                <a class="nav-item nav-link" href="/v1/category/entertainment">Entertainment</a>
+                <a class="nav-item nav-link"
+                    href="/v1/category/markets">Markets</a>
+                <a class="nav-item nav-link"
+                    href="/v1/category/politics">Politics</a>
+                <a class="nav-item nav-link"
+                    href="/v1/category/entertainment">Entertainment</a>
                 <!-- <a class="nav-item nav-link disabled" href="#">Disabled</a> -->
-                <a class="nav-item nav-link" href="/v1/newsletter/signup"><strong>Newsletter</strong></a>
-                <a class="nav-item nav-link" href="/about"><strong> About</strong></a>
+                <a class="nav-item nav-link"
+                    href="/v1/newsletter/signup"><strong>Newsletter</strong></a>
+                <a class="nav-item nav-link" href="/about"><strong>
+                        About</strong></a>
             </div>
         </div>
         <!-- <span class="d-inline-block" data-toggle="popover" data-content="Contact us">
@@ -51,25 +64,77 @@
     @content
 
     <br>
-    <footer class="container">
-        <hr>
-        <p class="float-right"><a href="#">Back to top</a></p>
-        <p>© 2021 |
-            Built by <a target="_blank" href="https://www.linkedin.com/in/raokrutarth/">K.R.</a>
-            | <a target="_blank" href="https://www.linkedin.com/in/raokrutarth/">Feedback</a>
-            | <a target="_blank" href="/about#faq">FAQ</a>
-        </p>
+    <footer class="container pt-4 my-md-5 pt-md-5 border-top">
+        <div class="row">
+            <div class="col-12 col-md">
+                <img class="mb-2"
+                    src='https://newssnips-fyi.s3.us-west-1.amazonaws.com/public/images/favicon-highres.png'
+                    alt="" width="24" height="24">
+                <small class="d-block mb-3 text-muted">
+                    Take control of the topics that get your attention.
+                </small>
+                <small class="d-block mb-3 text-muted">&copy; 2021</small>
+            </div>
+            <div class="col-6 col-md">
+                <h5>Pages</h5>
+                <ul class="list-unstyled text-small">
+                    <li><a class="text-muted" href="/v1/home">Home</a></li>
+                    <li><a class="text-muted"
+                            href="/v1/category/markets">Markets</a></li>
+                    <li><a class="text-muted"
+                            href="/v1/category/politics">Politics</a></li>
+                    <li><a class="text-muted"
+                            href="/v1/category/entertainment">Entertainment</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-6 col-md">
+                <h5>Subscribe</h5>
+                <ul class="list-unstyled text-small">
+                    <li><a class="text-muted"
+                            href="/v1/newsletter/signup">Newsletter</a></li>
+                    @* TODO add API here *@
+                </ul>
+            </div>
+            <div class="col-6 col-md">
+                <h5><a class="text-reset" href="/about">About</a></h5>
+                <ul class="list-unstyled text-small">
+                    <li><a class="text-muted" href="#"><a target="_blank"
+                                href="/about#faq">FAQ</a></li>
+                    <li>
+                        <a href="https://twitter.com/messages/compose?recipient_id=740934540"
+                            class="text-decoration-none">
+                            Feedback
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                height="16" fill="currentColor"
+                                class="bi bi-twitter" viewBox="0 0 16 16">
+                                <path
+                                    d="M5.026 15c6.038 0 9.341-5.003 9.341-9.334 0-.14 0-.282-.006-.422A6.685 6.685 0 0 0 16 3.542a6.658 6.658 0 0 1-1.889.518 3.301 3.301 0 0 0 1.447-1.817 6.533 6.533 0 0 1-2.087.793A3.286 3.286 0 0 0 7.875 6.03a9.325 9.325 0 0 1-6.767-3.429 3.289 3.289 0 0 0 1.018 4.382A3.323 3.323 0 0 1 .64 6.575v.045a3.288 3.288 0 0 0 2.632 3.218 3.203 3.203 0 0 1-.865.115 3.23 3.23 0 0 1-.614-.057 3.283 3.283 0 0 0 3.067 2.277A6.588 6.588 0 0 1 .78 13.58a6.32 6.32 0 0 1-.78-.045A9.344 9.344 0 0 0 5.026 15z">
+                                </path>
+                            </svg>
+                        </a>
+                    </li>
+                    <li class="text-muted">Built by <a target="_blank"
+                        href="https://twitter.com/krutarth_1995">KR</a></li>
+
+                    @* TODO add privacy and terms here *@
+                </ul>
+            </div>
+        </div>
     </footer>
 
     <!-- Jquery, popper and Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/jquery@@3.5.1/dist/jquery.slim.min.js"
+    <script
+        src="https://cdn.jsdelivr.net/npm/jquery@@3.5.1/dist/jquery.slim.min.js"
         integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
         crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@@4.6.1/dist/js/bootstrap.bundle.min.js"
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@@4.6.1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF"
         crossorigin="anonymous"></script>
 
-    <script src='@routes.Assets.versioned("javascripts/main.js")' type="text/javascript"></script>
+    <script src='@routes.Assets.versioned("javascripts/main.js")'
+        type="text/javascript"></script>
 </body>
 
 </html>

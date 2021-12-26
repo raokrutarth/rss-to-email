@@ -103,15 +103,22 @@ object SharedConfig {
     )
   }
 
-  private def extractRedisConfig(config: Config): RedisConfig = {
+  private def extractRedisConfig(config: Config, inProd: Boolean): RedisConfig = {
     // TODO move to redis case class
     // convert the redis connection URL provided by heroku to
     // it's individual parts to feed into spark config.
     // e.g. rediss://:ioiuiy67t@ecty6.compute-1.amazonaws.com:28798
+
+    val provider = if (inProd) "upstash" else "heroku"
+    val useSsl   = if (inProd) true else false
+
+    log.info(s"Using cache privider $provider with SSL $useSsl.")
     val connUrl: String = Properties.envOrNone("REDIS_URL") match {
       case Some(url) =>
+        // give priority to redis provided by env var
+        log.warn(s"Overriding cache provider with env var redis URI.")
         url
-      case _ => config.getString("cache.redis.http_url")
+      case _ => config.getString(s"cache.redis.${provider}.uri")
     }
 
     val halfs    = connUrl.split("@")
@@ -122,9 +129,9 @@ object SharedConfig {
     RedisConfig(
       url = connUrl,
       host = host,
-      port = port,
+      port = port.toInt,
       password = password,
-      useTls = false
+      useTls = useSsl
     )
   }
 
@@ -135,7 +142,7 @@ object SharedConfig {
     SharedConfig(
       runtimeEnv = runtime,
       inProd = inProd,
-      redis = extractRedisConfig(config),
+      redis = extractRedisConfig(config, inProd),
       timezone = Properties.envOrElse("TZ", "America/Los_Angeles"),
       pg = getPostgresConfig(config, inProd),
       adminHttpAuth = AdminAuth(

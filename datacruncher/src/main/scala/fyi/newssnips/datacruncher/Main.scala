@@ -281,7 +281,11 @@ object ScratchCode {
     ("GE", "abc3", 1),
     ("the U.S.", "abc4", 1),
     ("US", "abc5", 1),
-    ("Unites States", "iio", 6)
+    ("Unites States", "iio", 6),
+    ("The Em States", "iio", 6),
+    ("The Em State's", "iio", 6),
+    ("abc ts's", "iio", 6),
+    ("it's", "iio", 6)
   ).toDF("entityName", "entityType", "count")
 
   origDf.show(false)

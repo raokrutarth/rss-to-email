@@ -188,9 +188,10 @@ scala + play tutorials: https://www.youtube.com/watch?v=FqMDHsFNlxQ&list=PLLMXbk
   - `https://github.com/nulab/play2-oauth2-provider`
   - `https://www.playframework.com/documentation/2.8.x/ScalaActionsComposition#Authentication`
   - `https://github.com/AlexITC/crypto-coin-alerts/blob/develop/alerts-server/app/com/alexitc/coinalerts/services/JWTAuthenticatorService.scala`
-
 - rss URL finder
   - `http://www.aaronsw.com/2002/feedfinder/`
-
 - rdb errors:
   - m [36mc.zaxxer.hikari.pool.ProxyConnection [0;39m [35m[0;39m HikariPool-1 - Connection org.postgresql.jdbc.PgConnection@53c37d2 marked as broken because of SQLSTATE(08006), ErrorCode(0)
+- redis SSL via stunnel:
+  - `https://morethantech.info/blogs/2020/04/26/redis-via-stunnel/`
+- sendgrid bulk send: `https://www.twilio.com/blog/sending-bulk-emails-3-ways-sendgrid-nodejs`

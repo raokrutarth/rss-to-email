@@ -5,6 +5,7 @@
 
 # An example controller showing a sample home page
 GET     /         controllers.HomeController.index()
+GET     /robots.txt         controllers.HomeController.robotsTxt()
 GET     /admin         controllers.HomeController.adminDash()
 GET     /about     controllers.HomeController.about()
 

@@ -29,7 +29,7 @@ class Postgres @Inject() (
     c.setJdbcUrl(AppConfig.settings.shared.pg.jdbcUrl)
     c.setMaximumPoolSize(5)
     c.setAutoCommit(true)
-    // c.setDriverClassName("org.postgresql.Driver")
+    c.setDriverClassName("org.postgresql.Driver")
     c.setSchema(keySpace)
     c.setKeepaliveTime(30 * 1000) // 30s
     c.setLeakDetectionThreshold(2000)

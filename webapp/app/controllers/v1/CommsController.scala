@@ -2,7 +2,6 @@ package controllers.v1
 
 import play.api._
 import play.api.mvc._
-import scala.util.Success
 import javax.inject._
 import com.typesafe.scalalogging.Logger
 import play.twirl.api.Html
@@ -16,7 +15,6 @@ import java.util.UUID
 import fyi.newssnips.core.Mailer
 import fyi.newssnips.webapp.config.AppConfig
 import play.api.libs.json._
-import scala.util.Failure
 import scala.concurrent.{Future, blocking}
 import fyi.newssnips.webapp.core.dal._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -105,8 +103,8 @@ class CommsController @Inject() (
       val token = UUID.randomUUID().toString()
 
       cache.set(verificationKeyPrefix + token, Json.toJson(sd).toString(), exSec = 86400) match {
-        case Failure(e) =>
-          log.error(s"failed to set verification token for ${sd.email} because ${e}")
+        case false =>
+          log.error(s"failed to set verification token for ${sd.email}.")
           errorResp
         case _ =>
           Mailer.sendMail(
@@ -135,12 +133,14 @@ class CommsController @Inject() (
 
   def newsletterVerifyGet(token: String) = Action {
     cache.get(verificationKeyPrefix + token) match {
-      case Success(sdJson) =>
+      case Some(sdJson) =>
         val sd = Json.parse(sdJson).as[SignupData]
 
         // TODO add to db
         if (dal.upsertSubscriber(sd).isSuccess) {
-          log.info(s"db save successful.")
+          log.info(
+            s"${sd.email} sucessfully added to mail digest subscribers list for a ${sd.frequency} subscription."
+          )
           // early manual delete
           Future {
             blocking {
@@ -148,22 +148,39 @@ class CommsController @Inject() (
             }
           }
         }
-
-        Ok(
-          views.html.siteTemplate("Verified")(
-            Html(
-              s"""
+        val currCount = dal.getSubscriberCount()
+        if (currCount.isSuccess && currCount.get >= 100) {
+          Ok(
+            views.html.siteTemplate("Verified")(
+              Html(
+                s"""
+                <div class='alert alert-warning col-md-6 offset-md-3'>
+                  <h3>
+                    ${sd.email} verified but we have already reach maximum capacity 
+                    for free subscribers. You're on the list and we'll contact you shortly
+                    when more capacity opens up or a paid plan is available.
+                  </h3>
+                </div>
+              """
+              )
+            )
+          ).as("text/html")
+        } else {
+          Ok(
+            views.html.siteTemplate("Verified")(
+              Html(
+                s"""
                 <div class='alert alert-success col-md-6 offset-md-3'>
                   <h3>${sd.email} verified for a ${sd.frequency} digest on NewsSnips.</h3>
                 </div>
               """
+              )
             )
-          )
-        ).as("text/html")
-
-      case Failure(e) =>
-        log.error(s"Newsletter subscription verification failed with error ${e}")
-        BadRequest("newsletter signup verification failed.")
+          ).as("text/html")
+        }
+      case _ =>
+        log.error(s"Newsletter subscription verification failed for token $token.")
+        BadRequest("Newsletter signup verification failed. Please try again later.")
     }
 
   }

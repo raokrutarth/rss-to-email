@@ -75,7 +75,7 @@ class PageDataFetcher @Inject() (dal: PgAccess, db: Postgres)() {
     Try {
       val cacheKey = categoryMetadata.name + ".page.data"
       cache.get(cacheKey) match {
-        case Success(cachedRaw) =>
+        case Some(cachedRaw) =>
           log.info(s"Cache hit for ${categoryMetadata.name} page data.")
           Json.parse(cachedRaw).as[CategoryAnalysisPageData]
         case _ =>
