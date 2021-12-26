@@ -4,12 +4,12 @@ import java.nio.file.Paths
 import com.typesafe.scalalogging.Logger
 import org.apache.spark.ml._
 import org.apache.spark.sql.SparkSession
-import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
 import configuration.AppConfig
 import com.johnsnowlabs.nlp.annotator._
 import com.johnsnowlabs.nlp.base._
 import com.johnsnowlabs.nlp._
 import java.nio.file.Path
+import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
 
 /** One-time utility created to store the needed
   *
@@ -58,13 +58,46 @@ object ModelStore {
     )
 
   }
-  def storeNerPipeline() {
+  def storeNerPipeline(spark: SparkSession, model: String = "electra") = {
+    import spark.implicits._
     log.info("Storing NER pipeline.")
+
+    val pipeline = model match {
+
+      case "electra" =>
+        new PretrainedPipeline(
+          "onto_recognize_entities_electra_base",
+          lang = "en"
+        ).model
+      case "roberta" =>
+        // Uses 4GB+ memory just for model
+        new Pipeline()
+          .setStages(
+            Array(
+              new DocumentAssembler()
+                .setInputCol("text")
+                .setOutputCol("document"),
+              new Tokenizer()
+                .setInputCols("document")
+                .setOutputCol("token"),
+              RoBertaForTokenClassification
+                // roberta_base_token_classifier_conll03 OR roberta_base_token_classifier_ontonotes
+                .pretrained("roberta_base_token_classifier_conll03", "en")
+                .setInputCols("document", "token")
+                .setOutputCol("ner")
+                .setCaseSensitive(true)
+                .setMaxSentenceLength(512),
+              // since output column is IOB/IOB2 style, NerConverter can extract entities
+              new NerConverter()
+                .setInputCols("document", "token", "ner")
+                .setOutputCol("entities")
+            )
+          )
+          .fit(Seq[String]().toDF("text"))
+    }
+
     savePipeline(
-      new PretrainedPipeline(
-        "onto_recognize_entities_electra_base",
-        lang = "en"
-      ).model,
+      pipeline,
       nerModelPath
     )
   }
@@ -118,7 +151,7 @@ object ModelStore {
         .getOrCreate()
 
     if (sentence) storeSentencePipeline(spark)
-    if (ner) storeNerPipeline()
+    if (ner) storeNerPipeline(spark)
     if (sentiment) storeSentimentPipeline(spark)
 
     spark.stop()

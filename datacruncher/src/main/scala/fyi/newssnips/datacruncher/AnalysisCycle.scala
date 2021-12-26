@@ -35,7 +35,7 @@ object CycleHelpers {
     var feeds = Seq[Feed]()
 
     while (curr.nonEmpty) {
-      Scraper.getAndParseFeed(FeedURL(curr.head), false) match {
+      Scraper.getAndParseFeed(FeedURL(curr.head)) match {
         case Some(f) => feeds = feeds :+ f
         case _       => log.error(s"Unable to extract feed from $curr.")
       }

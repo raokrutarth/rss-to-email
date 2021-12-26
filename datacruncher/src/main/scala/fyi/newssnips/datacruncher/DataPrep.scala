@@ -20,7 +20,7 @@ object DataPrepHelpers {
   def normalizeTitle(url: String, title: String): String = {
     if (url.contains("news.google.com")) {
       // google news titles contain the publisher at the end seperated by -
-      val sepIdx = title.lastIndexOf("-")
+      val sepIdx = Seq(title.lastIndexOf("-"), title.lastIndexOf("|")).sorted.reverse.head
       if (sepIdx > -1) {
         title.slice(0, sepIdx)
       } else {
@@ -58,6 +58,7 @@ class DataPrep(spark: SparkSession) {
     .fit(Seq[String]().toDF("rawText"))
 
   private val sentencePipeline =
+    // Breaks sentences at "." so U.N and U.S cause issues.
     PipelineModel.read.load(ModelStore.cleanupPipelinePath.toString())
 
   def constructContentsDf(

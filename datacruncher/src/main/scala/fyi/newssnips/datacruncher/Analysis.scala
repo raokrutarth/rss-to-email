@@ -77,8 +77,10 @@ class Analysis(spark: SparkSession) {
       .filter(
         !lower(col("entityName")).isInCollection(ManualOverrides.entitiesToSkip)
       )
+      .withColumn("entityName", initcap(col("entityName"))) // normalize case
       .withColumn(
         "entityName",
+        // manual fixes
         NerHelper.entityNameNormalizeUdf(col("entityName"))
       )
 

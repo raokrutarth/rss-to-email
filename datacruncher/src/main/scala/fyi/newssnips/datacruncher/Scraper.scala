@@ -187,6 +187,7 @@ object Scraper {
   ): Seq[FeedContent] = {
     for {
       xmlItem <- (xml \\ "item")
+      // FIXME also takes media title. e.g. http://feeds.feedburner.com/realclearpolitics/qlMj
       title       = (xmlItem \ "title").text
       description = if (disableContent) "" else (xmlItem \ "description").text
       link        = (xmlItem \ "link").text

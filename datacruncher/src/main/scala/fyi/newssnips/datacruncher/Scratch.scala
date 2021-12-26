@@ -1,6 +1,7 @@
 package fyi.newssnips.datacruncher
 
 import org.apache.spark.sql._
+import org.apache.spark.sql.functions._
 import com.typesafe.scalalogging.Logger
 import scala.concurrent._
 import java.util.concurrent.Executors
@@ -69,7 +70,38 @@ object ScratchCode {
       case _ => log.error("Parsing failed.")
     }
   }
-  foo()
+
+  def checkCaseFix() = {
+    val spark: SparkSession =
+      SparkSession
+        .builder()
+        .appName("newssnips.fyi")
+        .config(
+          "spark.serializer",
+          "org.apache.spark.serializer.KryoSerializer"
+        )
+        .master("local[*]")
+        .getOrCreate()
+    import spark.implicits._
+    val df = Seq(
+      "EU",
+      "u.k",
+      "omi",
+      "Omi",
+      "ted, j",
+      "ted js",
+      "Ted j",
+      "kku lio yyu",
+      "p",
+      "United States of America",
+      "U.S.A",
+      " the orbit"
+    ).toDF("text")
+      .withColumn("normalized", initcap(col("text")))
+    df.show(false)
+    spark.stop
+  }
+  checkCaseFix()
 
   def sp() = {
     val spark: SparkSession =
