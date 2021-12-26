@@ -6,7 +6,7 @@ eval $(minikube -p minikube docker-env)
 
 docker build \
     -t rss-to-email:latest \
-    -f target/docker/stage/Dockerfile \
+    -f deploy/Dockerfile \
     target/docker/stage
 
 if [[ -v RUN ]]; then
@@ -16,7 +16,6 @@ if [[ -v RUN ]]; then
     --rm \
     -it \
     -p 9001:9000 \
-    rss-to-email:latest -Dplay.http.secret.key="${dummy_token}"
+    rss-to-email:latest
 fi
-
 eval $(minikube -p minikube docker-env -u)

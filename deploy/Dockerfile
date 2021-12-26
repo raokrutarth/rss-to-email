@@ -1,8 +1,4 @@
-# from https://github.com/jupyter/docker-stacks/tree/master/base-notebook
-# and https://raw.githubusercontent.com/jupyter/docker-stacks/master/pyspark-notebook/Dockerfile
-ARG ROOT_CONTAINER=ubuntu:focal
-
-FROM $ROOT_CONTAINER
+FROM bitnami/spark:3.1.2
 
 ARG NB_USER="prod"
 ARG NB_UID="1000"
@@ -22,8 +18,6 @@ RUN apt-get update --yes && \
     tini \
     ca-certificates \
     locales \
-    default-jdk \
-    scala \
     vim \
     curl \
     wget
@@ -46,70 +40,53 @@ RUN useradd -l -m -s /bin/bash -N -u "${NB_UID}" "${NB_USER}"
 
 ENV HOME="/home/${NB_USER}"
 
-# Spark dependencies
-# Default values can be overridden at build time
-# (ARGS are in lower case to distinguish them from ENV)
-ARG spark_version="3.1.2"
-ARG hadoop_version="3.2"
-ARG openjdk_version="11"
+# install java 11
+# https://github.com/AdoptOpenJDK/openjdk-docker/blob/master/11/jdk/ubuntu/Dockerfile.hotspot.releases.full
+ENV JAVA_VERSION jdk-11.0.11+9
 
-ENV APACHE_SPARK_VERSION="${spark_version}" \
-    HADOOP_VERSION="${hadoop_version}"
+RUN set -eux; \
+    ARCH="$(dpkg --print-architecture)"; \
+    case "${ARCH}" in \
+       aarch64|arm64) \
+         ESUM='4966b0df9406b7041e14316e04c9579806832fafa02c5d3bd1842163b7f2353a'; \
+         BINARY_URL='https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.11%2B9/OpenJDK11U-jdk_aarch64_linux_hotspot_11.0.11_9.tar.gz'; \
+         ;; \
+       armhf|armv7l) \
+         ESUM='2d7aba0b9ea287145ad437d4b3035fc84f7508e78c6fec99be4ff59fe1b6fc0d'; \
+         BINARY_URL='https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.11%2B9/OpenJDK11U-jdk_arm_linux_hotspot_11.0.11_9.tar.gz'; \
+         ;; \
+       ppc64el|ppc64le) \
+         ESUM='945b114bd0a617d742653ac1ae89d35384bf89389046a44681109cf8e4f4af91'; \
+         BINARY_URL='https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.11%2B9/OpenJDK11U-jdk_ppc64le_linux_hotspot_11.0.11_9.tar.gz'; \
+         ;; \
+       s390x) \
+         ESUM='5d81979d27d9d8b3ed5bca1a91fc899cbbfb3d907f445ee7329628105e92f52c'; \
+         BINARY_URL='https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.11%2B9/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.11_9.tar.gz'; \
+         ;; \
+       amd64|x86_64) \
+         ESUM='e99b98f851541202ab64401594901e583b764e368814320eba442095251e78cb'; \
+         BINARY_URL='https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.11%2B9/OpenJDK11U-jdk_x64_linux_hotspot_11.0.11_9.tar.gz'; \
+         ;; \
+       *) \
+         echo "Unsupported arch: ${ARCH}"; \
+         exit 1; \
+         ;; \
+    esac; \
+    curl -LfsSo /tmp/openjdk.tar.gz ${BINARY_URL}; \
+    echo "${ESUM} */tmp/openjdk.tar.gz" | sha256sum -c -; \
+    mkdir -p /opt/java/openjdk; \
+    cd /opt/java/openjdk; \
+    tar -xf /tmp/openjdk.tar.gz --strip-components=1; \
+    rm -rf /tmp/openjdk.tar.gz;
 
-RUN apt-get install --yes --no-install-recommends \
-    "openjdk-${openjdk_version}-jre-headless" \
-    ca-certificates-java && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Spark installation
-WORKDIR /tmp
-RUN wget "https://archive.apache.org/dist/spark/spark-${APACHE_SPARK_VERSION}/spark-${APACHE_SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz" && \
-    tar xzf "spark-${APACHE_SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz" -C /usr/local --owner root --group root --no-same-owner && \
-    rm "spark-${APACHE_SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz"
-
-WORKDIR /usr/local
-
-# Configure Spark
-ENV SPARK_HOME=/usr/local/spark
-ENV SPARK_OPTS="--driver-java-options=-Xms1024M --driver-java-options=-Xmx4096M --driver-java-options=-Dlog4j.logLevel=info" \
-    PATH="${PATH}:${SPARK_HOME}/bin"
-
-RUN ln -s "spark-${APACHE_SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}" spark && \
-    # Add a link in the before_notebook hook in order to source automatically PYTHONPATH
-    mkdir -p /usr/local/bin/before-notebook.d && \
-    ln -s "${SPARK_HOME}/sbin/spark-config.sh" /usr/local/bin/before-notebook.d/spark-config.sh
-
-# Fix Spark installation for Java 11 and Apache Arrow library
-# see: https://github.com/apache/spark/pull/27356, https://spark.apache.org/docs/latest/#downloading
-RUN cp -p "${SPARK_HOME}/conf/spark-defaults.conf.template" "${SPARK_HOME}/conf/spark-defaults.conf" && \
-    echo 'spark.driver.extraJavaOptions -Dio.netty.tryReflectionSetAccessible=true' >> "${SPARK_HOME}/conf/spark-defaults.conf" && \
-    echo 'spark.executor.extraJavaOptions -Dio.netty.tryReflectionSetAccessible=true' >> "${SPARK_HOME}/conf/spark-defaults.conf"
-
-# scala-coursier
-ENV COURSIER_INSTALL_DIR /home/${NB_USER}/coursier
-RUN mkdir -p "${COURSIER_INSTALL_DIR}"
-RUN set -x && \
-    curl -fLo /tmp/cs https://git.io/coursier-cli-"$(uname | tr LD ld)" && \
-    chmod +x /tmp/cs && \
-    ls ${COURSIER_INSTALL_DIR} && \
-    /tmp/cs install cs && \
-    rm /tmp/cs && \
-    echo "export PATH=\"$PATH:${COURSIER_INSTALL_DIR}\"" >> /home/${NB_USER}/.bashrc && \
-    ${COURSIER_INSTALL_DIR}/cs setup -y --jvm adopt:11
+ENV JAVA_HOME=/opt/java/openjdk \
+    PATH="/opt/java/openjdk/bin:$PATH"
 
 WORKDIR /opt/rss-to-email
 RUN chown ${NB_USER} /opt/rss-to-email
 EXPOSE 9000
 
-COPY ./app ./app
-COPY ./conf ./conf
-COPY ./project ./project
-COPY ./public ./public
-COPY ./test ./test
-# COPY ./target .
-COPY ./build.sbt .
+COPY --chown=${NB_USER}:root opt /opt
 
-# USER ${NB_UID}
-# Configure container startup
-ENTRYPOINT ["/bin/bash"]
-# CMD [ "compile", "run" ]
+USER ${NB_UID}
+ENTRYPOINT ["/opt/docker/bin/rss-to-email"]
