@@ -1,5 +1,12 @@
 name    := "datacruncher"
 version := "0.0.1"
+inThisBuild(
+  List(
+    scalaVersion := "2.12.13",
+    semanticdbEnabled := true,
+    semanticdbVersion := scalafixSemanticdb.revision
+  )
+)
 
 val sparkVersion = "3.1.2"
 libraryDependencies += "org.apache.spark" %% "spark-sql"   % sparkVersion
@@ -19,15 +26,21 @@ libraryDependencies += "com.datastax.spark" % "spark-cassandra-connector_2.12" %
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.1" % "test"
 
 scalafmtOnCompile := true
+scalafixOnCompile := true
+scalacOptions += "-Ywarn-unused"
 
+// export JAVA_OPTS="-Xms512M -Xmx4048M -XX:+UseG1GC -XX:+CMSClassUnloadingEnabled -XX:ParallelGCThreads=4 -XX:GCTimeRatio=5"
 lazy val root = (project in file(".")).settings(
   javaOptions ++= Seq(
     "-Xms512M",
     "-Xmx4048M",
-    "-XX:MaxPermSize=4048M",
-    "-XX:+CMSClassUnloadingEnabled"
+    "-XX:+UseG1GC",
+    "-XX:+CMSClassUnloadingEnabled",
+    "-XX:ParallelGCThreads=4",
+    "-XX:GCTimeRatio=5" // app gets 5x the time on the CPU vs. GC
   )
 )
+// fork := true
 
 // https://sbt-native-packager.readthedocs.io/en/latest/formats/docker.html#requirements
 // https://medium.com/jeroen-rosenberg/lightweight-docker-containers-for-scala-apps-11b99cf1a666
@@ -45,7 +58,7 @@ Docker / packageName   := "fyi.newssnips"
 Docker / version       := sys.env.getOrElse("BUILD_NUMBER", "0")
 Docker / daemonUserUid := None
 Docker / daemonUser    := "daemon"
-// dockerExposedPorts := Seq(9000)
+
 dockerBaseImage    := "openjdk:11-slim"
 dockerUpdateLatest := true
 dockerVersion      := Some(DockerVersion(20, 10, 7, Some("ce")))

@@ -144,6 +144,7 @@ scala + play tutorials: https://www.youtube.com/watch?v=FqMDHsFNlxQ&list=PLLMXbk
 - ms how tos <https://docs.microsoft.com/en-us/azure/cosmos-db/cassandra/spark-upsert-operations>
 - spark cassandra basics <https://itnext.io/spark-cassandra-all-you-need-to-know-tips-and-optimizations-d3810cc0bd4e>
 - nice font and color scheme: <https://getbootstrap.com/docs/4.0/examples/blog/#>
+- telegram bot <https://hackernoon.com/telegram-bot-in-scala-3-with-bot4s-http4s-doobie-for-ci-notifications>
 
 names:
 - sentimetrics

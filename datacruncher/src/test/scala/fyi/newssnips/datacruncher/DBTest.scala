@@ -92,23 +92,24 @@ class DatastaxCassandraSpec extends FlatSpec {
 //   List(
 //     FeedContent(
 /* "https://www.wsj.com/articles/u-s-military-chief-says-chinas-hypersonic-missile-test-is-close-to-sputnik-moment-11635344992", */
-/* "China's Hypersonic Missile Test Is Close to 'Sputnik Moment,' U.S. Military Chief Says", */
-/* "Gen. Mark Milley described China’s recent test of a hypersonic missile as “very concerning” and
- * said the Pentagon was focused on the development.", */
+/* "China's Hypersonic Missile Test Is Close to 'Sputnik Moment,' U.S. Military
+ * Chief Says", */
+/* "Gen. Mark Milley described China’s recent test of a hypersonic missile as
+ * “very concerning” and said the Pentagon was focused on the development.", */
 //       false
 //     ),
 //     FeedContent(
 /* "https://www.wsj.com/articles/iran-to-return-to-nuclear-deal-talks-in-vienna-next-month-11635348645", */
 //       "Iran to Return to Nuclear Deal Talks Next Month",
-/* "Tehran will return to negotiations on reviving the 2015 nuclear deal by the end of November, its
- * chief negotiator said Wednesday.", */
+/* "Tehran will return to negotiations on reviving the 2015 nuclear deal by the
+ * end of November, its chief negotiator said Wednesday.", */
 //       false
 //     ),
 //     FeedContent(
 /* "https://www.wsj.com/articles/iran-to-return-to-nuclear-deal-talks-in-vienna-next-month-11635348645", */
 //       "Iran to Return to Nuclear Deal Talks Next Month",
-/* "Tehran will return to negotiations on reviving the 2015 nuclear deal by the end of November, its
- * chief negotiator said Wednesday.", */
+/* "Tehran will return to negotiations on reviving the 2015 nuclear deal by the
+ * end of November, its chief negotiator said Wednesday.", */
 //       false
 //     )
 //   )

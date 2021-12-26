@@ -1,29 +1,16 @@
 package fyi.newssnips.datacruncher.core
 
-import fyi.newssnips.models.{AnalysisRow, Feed, FeedContent, FeedURL}
 import javax.inject._
 
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql._
-import org.apache.spark.sql.expressions.scalalang.typed
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
-import org.apache.spark.ml.feature.RegexTokenizer
-import org.apache.spark.ml.Pipeline
 
 import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
-import com.johnsnowlabs.nlp.SparkNLP
-import com.johnsnowlabs.nlp.{DocumentAssembler, Finisher}
-import com.johnsnowlabs.nlp.annotators.{Normalizer, StopWordsCleaner, Tokenizer}
-
-import scala.concurrent.Future
-import scala.collection.mutable.WrappedArray
-import scala.collection.JavaConverters._
-import com.johnsnowlabs.nlp.embeddings.BertSentenceEmbeddings
-import com.johnsnowlabs.nlp.annotators.classifier.dl.ClassifierDLModel
 import com.johnsnowlabs.nlp.LightPipeline
-import com.johnsnowlabs.nlp.annotators.sentence_detector_dl.SentenceDetectorDLModel
+
 import com.typesafe.scalalogging.Logger
+import fyi.newssnips.shared.DfUtils
 
 @Singleton
 class Analysis(spark: SparkSession) {
@@ -32,30 +19,14 @@ class Analysis(spark: SparkSession) {
 
   // https://nlp.johnsnowlabs.com/docs/en/pipelines#recognizeentitiesdl
   private val entityRecognitionPipeline =
-    new PretrainedPipeline("onto_recognize_entities_sm", lang = "en")
+    new LightPipeline(
+      new PretrainedPipeline("onto_recognize_entities_sm", lang = "en").model
+    )
 
   private val sentimetPipeline =
-    new PretrainedPipeline("analyze_sentiment", lang = "en")
-
-  private val cleaningPipeline =
-    // removes html tags from string and splits into words
-    new RegexTokenizer()
-      .setInputCol("rawText")
-      .setOutputCol("normalized")
-      .setPattern("<[^>]+>|\\s+") // split by html tag or space
-      .setToLowercase(false)
-
-  private val sentencePipeline = new Pipeline().setStages(
-    Array(
-      new DocumentAssembler()
-        .setInputCol("textBlock")
-        .setOutputCol("document"),
-      SentenceDetectorDLModel
-        .pretrained("sentence_detector_dl", "en")
-        .setInputCols(Array("document"))
-        .setOutputCol("sentence")
+    new LightPipeline(
+      new PretrainedPipeline("analyze_sentiment", lang = "en").model
     )
-  )
 
   private def getEntities(contentsDf: DataFrame): DataFrame = {
     val transformed = entityRecognitionPipeline.transform(contentsDf)
@@ -67,17 +38,17 @@ class Analysis(spark: SparkSession) {
     val entitiesDf = transformed
       .select(
         // expand entities array to individual rows
-        col("id").as("textId"),
+        col("text_id"),
         explode(col("entities")).as("entity")
       )
       .select(
         // extract values from each entity struct
-        col("textId"),
+        col("text_id"),
         col("entity.result").as("entityName"),
         col("entity.metadata.entity").as("entityType")
       )
     log.info(s"Extracted ${entitiesDf.count()} entities and their types.")
-    entitiesDf.limit(7).show(false)
+    DfUtils.showSample(entitiesDf, 5f)
     entitiesDf
   }
 
@@ -90,11 +61,11 @@ class Analysis(spark: SparkSession) {
 
     val sentimentDf = transformed
       .select(
-        col("id").as("textId"),
+        col("text_id"),
         explode(col("sentiment")).as("sentiment")
       )
       .select(
-        col("textId"),
+        col("text_id"),
         col("sentiment.result").as("sentiment"),
         col("sentiment.metadata.confidence").as("confidence"),
         (col("sentiment.end") - col("sentiment.begin"))
@@ -102,91 +73,30 @@ class Analysis(spark: SparkSession) {
       )
 
     log.info(s"Extracted ${sentimentDf.count()} sentiment blocks.")
-    sentimentDf
-      .limit(10)
-      .show(false)
+    DfUtils.showSample(sentimentDf, 5f)
 
     sentimentDf
   }
 
-  private def constructContentsDf(
-      contents: Seq[FeedContent]
-  ): DataFrame = {
-    // Break down descriptions into clean sentences
-    val descriptionsDf = spark.sparkContext
-      .parallelize(contents.map { c => c.body })
-      .toDF("rawText")
-    log.info(s"Identified ${descriptionsDf.count()} blocks of description.")
+  def generateReport(contentsDf: DataFrame): Option[DataFrame] = {
 
-    val cleanedDescriptionsDf = cleaningPipeline
-      .transform(descriptionsDf)
-      .select(
-        concat_ws(" ", col("normalized")).as("textBlock")
-      )
+    log.info(s"Performing analysis on ${contentsDf.count()} mentions.")
 
-    val descriptionSentencesDf = sentencePipeline
-      .fit(cleanedDescriptionsDf)
-      .transform(cleanedDescriptionsDf)
-      .select(
-        // expand array of sentences to individual rows
-        explode(col("sentence.result")).as("text")
-      )
-
-    log.info(
-      s"Cleaned and extracted ${descriptionSentencesDf.count()} sentences from descriptions."
-    )
-
-    // prepare titles
-    val cleanTitlesDf = cleaningPipeline
-      .transform(
-        spark.sparkContext
-          .parallelize(contents.map { c => c.title })
-          .toDF("rawText")
-      )
-      .select(
-        concat_ws(" ", col("normalized")).as("text")
-      )
-    log.info(
-      s"Cleaned and extracted ${cleanTitlesDf.count()} titles."
-    )
-
-    val contentsDf =
-      cleanTitlesDf
-        .union(descriptionSentencesDf)
-        .select(monotonically_increasing_id().as("id"), col("text"))
-        .filter("text != ''")
-
-    log.info(
-      s"Extracted a total of ${contentsDf.count()} sentences from titles and descriptions."
-    )
-    contentsDf.sample(5f / math.max(5, contentsDf.count())).show(false)
-    contentsDf
-  }
-
-  def generateReport(contents: Seq[FeedContent]): Option[DataFrame] = {
-
-    log.info(s"Performing analysis for ${contents.size} articles.")
-
-    /* TODO
-     * - get counts per (entity, ET, sentiment)
-     * - get rows of (E, ET, neg-sentences, pos-sentences, n-count, p-count) */
-    val contentsDf = constructContentsDf(contents)
-    contentsDf.cache()
     val entitiesDf  = getEntities(contentsDf)
     val sentimentDf = getSentiment(contentsDf)
 
-    entitiesDf.cache()
-    sentimentDf.cache()
     val expandedDf = entitiesDf
       .join(
         sentimentDf,
-        sentimentDf("textId") === entitiesDf("textId"),
-        "inner"
+        Seq("text_id")
       )
-      // not the ideal join given the
-      .join(contentsDf, contentsDf("id") === sentimentDf("textId"))
+      .alias("entities_and_sentiments_df")
+      .join(
+        contentsDf,
+        Seq("text_id")
+      )
       .select(
-        sentimentDf("textId"),
+        col("entities_and_sentiments_df.text_id"),
         col("entityName"),
         col("entityType"),
         col("sentiment"),
@@ -194,16 +104,12 @@ class Analysis(spark: SparkSession) {
         col("sentimentBlockLength"),
         col("text")
       )
-    log.info(
-      s"Constructed expanded result of ${expandedDf.count()} entities and their accompnying texts."
-    )
-    expandedDf
-      .sample(5f / math.max(5, expandedDf.count()))
-      .show()
 
-    contentsDf.unpersist()
-    entitiesDf.unpersist()
-    sentimentDf.unpersist()
+    log.info(
+      s"Constructed expanded result of ${expandedDf.count()} entities, sentiments " +
+        "and their accompnying texts."
+    )
+    DfUtils.showSample(expandedDf, 5f)
 
     val negCondition = col("sentiment") === "negative"
     val posCondition = col("sentiment") === "positive"
@@ -215,10 +121,10 @@ class Analysis(spark: SparkSession) {
         sum(when(negCondition, 1).otherwise(0)).as("negativeMentions"),
         sum(when(posCondition, 1).otherwise(0)).as("positiveMentions"),
         // collect relevant texts
-        collect_set(when(posCondition, $"textId")).as("positiveTextIds"),
-        collect_set(when(negCondition, $"textId")).as("negativeTextIds"),
+        collect_set(when(posCondition, $"text_id")).as("positiveTextIds"),
+        collect_set(when(negCondition, $"text_id")).as("negativeTextIds"),
         // count total mentions
-        countDistinct("textId").as("totalNumTexts"),
+        countDistinct("text_id").as("totalNumTexts"),
         // get approximate confidence of sentiment labeling.
         (sum("confidence") * sum("sentimentBlockLength"))
           .as("aggregateConfidence")
@@ -232,8 +138,8 @@ class Analysis(spark: SparkSession) {
       .na
       .drop("any")
 
-    log.info(s"Analysis resulted in ${resultDf.count()} results")
-    resultDf.sample(5f / math.max(5, resultDf.count())).show()
+    log.info(s"Analysis resulted in ${resultDf.count()} entities of interest.")
+    DfUtils.showSample(resultDf, 5f)
     Some(resultDf)
   }
 

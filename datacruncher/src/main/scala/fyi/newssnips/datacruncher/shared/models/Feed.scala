@@ -5,7 +5,7 @@ import java.security.MessageDigest
 import java.math.BigInteger
 
 //
-case class FeedURL(url: String) {
+case class FeedURL(value: String) {
 
   def digest(): String = {
     // get a query-safe identifier for the url
@@ -15,7 +15,7 @@ case class FeedURL(url: String) {
         1,
         MessageDigest
           .getInstance("SHA-256")
-          .digest(url.getBytes("UTF-8"))
+          .digest(value.getBytes("UTF-8"))
       )
     )
   }
@@ -33,16 +33,3 @@ case class Feed(
     // https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html
     lastScraped: Option[LocalDate]
 )
-
-// companion objects needed for json parsing to object
-// object FeedURL {
-//   implicit val feedUrlFormat = Json.format[FeedURL]
-// }
-
-// object FeedContent {
-//   implicit val feedContentFormat = Json.format[FeedContent]
-// }
-
-// object Feed {
-//   implicit val feedFormat = Json.format[Feed]
-// }
