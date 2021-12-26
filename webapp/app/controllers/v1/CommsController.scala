@@ -103,7 +103,7 @@ class CommsController @Inject() (
       }
 
       val token = UUID.randomUUID().toString()
-      
+
       cache.set(verificationKeyPrefix + token, Json.toJson(sd).toString(), exSec = 86400) match {
         case Failure(e) =>
           log.error(s"failed to set verification token for ${sd.email} because ${e}")

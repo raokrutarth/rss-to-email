@@ -13,7 +13,7 @@ GCLD = docker run --rm -ti \
 	gcr.io/google.com/cloudsdktool/cloud-sdk \
 	bash -c
 
-GCP_WA_IMAGE="us-west1-docker.pkg.dev/newssnips/newssnips/webapp:latest"
+GCP_WA_IMAGE="us-west1-docker.pkg.dev/newssnips/newssnips/webapp:$$(date +%Hh-%b-%d-%Y)"
 
 init-minikube:
 	minikube start \

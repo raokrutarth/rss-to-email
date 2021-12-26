@@ -24,17 +24,7 @@ class HomeController @Inject() (
 
   def index() = Action { _ =>
     // TODO take query args like ref and put in cassandra.
-    // Mailer.test()
-    // Redirect("/about")
-    Ok(
-      views.html.emailTemplate(
-        views.html.newsletterSignupEmail(
-          "http://localhost:9000/about",
-          "Welcome to the NewsSnips.fyi Newsletter",
-          true
-        )
-      )
-    )
+    Redirect("/about")
   }
 
   def adminDash() = auth { request =>

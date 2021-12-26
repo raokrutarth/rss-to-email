@@ -65,7 +65,8 @@ object AnalysisCycle {
       "http://feeds.foxnews.com/foxnews/world",
       "https://cdn.feedcontrol.net/8/1114-wioSIX3uu8MEj.xml",
       "https://www.yahoo.com/news/rss",
-      "https://www.rt.com/rss/news/"
+      "https://www.rt.com/rss/news/",
+      "https://www.investing.com/rss/news.rss",
     ),
     "markets" -> Seq(
       "http://feeds.marketwatch.com/marketwatch/realtimeheadlines/",
@@ -80,7 +81,14 @@ object AnalysisCycle {
       "http://thehill.com/taxonomy/term/20/feed",
       "https://nypost.com/business/feed/",
       "http://feeds.marketwatch.com/marketwatch/topstories/",
-      "https://fool.libsyn.com/rss",
+      "https://www.investing.com/rss/investing_news.rss",
+      "https://www.investing.com/rss/stock.rss",
+
+      // https://tradingeconomics.com/rss/ (see other useful)
+      "https://tradingeconomics.com/rss/news.aspx",
+      "https://tradingeconomics.com/united-states/rss",
+
+      // "https://fool.libsyn.com/rss",
       "https://www.cnbc.com/id/20409666/device/rss/rss.html?x=1",
       "https://www.wallstreetsurvivor.com/feed/",
       "https://www.investing.com/rss/news_25.rss",

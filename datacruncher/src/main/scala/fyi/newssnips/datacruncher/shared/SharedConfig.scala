@@ -97,7 +97,13 @@ object SharedConfig {
     val host     = halfs(1).split(":").head.strip()
     val port     = halfs(1).split(":").last.strip().toInt
 
-    RedisConfig(url = connUrl, host = host, port = port, password = password, useTls = false)
+    RedisConfig(
+      url = connUrl,
+      host = host,
+      port = port,
+      password = password,
+      useTls = false
+    )
   }
 
   def load(config: Config): SharedConfig = {
