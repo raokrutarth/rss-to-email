@@ -1,45 +1,29 @@
 package controllers
 
-import java.io._
-import java.lang.Runnable
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject._
-
-import scala.concurrent.ExecutionContext
-import scala.concurrent.duration._
-import scala.concurrent.duration._
 
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql._
-import org.apache.spark.sql.expressions.scalalang.typed
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
 
-import play.api._
-import play.api.inject.SimpleModule
-import play.api.inject._
-import play.api.libs.concurrent.CustomExecutionContext
 import play.api.mvc._
-import play.libs.Akka
-
-import configuration.AppConfig
+import fyi.newssnips.datastore.ConnectDatabase
 
 @Singleton
 class HomeController @Inject() (val controllerComponents: ControllerComponents)
     extends BaseController {
 
-  def index() = Action { implicit request: Request[AnyContent] =>
+  def index() = Action {
     Redirect("/v1/home")
   }
 
-  def about() = Action { implicit request: Request[AnyContent] =>
+  def about() = Action {
     Ok(
       views.html.about()
     ).as("text/html")
   }
 
-  def testSpark() = Action { implicit request: Request[AnyContent] =>
+  def testSpark() = Action {
     val spark: SparkSession =
       SparkSession
         .builder()

@@ -1,53 +1,78 @@
 package fyi.newssnips.webapp.datastore
 
 import com.typesafe.scalalogging.Logger
-import com.datastax.spark.connector._
 
-import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.types._
 import org.apache.spark.sql._
-import org.apache.spark.sql.functions._
-import scala.util.{Failure, Success, Try}
-
-import com.datastax.spark.connector._
-import com.datastax.spark.connector.cql.CassandraConnector
-import com.datastax.spark.connector.writer._
+import scala.util.Try
 
 import javax.inject._
 import configuration.AppConfig
-import org.apache.spark.SparkContext
-import com.redislabs.provider.redis._
+import org.apache.spark.storage.StorageLevel
 
 @Singleton
 class Cache(spark: SparkSession) {
-  // FIXME: not working with exception:
-  // redis.clients.jedis.exceptions.JedisConnectionException: Could not get a resource from the pool
-  // https://github.com/RedisLabs/spark-redis/issues/325
-  val log = Logger(this.getClass())
+  private val log = Logger("app." + this.getClass().toString())
 
   // https://github.com/RedisLabs/spark-redis/blob/master/doc/dataframe.md
-  spark.conf.set("spark.redis.host", AppConfig.settings.redis.host)
-  spark.conf.set("spark.redis.port", AppConfig.settings.redis.port)
-  spark.conf.set("spark.redis.auth", AppConfig.settings.redis.password)
-  spark.conf.set("spark.redis.ssl", AppConfig.settings.redis.useTls)
-  spark.conf.set("spark.redis.timeout", 5000)
 
-  def putDf(key: String, df: DataFrame, ttl: Int = 30) = Try {
+  def putDf(key: String, df: DataFrame, ttl: Int = 300) = Try {
+    log.info(s"Saving dataframe with ${df.count()} rows using key ${key} to cache.")
+
+    df.persist(StorageLevel.DISK_ONLY) // FIXME saves empty df otherwise
     df.write
       .format("org.apache.spark.sql.redis")
       .option("table", key)
-      .option("ttl", 30)
+      .option("ttl", ttl)
       .option("model", "binary")
+      .option("host", AppConfig.settings.redis.host)
+      .option("port", AppConfig.settings.redis.port)
+      .option("auth", AppConfig.settings.redis.password)
+      .option("ssl", AppConfig.settings.redis.useTls)
+      .option("timeout", 5000)
+      .mode(SaveMode.Overwrite)
+      .save()
+
+    df.unpersist()
+  }
+
+  def removeDf(key: String) = Try {
+    // TODO think of a better way to do this.
+    log.info(s"Overwriting dataframe with key ${key} with empty data in cache.")
+
+    spark.emptyDataFrame.write
+      .format("org.apache.spark.sql.redis")
+      .option("table", key)
+      .option("model", "binary")
+      .option("host", AppConfig.settings.redis.host)
+      .option("port", AppConfig.settings.redis.port)
+      .option("auth", AppConfig.settings.redis.password)
+      .option("ssl", AppConfig.settings.redis.useTls)
+      .option("timeout", 5000)
       .mode(SaveMode.Overwrite)
       .save()
   }
 
   def getDf(key: String): Try[DataFrame] = Try {
-    spark.read
+    val df = spark.read
       .format("org.apache.spark.sql.redis")
       .option("table", key)
-      .option("infer.schema", true)
+      // .option("infer.schema", true)
+      .option("host", AppConfig.settings.redis.host)
+      .option("port", AppConfig.settings.redis.port)
+      .option("auth", AppConfig.settings.redis.password)
+      .option("ssl", AppConfig.settings.redis.useTls)
+      .option("timeout", 5000)
+      .option("model", "binary")
       .load()
+
+    // df.persist(StorageLevel.DISK_ONLY) // FIXME loads empty df otherwise
+    if (df.isEmpty) {
+      log.warn(s"Cache miss on table $key.")
+      throw new RuntimeException(s"Dataframe in cache for key $key is empty.")
+    }
+
+    log.info(s"Fetched dataframe with ${df.count()} rows using key ${key} from cache.")
+    df
   }
 }

@@ -144,6 +144,7 @@ class Analysis(spark: SparkSession) {
       .where("""
         entityType != 'CARDINAL' 
         and entityType != 'ORDINAL' 
+        and entityType != 'PERCENT'
         and aggregateConfidence > 0
       """)
       .orderBy(col("totalNumTexts").desc)

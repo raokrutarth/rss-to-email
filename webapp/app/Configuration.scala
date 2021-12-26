@@ -3,8 +3,7 @@ package configuration
 import com.typesafe.config.ConfigFactory
 import com.typesafe.config.Config
 import scala.util.Properties
-import java.io.{File, FileOutputStream}
-import org.apache.http.impl.client.HttpClientBuilder
+import java.io.FileOutputStream
 import org.apache.http.client.config.RequestConfig
 import java.util.Base64
 import scala.io.Source
@@ -38,7 +37,7 @@ case class RedisConfig(
 )
 
 object AppConfig {
-  val log: Logger = Logger(this.getClass())
+  val log: Logger = Logger("app." + this.getClass().toString())
 
   // no way to mount files in heroku so convert the
   // secrets to base64 string and decode from env var.
@@ -88,7 +87,7 @@ object AppConfig {
     // convert the redis connection URL provided by heroku to
     // it's individual parts to feed into spark config.
     // e.g. rediss://:ioiuiy67t@ecty6.compute-1.amazonaws.com:28798
-    var connUrl: String = Properties.envOrNone("REDIS_URL") match {
+    val connUrl: String = Properties.envOrNone("REDIS_URL") match {
       case Some(url) =>
         url
       case _ => config.getString("secrets.cache.redis.http_url")

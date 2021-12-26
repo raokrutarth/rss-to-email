@@ -147,6 +147,8 @@ scala + play tutorials: https://www.youtube.com/watch?v=FqMDHsFNlxQ&list=PLLMXbk
 - telegram bot <https://hackernoon.com/telegram-bot-in-scala-3-with-bot4s-http4s-doobie-for-ci-notifications>
 - language models <https://www.reddit.com/r/LanguageTechnology/comments/lsckqc/train_multilingual_classifier_for_100_languages/>
 - explore importing huggingface models to spark.
+- async rest client within play <https://www.playframework.com/documentation/2.8.x/ScalaWS>
+- 2gb ram <https://www.koyeb.com/pricing>
 
 names:
 - sentimetrics

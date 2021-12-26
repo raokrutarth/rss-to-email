@@ -1,0 +1,87 @@
+@import fyi.newssnips.models.AnalysisRow
+@import fyi.newssnips.shared.EntityTypeDescriptions
+
+
+@(analysisDf: Array[AnalysisRow], sourceFeeds: Seq[String], lastUpdated: String, categroyId: String)
+
+@siteTemplate("NewsSnips") {
+<div class="container">
+  
+  @if(categroyId == "home") {
+    <div class="container">
+      <div class="jumbotron">
+        <h1>Home of Smarter News</h1>
+        <p>
+          Here are the trending topics and their sentiment trends. 
+        </p>
+      </div>
+    </div>
+  }
+  
+  <div class="row" id="pre-table">
+    <div class="col-md-12">
+      <div class="float-right">
+        Last updated: @lastUpdated
+      </div>
+
+      <p>
+        <a 
+        class="btn btn-dark dropdown-toggle" 
+          data-toggle="collapse" 
+          href="#collapseExample" role="button"
+          aria-expanded="false" aria-controls="collapseExample">
+          Sources
+        </a>
+      </p>
+      <div class="collapse" id="collapseExample">
+        <div class="card card-body">
+
+          <ul class="list-group list-group-flush">
+            @for(sf <- sourceFeeds) {<tr>
+              <li class="list-group-item"><a href="@sf">@sf</a></li>
+              }
+          </ul>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table table-bordered table-dark table-striped">
+            <thead>
+              <tr>
+                <th>Topic</th>
+                <th>Topic Type</th>
+                <th>Total Mentions</th>
+                <th>&#128512 Mentions</th>
+                <th>&#128545 Mentions</th>
+                <!-- <th>Confidence</th> -->
+              </tr>
+            </thead>
+            <tbody>
+              @for(t <- analysisDf) {<tr>
+                <th scope="row">@t.entityName</th>
+                <td 
+                  data-bs-toggle="popover" data-bs-placement="top" 
+                  title='@{EntityTypeDescriptions.descriptions getOrElse(t.entityType.get, "")}'
+                >@t.entityType</td>
+                <td>@t.totalNumTexts</td>
+
+                <td><a href="/v1/@categroyId/mentions/@t.entityName/@t.entityType/positive" class="btn btn-outline-success">@t.positiveMentions</a></td>
+                <td><a href="/v1/@categroyId/mentions/@t.entityName/@t.entityType/negative" class="btn btn-outline-danger">@t.negativeMentions</a></td>
+
+                <!-- <td>@t.aggregateConfidence</td> -->
+                </tr>
+                }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  }

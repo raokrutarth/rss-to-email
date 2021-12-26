@@ -1,0 +1,51 @@
+@import fyi.newssnips.core.TextsPageRow
+@import fyi.newssnips.shared.EntityTypeDescriptions
+
+@(textsRows: Array[TextsPageRow], entityName: String, entityType: String, sentiment: String)
+
+@siteTemplate(entityName) {
+<div class="container">
+
+    @sentiment match {
+        case "positive" => {
+        <div class="alert alert-success" >
+            <h4 class="alert-heading">@entityName (@{EntityTypeDescriptions.descriptions getOrElse(entityType, "")})</h4>
+            <p>Positive/neutral mentions of @entityName.</p>
+        </div>
+        }
+        case "negative" => {
+            <div class="alert alert-danger">
+                <h4 class="alert-heading">@entityName (@{EntityTypeDescriptions.descriptions getOrElse(entityType, "")})</h4>
+                <p>Negative/neutral mentions of @entityName.</p>
+            </div>
+        }
+    }
+        
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-dark table-striped">
+                        <thead>
+                            <tr>
+                                <th>Snip</th>
+                                <th>Source</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for(t <- textsRows) { <tr>
+                                <th scope="row">@t.text</th>
+                                <td><span class="badge bg-light text-dark"><a href="@t.url" target="_blank">link</a></span>
+                                </td>
+                                </tr>
+                                }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+}

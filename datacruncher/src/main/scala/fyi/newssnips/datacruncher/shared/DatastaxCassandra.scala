@@ -25,10 +25,10 @@ object DatastaxCassandra {
   /* https://spark.apache.org/docs/latest/api/scala/org/apache/spark/sql/DataFrameWriterV2.html */
   /* https://docs.microsoft.com/en-us/azure/cosmos-db/cassandra/spark-create-operations */
   /* https://docs.datastax.com/en/dse/6.8/dse-dev/datastax_enterprise/spark/sparkSqlJava.html */
-  private val keySpace = if (AppConfig.settings.inProd) "prod" else "dev"
+  private val keySpace             = if (AppConfig.settings.inProd) "prod" else "dev"
   private val cassandraCatalogName = "datastaxCassandra"
   private val KVTableName          = "key_value_udepqrn4g8s"
-  val log                          = Logger(this.getClass())
+  val log                          = Logger("app." + this.getClass().toString())
 
   val spark: SparkSession =
     SparkSession
@@ -63,7 +63,7 @@ object DatastaxCassandra {
       .config("spark.cassandra.output.concurrent.writes", "1000")
       .config("spark.cassandra.concurrent.reads", "512")
       .config("spark.cassandra.output.batch.grouping.buffer.size", "1000")
-      .config("park.cassandra.connection.keepAliveMS", "600000000")
+      .config("spark.cassandra.connection.keepAliveMS", "600000000")
       .config(
         s"spark.sql.catalog.$cassandraCatalogName",
         "com.datastax.spark.connector.datasource.CassandraCatalog"
@@ -75,6 +75,7 @@ object DatastaxCassandra {
 
   val cdbConnector = CassandraConnector(spark.sparkContext.getConf)
 
+  // should only work in the BE
   Try {
     cdbConnector.withSessionDo(session =>
       session.execute(
@@ -88,8 +89,7 @@ object DatastaxCassandra {
     )
   }
 
-  /* replaces the table in the DB with the one provided. idCol has to have
-   * unique values. */
+  /* replaces the table in the DB with the one provided. idCol has to have unique values. */
   def putDataframe(
       tableName: String,
       df: DataFrame,
@@ -109,8 +109,7 @@ object DatastaxCassandra {
       // df.write
       //   .mode("overwrite")
       //   .format("org.apache.spark.sql.cassandra")
-      /* .options(Map("table" -> tableName, "keyspace" -> keySpace,
-       * "confirm.truncate" -> "true")) */
+      /* .options(Map("table" -> tableName, "keyspace" -> keySpace, "confirm.truncate" -> "true")) */
       //   .save()
       true
     }
@@ -167,5 +166,9 @@ object DatastaxCassandra {
     true
   }
 
-  def cleanup() = spark.stop()
+  def cleanup() = {
+    spark.stop()
+    log.warn("Stopping Spark session")
+  }
+
 }
