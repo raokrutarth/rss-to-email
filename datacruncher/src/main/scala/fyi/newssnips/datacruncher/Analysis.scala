@@ -14,19 +14,31 @@ import fyi.newssnips.shared.DfUtils
 
 @Singleton
 class Analysis(spark: SparkSession) {
-  val log: Logger = Logger(this.getClass())
+  private val log: Logger = Logger(this.getClass())
   import spark.implicits._
 
   // https://nlp.johnsnowlabs.com/docs/en/pipelines#recognizeentitiesdl
-  private val entityRecognitionPipeline =
-    new LightPipeline(
-      new PretrainedPipeline("onto_recognize_entities_sm", lang = "en").model
-    )
+  // https://nlp.johnsnowlabs.com/demo
 
+  log.info("Initalizing sentiment pipeline.")
   private val sentimetPipeline =
     new LightPipeline(
-      new PretrainedPipeline("analyze_sentiment", lang = "en").model
+      new PretrainedPipeline(
+        "analyze_sentiment",
+        lang = "en"
+      ).model
     )
+
+  log.info("Initalizing entity pipeline.")
+  private val entityRecognitionPipeline =
+    new LightPipeline(
+      new PretrainedPipeline(
+        "onto_recognize_entities_electra_small",
+        lang = "en"
+      ).model
+    )
+
+  log.info("Analysis pipelines initalized.")
 
   private def getEntities(contentsDf: DataFrame): DataFrame = {
     val transformed = entityRecognitionPipeline.transform(contentsDf)

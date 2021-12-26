@@ -19,8 +19,12 @@ object AnalysisCycle {
 
   private val db = DatastaxCassandra
   import db.spark.implicits._
+
+  log.info("Initalizing analysis")
   private val analysis = new Analysis(db.spark)
+  log.info("Initalized analysis")
   private val dataPrep = new DataPrep(db.spark)
+  log.info("Initalized dataprep")
 
   private val booksFinderUdf = udf(ContextFinder.findBooks)
   private val talksFinderUdf = udf(ContextFinder.findTalks)
@@ -136,5 +140,7 @@ object AnalysisCycle {
 
 object Main extends App {
   val log = Logger(this.getClass())
+  log.info("Running analysis cycle.")
   AnalysisCycle
+  log.info("Analysis cycle finished.")
 }

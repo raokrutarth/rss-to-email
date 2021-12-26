@@ -13,7 +13,7 @@ libraryDependencies += "org.apache.spark" %% "spark-sql"   % sparkVersion
 libraryDependencies += "org.apache.spark" %% "spark-mllib" % sparkVersion
 // libraryDependencies += "org.apache.spark" %% "spark-ml" % sparkVersion
 // https://mvnrepository.com/artifact/com.johnsnowlabs.nlp/spark-nlp
-libraryDependencies += "com.johnsnowlabs.nlp" %% "spark-nlp" % "3.3.0"
+libraryDependencies += "com.johnsnowlabs.nlp" %% "spark-nlp" % "3.3.2"
 libraryDependencies += "com.typesafe"          % "config"    % "1.4.1"
 
 libraryDependencies += "ch.qos.logback"              % "logback-classic" % "1.2.3"

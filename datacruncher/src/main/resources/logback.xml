@@ -21,7 +21,7 @@
   <logger name="o.s.j.server.handler" level="WARN" />
   <logger name="fyi.newssnips" level="INFO" />
 
-  <root level="WARN">
+  <root level="INFO">
     <appender-ref ref="ASYNCSTDOUT" />
   </root>
 

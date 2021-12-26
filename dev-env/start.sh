@@ -7,20 +7,22 @@
 
 docker rm -f rss-dev || true
 
-docker build --no-cache --file dev-env/Dockerfile -t rss-dev-img ./dev-env
+# docker build \
+#   --file dev-env/Dockerfile \
+#   --tag rss-dev-img:v2 ./dev-env
 
 docker run \
-    -d \
-    --restart "unless-stopped" \
-    -v "${PWD}":/home/dev/work \
-    --name rss-dev \
-    rss-dev-img
+  -d \
+  --restart "unless-stopped" \
+  -v "${PWD}":/home/dev/work \
+  --name rss-dev \
+  rss-dev-img:v2
 
 docker update \
-    --memory=6G \
-    --cpus=3 \
-    rss-dev
+  --memory=6G \
+  --cpus=4 \
+  rss-dev
 
 if [[ -v RUN ]]; then
-    docker exec -it rss-dev bash
+  docker exec -it rss-dev bash
 fi
