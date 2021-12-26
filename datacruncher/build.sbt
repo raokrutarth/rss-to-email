@@ -14,6 +14,9 @@ libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging"   % "3.9.
 
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.2"
 
+libraryDependencies += "com.datastax.spark" % "spark-cassandra-connector_2.12" % "3.1.0"
+
+
 scalafmtOnCompile := true
 
 lazy val root = (project in file(".")).settings(

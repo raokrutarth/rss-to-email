@@ -148,6 +148,8 @@ scala + play tutorials: https://www.youtube.com/watch?v=FqMDHsFNlxQ&list=PLLMXbk
 - redis <https://faun.pub/how-to-share-spark-dataset-across-applications-using-redis-9f64e6e79352>
   - set eviction policy <https://flaviocopes.com/heroku-redis-maxmemory-policy/>
 - spark advanced <https://medium.com/@vladimir.prus/advanced-custom-operators-in-spark-79b12da61ca7>
+- ms how tos <https://docs.microsoft.com/en-us/azure/cosmos-db/cassandra/spark-upsert-operations>
+- spark cassandra basics <https://itnext.io/spark-cassandra-all-you-need-to-know-tips-and-optimizations-d3810cc0bd4e>
 
 names:
 - sentimetrics

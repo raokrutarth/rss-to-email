@@ -20,13 +20,16 @@ case class AppConfig(
 
 case class DatastaxConfig(
     url: String,
-    appToken: String
+    appToken: String,
+    clientId: String,
+    clientSecret: String
 )
 
 case class SendgridConfig(
     apiKey: String
 )
 
+// https://stackoverflow.com/questions/20879639/write-base64-encoded-image-to-file
 object AppConfig {
 
   val settings: AppConfig = load(
@@ -54,7 +57,9 @@ object AppConfig {
     AppConfig(
       database = DatastaxConfig(
         url = config.getString("secrets.database.datastaxAstra.url"),
-        appToken = config.getString("secrets.database.datastaxAstra.token")
+        appToken = config.getString("secrets.database.datastaxAstra.token"),
+        clientId = config.getString("secrets.database.datastaxAstra.clientID"),
+        clientSecret = config.getString("secrets.database.datastaxAstra.clientSecret")
       ),
       sendgrid = SendgridConfig(
         apiKey = config.getString("secrets.sendgrid.apiKey")

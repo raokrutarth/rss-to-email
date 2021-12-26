@@ -9,14 +9,13 @@ import org.apache.spark.sql.expressions.scalalang.typed
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.ml.feature.{RegexTokenizer}
+import org.apache.spark.ml.Pipeline
+import org.apache.spark.sql.SparkSession
 
 import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
 import com.johnsnowlabs.nlp.SparkNLP
 import com.johnsnowlabs.nlp.{DocumentAssembler, Finisher}
 import com.johnsnowlabs.nlp.annotators.{StopWordsCleaner, Tokenizer, Normalizer}
-
-import org.apache.spark.ml.Pipeline
-import org.apache.spark.sql.SparkSession
 
 import scala.concurrent.Future
 import scala.collection.mutable.WrappedArray

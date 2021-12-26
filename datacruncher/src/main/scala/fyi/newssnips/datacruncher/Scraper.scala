@@ -19,7 +19,7 @@ object Scraper {
 
   val log: Logger = Logger(this.getClass())
 
-  private def getXML(url: String): Try[String] = Try {
+  private def getXML(url: String): Try[scala.xml.Elem] = Try {
     log.info(s"Fetching XML from feed $url")
     val request = new HttpGet(
       url.strip()
@@ -33,7 +33,8 @@ object Scraper {
     val status_code = response.getStatusLine().getStatusCode()
 
     status_code match {
-      case 200 => EntityUtils.toString(response.getEntity())
+      case 200 =>
+        XML.loadString(EntityUtils.toString(response.getEntity()))
       case _ =>
         log.error(
           s"Unable to fetch content from $url with status code $status_code"
@@ -46,9 +47,7 @@ object Scraper {
 
   def getContent(feedUrl: FeedURL): Option[Seq[FeedContent]] = {
     getXML(feedUrl.url) match {
-      case Success(payload) =>
-        val xml = XML.loadString(payload)
-
+      case Success(xml) =>
         val feedTitle = (xml \\ "title")(0).text // .as[Option[String]]
         log.info(f"Found feed with title: $feedTitle")
 
