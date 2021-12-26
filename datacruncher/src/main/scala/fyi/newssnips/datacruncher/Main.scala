@@ -6,7 +6,7 @@ import com.typesafe.scalalogging.Logger
 object Main extends App {
   val log = Logger("app." + this.getClass().toString())
 
-  val usage = "$ [expriment|cycle|scratch]"
+  val usage = "$ [expriment|cycle|scratch|model_store]"
   log.info(s"Running datacruncher with args: ${this.args.mkString(", ")}")
   val mode = args(0)
 
@@ -16,7 +16,7 @@ object Main extends App {
       // https://flurdy.com/docs/scalainit/startscala.html
       AnalysisCycle
     case "scratch"     => ScratchCode
-    case "model_store" => ModelStore.storeCycle()
+    case "model_store" => ModelStore.storePipelines(true, false, false)
     case _ =>
       log.error(s"$mode is an invalid mode.")
       sys.exit(1)

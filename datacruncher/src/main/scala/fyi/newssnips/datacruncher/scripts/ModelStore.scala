@@ -37,50 +37,40 @@ object ModelStore {
     )
   }
 
-  def storeCycle() = {
-    val spark: SparkSession =
-      SparkSession
-        .builder()
-        .appName("newssnips.fyi")
-        .config(
-          "spark.serializer",
-          "org.apache.spark.serializer.KryoSerializer"
-        )
-        .master("local[*]")
-        .getOrCreate()
-
+  def storeSentencePipeline(spark: SparkSession) = {
     import spark.implicits._
 
-    log.info(s"Saving models to ${modelsDir.toString()}")
-
-    def storeSmall() = {
-      savePipeline(
-        new Pipeline()
-          .setStages(
-            Array(
-              new DocumentAssembler()
-                .setInputCol("textBlock")
-                .setOutputCol("document"),
-              SentenceDetectorDLModel
-                .pretrained("sentence_detector_dl", "en")
-                .setInputCols(Array("document"))
-                .setOutputCol("sentence")
-            )
+    savePipeline(
+      new Pipeline()
+        .setStages(
+          Array(
+            new DocumentAssembler()
+              .setInputCol("textBlock")
+              .setOutputCol("document"),
+            SentenceDetectorDLModel
+              .pretrained("sentence_detector_dl", "en")
+              .setInputCols(Array("document"))
+              .setOutputCol("sentence")
           )
-          .fit(Seq[String]().toDF("textBlock")),
-        cleanupPipelinePath
-      )
+        )
+        .fit(Seq[String]().toDF("textBlock")),
+      cleanupPipelinePath
+    )
 
-      savePipeline(
-        new PretrainedPipeline(
-          "onto_recognize_entities_electra_small",
-          lang = "en"
-        ).model,
-        nerModelPath
-      )
+  }
+  def storeNerPipeline() {
+    log.info("Storing NER pipeline.")
+    savePipeline(
+      new PretrainedPipeline(
+        "onto_recognize_entities_electra_base",
+        lang = "en"
+      ).model,
+      nerModelPath
+    )
+  }
 
-    }
-    storeSmall()
+  def storeSentimentPipeline(spark: SparkSession) = {
+    import spark.implicits._
 
     savePipeline(
       new Pipeline()
@@ -107,6 +97,30 @@ object ModelStore {
         .fit(Seq[String]().toDF("text")),
       sentimentModelPath
     )
+  }
+
+  def storePipelines(
+      ner: Boolean = true,
+      sentence: Boolean = true,
+      sentiment: Boolean = true
+  ) = {
+    log.info(s"Saving models to ${modelsDir.toString()}")
+
+    lazy val spark: SparkSession =
+      SparkSession
+        .builder()
+        .appName("newssnips.fyi")
+        .config(
+          "spark.serializer",
+          "org.apache.spark.serializer.KryoSerializer"
+        )
+        .master("local[*]")
+        .getOrCreate()
+
+    if (sentence) storeSentencePipeline(spark)
+    if (ner) storeNerPipeline()
+    if (sentiment) storeSentimentPipeline(spark)
+
     spark.stop()
   }
 }

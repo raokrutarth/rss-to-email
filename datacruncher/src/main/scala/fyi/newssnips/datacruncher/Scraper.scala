@@ -11,12 +11,19 @@ import com.typesafe.scalalogging.Logger
 import fyi.newssnips.shared.DateTimeUtils
 import play.api.libs.json._
 
+import net.ruippeixotog.scalascraper.browser.JsoupBrowser
+import net.ruippeixotog.scalascraper.dsl.DSL._
+import net.ruippeixotog.scalascraper.dsl.DSL.Extract._
+
 object Scraper {
   private val httpClient =
     HttpClientBuilder
       .create()
       .setDefaultRequestConfig(AppConfig.settings.httpClientConfig)
       .build()
+
+  // https://github.com/ruippeixotog/scala-scraper#quick-start
+  private val htmlParser = JsoupBrowser()
 
   private val log: Logger = Logger("app." + this.getClass().toString())
 
@@ -75,21 +82,49 @@ object Scraper {
     }
   }
 
-  private def extractGNewsContent(
-      xml: Elem,
-      disableContent: Boolean
-  ): Seq[FeedContent] = {
-    for {
+  private def extractGNewsContent(xml: Elem): Seq[FeedContent] = {
+    var secondaryRaw = Seq[String]()
+
+    val primaryContent = for {
       xmlItems <- (xml \\ "item")
-      title       = (xmlItems \\ "title").text
-      description = if (disableContent) "" else (xmlItems \ "description").text
-      link        = (xmlItems \\ "link").text
-    } yield FeedContent(
-      link,
-      title,
-      description,
-      false
+      title          = (xmlItems \\ "title").text
+      descriptionRaw = (xmlItems \ "description").text
+      link           = (xmlItems \\ "link").text
+    } yield {
+      // content has nested html with list
+      // containing links and headlines to related
+      // articles.
+      secondaryRaw = secondaryRaw :+ descriptionRaw
+      FeedContent(
+        link,
+        title,
+        "",
+        false
+      )
+    }
+    var secondaryContent = Seq[FeedContent]()
+    for (raw <- secondaryRaw) {
+      try {
+        val doc    = htmlParser.parseString(raw)
+        val titles = (doc >> texts("a")).dropRight(1)
+        val links  = (doc >> elementList("a") >> attr("href")("a"))
+
+        for (tl <- (titles zip links)) yield {
+          secondaryContent =
+            secondaryContent :+ FeedContent(tl._1, tl._2, "", false)
+        }
+      } catch {
+        case e: Exception =>
+          log.error(
+            s"Unable to extract secondary content from gnews description with error $e"
+          )
+      }
+    }
+
+    log.info(
+      s"Extracted ${secondaryContent.size} secondary content items from gnews feed."
     )
+    primaryContent ++ secondaryContent
   }
 
   private def extractRedditContent(
@@ -101,7 +136,7 @@ object Scraper {
       title = (xmlItem \\ "title").text
       // TODO fix by parsing the html content
       // with https://github.com/ruippeixotog/scala-scraper
-      description = ""
+      description = if (disableContent) "" else (xmlItem \\ "content").text
       link        = (xmlItem \\ "link" \ "@href").text
     } yield FeedContent(
       link,
@@ -144,7 +179,7 @@ object Scraper {
         val contents = if (url.value.contains("reddit.com")) {
           extractRedditContent(xml, disableContent)
         } else if (url.value.contains("news.google.com")) {
-          extractGNewsContent(xml, disableContent)
+          extractGNewsContent(xml)
         } else {
           extractBasicContent(xml, disableContent)
         }

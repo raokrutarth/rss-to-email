@@ -139,7 +139,7 @@ class DataPrep(spark: SparkSession) {
     log.info(
       s"Extracted sentences from titles and descriptions."
     )
-    DfUtils.showSample(contentsDf, truncate = 200, overrideEnv = true)
+    DfUtils.showSample(contentsDf, truncate = 200)
     contentsDf
   }
 

@@ -20,7 +20,7 @@ import org.apache.spark.sql.functions._
 import com.johnsnowlabs.nlp.LightPipeline
 import org.apache.spark.ml.PipelineModel
 import fyi.newssnips.datacruncher.scripts.ModelStore
-import fyi.newssnips.datacruncher.NerHelper
+import fyi.newssnips.datacruncher._
 
 @Singleton
 class Analysis(spark: SparkSession) {
@@ -42,43 +42,6 @@ class Analysis(spark: SparkSession) {
       PipelineModel.read.load(ModelStore.nerModelPath.toString())
     )
   }
-  private val entitiesToSkip = Seq(
-    // hardcoded for now. move to file later.
-    "tyler durden",
-    "today",
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-    "sunday",
-    "today's",
-    "toto",
-    "week's",
-    "hollywood in toto",
-    "jason moser",
-    "ron gross",
-    "andy cross",
-    "emily flippen",
-    "matt argersinger",
-    "jim mueller",
-    "tom gardner",
-    "benzinga",
-    "axios",
-    "mto news",
-    "yahoo entertainment",
-    "google news",
-    "cnbc", // need a better filter
-    "cnn",
-    "fox news",
-    "yahoo finance",
-    "usa today",
-    "the wall street journal"
-    // remove https://fool.libsyn.com/michael-lewis-returns
-  )
-  private val typesToSkip =
-    Seq("CARDINAL", "ORDINAL", "PERCENT", "WORK_OF_ART", "DATE")
 
   // TODO use it to remove stop words from entity names
   // private val stopWordsPipeline = new StopWordsRemover()
@@ -110,8 +73,8 @@ class Analysis(spark: SparkSession) {
           .as("entityName"),
         col("entity.metadata.entity").as("entityType")
       )
-      .filter(!col("entityType").isInCollection(typesToSkip))
-      .filter(!lower(col("entityName")).isInCollection(entitiesToSkip))
+      .filter(!col("entityType").isInCollection(ManualOverrides.typesToSkip))
+      .filter(!lower(col("entityName")).isInCollection(ManualOverrides.entitiesToSkip))
       .withColumn(
         "entityName",
         NerHelper.entityNameNormalizeUdf(col("entityName"))

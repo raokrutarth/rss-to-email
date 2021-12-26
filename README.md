@@ -61,6 +61,15 @@ annual fees.
 
 ### Resources
 
+- hardcoded books:
+  - https://www.thewayoutofpolarization.com/buy-the-book
+  - narrow corridors
+  - why nations fail
+  - the everything store
+  - the power of us
+  - very important people
+  - little no body - anna k
+  - financial books
 - Scala talks (see other years) <https://scaladays.org/2019/lausanne/schedule>
 - Scala learning checklist <https://scalac.io/blog/scala-isnt-hard-how-to-master-scala-step-by-step/>
 - linting <https://www.youtube.com/watch?v=E06VRtUfdVM>
@@ -197,3 +206,13 @@ scala + play tutorials: https://www.youtube.com/watch?v=FqMDHsFNlxQ&list=PLLMXbk
 - sendgrid bulk send: `https://www.twilio.com/blog/sending-bulk-emails-3-ways-sendgrid-nodejs`
 - admin dashboard: `https://twitter.com/Cruip_com`
 - blog site `https://chadbaldwin.net/2021/03/14/how-to-build-a-sql-blog.html`
+- similar sites finders for dynamic rss feed crawlers:
+  - `http://www.moreofit.com/similar-to/thehill.com/Top_10_Sites_Like_Thehill/?&page=2`
+  - `https://www.similarsites.com/site/thehill.com`
+- NER models to try:
+  - `https://nlp.johnsnowlabs.com/2021/08/04/ner_ontonotes_roberta_base_en.html`
+  - `https://nlp.johnsnowlabs.com/2021/08/04/ner_conll_roberta_base_en.html`
+- seo optimization:
+  - `https://www.crazyegg.com/` site scan
+  - `https://matomo.org/` click tracking
+  - `https://analytics.google.com/analytics/web/provision/#/provision`

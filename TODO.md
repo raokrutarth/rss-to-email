@@ -20,48 +20,30 @@
 
 ## dc
 
+- verify time for stale article.
 - twitter bot for daily post. (WIP)
-- entity name cleanup.
-  - E.g. Merkel's
 - collect feeds that did not work at each cycle.
   - may need automated admin notification feature.
 - title cleanup.
-  - google news title contains news outlet name after "-"
-- description cleanup.
-  - in general, the sentence dl gets unclean text with 
-    urls and html escape tags during data prep.
-  - Fix description fetching for image captions.
-    - recursive is going into nested items.
-    - remove zeroedge. long description with image captions.
-    - e.g. remove slate content. unrelated image descriptions.
-    - remove axios content too long. has content:encoded for html
-      formatted content that can be parsed.
-  - meaningful html escape chars and tags in text.
-    - e.g. e denials,&lt;strong&gt; &lt;/strong&gt;according 
-      - does system see html tags to explore or escape chars?
-        - also seen in reddit & axios content.
-    - could use content:encoded when available.
-  - google news nested headlines
-    - also contains news outlet name in neighbor html tag.
-    - last list item in description is default message to go to google.
-- automation:
-  - rss feed URL finder script using nav bar links.
+  - google news nested titles with html read.
+- move to headline only + description use presentation style.
+  - see how use use descriptions for sentiment without showing them.
 
 ## non-urgent
 
-- call cache warm after update.
-- scrape entrypoint router for xml vs REST scrape.
+- Automation:
+  - rss feed URL finder script using nav bar links.
+- Call cache warm after update.
 - Hardcoded books links for each category.
-- look into @samanthasunne and toolsforreporters website.
-- add admin dashboard.
+- Look into @samanthasunne and toolsforreporters website.
+- Add admin dashboard.
 - paginated analysis page view.
-- Add news API to scraper. (not a lot of data, needs scraper router).
 - Precomputing texts for top x topics in each category and add to cache.
 - add context column.
-- table column names to shared.
-- dynamic entity book url scraper.
-- add roadmap section. e.g. filtering feeds.
+- add "for businesses" section. e.g. filtering feeds.
 - move to bootstrap 5.1
 - enable pagination for text and entity pages.
 - add historical data to s3/r2 for API.
-- make footer look professional (bg color, sitemap, copyright, policy).
+- footer copyright & newsletter policy.
+- scrape entrypoint router for xml vs REST scrape.
+  - Add news API to scraper. (not a lot of data, needs scraper router).

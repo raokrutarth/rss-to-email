@@ -18,6 +18,33 @@ import fyi.newssnips.datastore.Cache
 import org.apache.spark.storage.StorageLevel
 import fyi.newssnips.datacruncher.datastore.SparkPostgres
 import configuration.AppConfig
+import java.net.URL
+
+object CycleHelpers {
+  private val log = Logger("app." + this.getClass().toString())
+  /*
+    RSS feed URL to feed obj.
+    pause only if there is more urls to scrape
+   */
+  def extractFeeds(host: String, urls: Seq[String]): Seq[Feed] = {
+    log.info(
+      s"Running scrape for host: $host with ${urls.size} feed URL(s)."
+    )
+
+    var curr  = urls
+    var feeds = Seq[Feed]()
+
+    while (curr.nonEmpty) {
+      Scraper.getAndParseFeed(FeedURL(curr.head), false) match {
+        case Some(f) => feeds = feeds :+ f
+        case _       => log.error(s"Unable to extract feed from $curr.")
+      }
+      curr = curr.tail
+      if (curr.nonEmpty) Thread.sleep(1000)
+    }
+    feeds
+  }
+}
 
 object AnalysisCycle {
   private val log = Logger("app." + this.getClass().toString())
@@ -40,7 +67,7 @@ object AnalysisCycle {
 
   private val cache = new Cache()
 
-  private val analysis = new Analysis(spark)
+  private lazy val analysis = new Analysis(spark)
   log.info("Initalized analysis module.")
 
   private val dataPrep = new DataPrep(spark)
@@ -141,21 +168,13 @@ object AnalysisCycle {
       if (AppConfig.settings.shared.inProd) Random.shuffle(urls.distinct)
       else Random.shuffle(urls).take(2)
 
-    var staleFeeds = Seq[String]()
-    val categoryFeeds: Seq[Feed] = cycleUrls.flatMap { u =>
-      // TODO group urls by host/first8-chars and reduce sleep time.
-      Thread.sleep(726) // sleep to avoid rate limiting
-      Scraper.getAndParseFeed(FeedURL(u)) match {
-        case Some(f) if (f.content.size < 3) =>
-          staleFeeds = staleFeeds :+ u
-          None
-        case None =>
-          staleFeeds = staleFeeds :+ u
-          None
-        case Some(f) => Some(f)
-      }
-    }
-    log.error(s"Stale feeds for $categoryId: ${staleFeeds.mkString("\n")}")
+    val categoryFeeds: Seq[Feed] =
+      cycleUrls
+        .groupBy(u => new URL(u).getHost())
+        .flatMap { case (host, urls) =>
+          CycleHelpers.extractFeeds(host, urls) // TODO can run this in parallel
+        }
+        .toSeq
 
     categoryCycle(categoryId, categoryFeeds)
   }

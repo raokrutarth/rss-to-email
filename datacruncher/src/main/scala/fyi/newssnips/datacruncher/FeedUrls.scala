@@ -40,7 +40,8 @@ object FeedUrls {
       "https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGx1YlY4U0FtVnVHZ0pWVXlnQVAB",
       "https://www.upworthy.com/feeds/feed.rss",
       "https://feeds.npr.org/1001/rss.xml",
-      "https://feeds.npr.org/1004/rss.xml"
+      "https://feeds.npr.org/1004/rss.xml",
+      "https://www.express.co.uk/posts/rss/78/world",
     ),
     "markets" -> Seq(
       "https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGx6TVdZU0FtVnVHZ0pWVXlnQVAB?hl=en-US&gl=US&ceid=US%3Aen&oc=11",
@@ -82,6 +83,7 @@ object FeedUrls {
       "https://www.reddit.com/r/investing/.rss",
       "https://www.reddit.com/r/SPACs/.rss",
       "https://www.reddit.com/r/options/.rss",
+      "https://www.express.co.uk/posts/rss/21/finance",
 
       // https://tradingeconomics.com/rss/ (see other useful)
       // "https://tradingeconomics.com/rss/news.aspx", (generic headline for every country. e.g. GDP)
@@ -137,12 +139,14 @@ object FeedUrls {
       "https://www.standard.co.uk/culture/music/rss",
       "https://www.standard.co.uk/culture/comedy/rss",
       "https://www.motherjones.com/media/feed/",
+      "https://www.express.co.uk/posts/rss/79/celebritynews",
       "https://www.buzzfeed.com/celebrity.xml",
       "http://feeds.skynews.com/feeds/rss/entertainment.xml",
       "https://www.buzzfeed.com/tvandmovies.xml",
       "http://syndication.eonline.com/syndication/feeds/rssfeeds/topstories.xml",
       "https://meredith.mediaroom.com/news-releases?pagetemplate=rss&category=816",
-      "http://feeds.bet.com/AllBetcom",
+      "https://www.express.co.uk/posts/rss/18/entertainment",
+      // "http://feeds.bet.com/AllBetcom", stale data and posts.
       "https://www.hollywoodintoto.com/feed/",
       "https://hollywoodlife.com/feed/",
       "https://mtonews.com/.rss/full/",

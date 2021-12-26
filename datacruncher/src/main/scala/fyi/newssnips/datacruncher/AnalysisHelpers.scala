@@ -7,6 +7,12 @@ object NerHelper {
     en match {
       case "US" | "U.S" | "U.S.A" | "USA" | "United States of America" =>
         "United States"
+      case "UK" | "U.K"     => "United Kingdom"
+      case "Biden"          => "Joe Biden"
+      case "Putin"          => "Vladimir Putin"
+      case "Trump"          => "Donald Trump"
+      case "Tesla" | "TSLA" => "Tesla Inc"
+      case "omicron"        => "Omicron"
       case en if (en.startsWith("the ") || en.startsWith("The ")) =>
         normalizeEntityName(
           en.replaceFirst("(The\\s*|the\\s*)", "")
@@ -14,6 +20,10 @@ object NerHelper {
       case en if (en.endsWith("'s")) =>
         normalizeEntityName(
           en.slice(0, en.lastIndexOf("'s"))
+        )
+      case en if (en.endsWith("’s")) =>
+        normalizeEntityName(
+          en.slice(0, en.lastIndexOf("’s"))
         )
       case _ => en
     }
