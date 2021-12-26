@@ -1,6 +1,6 @@
 package fyi.newssnips.datacruncher.core
 
-import fyi.newssnips.datacruncher.models.{Feed, FeedURL, FeedContent, AnalysisRow}
+import fyi.newssnips.models.{AnalysisRow, Feed, FeedContent, FeedURL}
 import javax.inject._
 
 import org.apache.spark.sql.SparkSession
@@ -8,14 +8,13 @@ import org.apache.spark.sql._
 import org.apache.spark.sql.expressions.scalalang.typed
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import org.apache.spark.ml.feature.{RegexTokenizer}
+import org.apache.spark.ml.feature.RegexTokenizer
 import org.apache.spark.ml.Pipeline
-import org.apache.spark.sql.SparkSession
 
 import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
 import com.johnsnowlabs.nlp.SparkNLP
 import com.johnsnowlabs.nlp.{DocumentAssembler, Finisher}
-import com.johnsnowlabs.nlp.annotators.{StopWordsCleaner, Tokenizer, Normalizer}
+import com.johnsnowlabs.nlp.annotators.{Normalizer, StopWordsCleaner, Tokenizer}
 
 import scala.concurrent.Future
 import scala.collection.mutable.WrappedArray
@@ -182,9 +181,8 @@ class Analysis() {
     log.info(s"Performing analysis for ${contents.size} articles.")
 
     /* TODO
-    - get counts per (entity, ET, sentiment)
-    - get rows of (E, ET, neg-sentences, pos-sentences, n-count, p-count)
-     */
+     * - get counts per (entity, ET, sentiment)
+     * - get rows of (E, ET, neg-sentences, pos-sentences, n-count, p-count) */
     val contentsDf = constructContentsDf(contents)
     contentsDf.cache()
     val entitiesDf  = getEntities(contentsDf)

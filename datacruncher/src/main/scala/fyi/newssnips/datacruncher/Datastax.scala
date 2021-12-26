@@ -1,18 +1,18 @@
 package datastore
 
-import scala.util.{Try, Success, Failure}
-import fyi.newssnips.datacruncher.models.{Feed, FeedURL}
+import scala.util.{Failure, Success, Try}
+import fyi.newssnips.models.{Feed, FeedURL}
 import java.time.LocalDate
 import java.io._
 import org.apache.commons._
 import org.apache.http._
 import org.apache.http.client._
 import org.apache.http.client.methods.{
+  HttpDelete,
+  HttpGet,
+  HttpPatch,
   HttpPost,
   HttpPut,
-  HttpDelete,
-  HttpPatch,
-  HttpGet,
   HttpRequestBase
 }
 
@@ -30,12 +30,12 @@ import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.client.methods.HttpPut
 import org.apache.http.util.EntityUtils
 import org.apache.http.entity.StringEntity
-import fyi.newssnips.datacruncher.models.FeedContent
-import fyi.newssnips.datacruncher.models.AnalysisRow
+import fyi.newssnips.models.FeedContent
+import fyi.newssnips.models.AnalysisRow
 import com.typesafe.scalalogging.Logger
 import play.api.libs.json.Json
 
-// https://stargate.io/docs/stargate/1.0/developers-guide/document-using.html#_retrieving_a_document_using_a_where_clause
+/* https://stargate.io/docs/stargate/1.0/developers-guide/document-using.html#_retrieving_a_document_using_a_where_clause */
 
 // temporary json based cloud storage layer.
 @Singleton

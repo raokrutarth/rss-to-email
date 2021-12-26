@@ -1,4 +1,4 @@
-package fyi.newssnips.datacruncher.models
+package fyi.newssnips.models
 
 case class AnalysisRow(
     entityName: Option[String],

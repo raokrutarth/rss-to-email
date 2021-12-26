@@ -8,7 +8,7 @@ import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.client.config.RequestConfig
 
 // https://github.com/alexandru/scala-best-practices/blob/master/sections/
-// 3-architecture.md#35-must-not-use-parameterless-configfactoryload-or-access-a-config-object-directly
+/* 3-architecture.md#35-must-not-use-parameterless-configfactoryload-or-access-a-config-object-directly */
 
 case class AppConfig(
     database: DatastaxConfig,

@@ -1,9 +1,10 @@
-package fyi.newssnips.datacruncher.models
+package fyi.newssnips.models
 
 import java.time.LocalDate
 import java.security.MessageDigest
 import java.math.BigInteger
 
+//
 case class FeedURL(url: String) {
 
   def digest(): String = {

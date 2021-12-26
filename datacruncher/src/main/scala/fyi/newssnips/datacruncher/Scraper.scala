@@ -1,13 +1,13 @@
 package fyi.newssnips.datacruncher.core
 
-import fyi.newssnips.datacruncher.models.{Feed, FeedURL, FeedContent}
+import fyi.newssnips.models.{Feed, FeedContent, FeedURL}
 import scala.xml.XML
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.entity.StringEntity
 import org.apache.http.util.EntityUtils
 import configuration.AppConfig
-import scala.util.{Try, Success, Failure}
+import scala.util.{Failure, Success, Try}
 import com.typesafe.scalalogging.Logger
 
 object Scraper {
