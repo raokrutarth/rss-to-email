@@ -24,13 +24,12 @@ object Scraper {
     val request = new HttpGet(
       url.strip()
     )
-    val response = httpClient.execute(request)
     request.setHeader(
       "user-agent",
       "Mozilla/5.0"
     )
-    // request.setHeader("Content-Type", "application/json")
     request.setHeader("Accept", "application/rss+xml")
+    val response    = httpClient.execute(request)
     val status_code = response.getStatusLine().getStatusCode()
 
     status_code match {
@@ -50,14 +49,16 @@ object Scraper {
       case Success(payload) =>
         val xml = XML.loadString(payload)
 
-        val feedTitle = (xml \ "channel" \ "title").text // .as[Option[String]]
+        val feedTitle = (xml \\ "title")(0).text // .as[Option[String]]
         log.info(f"Found feed with title: $feedTitle")
 
+        val itemTag = if (feedUrl.url.contains("reddit.com")) "entry" else "item"
+
         val contents = for {
-          xmlItems <- (xml \\ "item")
-          title = (xmlItems \\ "title").text
+          xmlItems <- (xml \\ itemTag)
+          title       = (xmlItems \\ "title").text
           description = (xmlItems \\ "description").text
-          link = (xmlItems \\ "link").text
+          link        = (xmlItems \\ "link").text
         } yield FeedContent(
           link,
           title,

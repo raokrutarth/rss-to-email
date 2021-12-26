@@ -5,14 +5,11 @@ sends periodic emails to the configured destination email address.
 
 ## TODO
 
-- seperate into prez & worker layer.
 - setup k8s worker cron job.
-- pick name.
-- create static pages.
-- provision redis.
 - setup heroku secrets and local dynamic secrets.
 - makefile for deployments and management.
-- minikube at crontab reboot.
+
+- use link in feedCOntent object to link to a given text.
 
 ## Usage
 
@@ -150,6 +147,7 @@ scala + play tutorials: https://www.youtube.com/watch?v=FqMDHsFNlxQ&list=PLLMXbk
 - datastax + spark integration.
 - redis <https://faun.pub/how-to-share-spark-dataset-across-applications-using-redis-9f64e6e79352>
   - set eviction policy <https://flaviocopes.com/heroku-redis-maxmemory-policy/>
+- spark advanced <https://medium.com/@vladimir.prus/advanced-custom-operators-in-spark-79b12da61ca7>
 
 names:
 - sentimetrics

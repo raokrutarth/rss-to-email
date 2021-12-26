@@ -59,9 +59,9 @@ class DocumentStore {
   private val userToFeedsCollections = "user-to-feeds"
 
   implicit val analysisRowFormat = Json.format[AnalysisRow]
-  implicit val feedUrlFormat = Json.format[FeedURL]
+  implicit val feedUrlFormat     = Json.format[FeedURL]
   implicit val feedContentFormat = Json.format[FeedContent]
-  implicit val feedFormat = Json.format[Feed]
+  implicit val feedFormat        = Json.format[Feed]
 
   private def addAuth(request: HttpRequestBase): Unit = {
     request.setHeader("X-Cassandra-Token", AppConfig.settings.database.appToken)
@@ -84,9 +84,9 @@ class DocumentStore {
     val request = new HttpGet(url)
     addAuth(request)
 
-    val response = httpClient.execute(request)
+    val response    = httpClient.execute(request)
     val status_code = response.getStatusLine().getStatusCode()
-    val payload = EntityUtils.toString(response.getEntity())
+    val payload     = EntityUtils.toString(response.getEntity())
 
     status_code match {
       case 200 =>
@@ -104,9 +104,9 @@ class DocumentStore {
     val request = new HttpGet(url)
     addAuth(request)
 
-    val response = httpClient.execute(request)
+    val response    = httpClient.execute(request)
     val status_code = response.getStatusLine().getStatusCode()
-    val payload = EntityUtils.toString(response.getEntity())
+    val payload     = EntityUtils.toString(response.getEntity())
 
     status_code match {
       case 200 =>
@@ -129,9 +129,9 @@ class DocumentStore {
     val feedJson =
       request.setEntity(new StringEntity(Json.toJson(rows).toString()))
 
-    val response = httpClient.execute(request)
+    val response    = httpClient.execute(request)
     val status_code = response.getStatusLine().getStatusCode()
-    val message = EntityUtils.toString(response.getEntity())
+    val message     = EntityUtils.toString(response.getEntity())
     status_code match {
       case 200 =>
         logger.info(s"Saved dataframe with message $message")
@@ -148,7 +148,7 @@ class DocumentStore {
   /** Add or update an existing feed
     *
     * @param feed
-    *   @param userID
+    * @param userID
     * @return
     *   the document ID of the feed.
     */
@@ -162,9 +162,9 @@ class DocumentStore {
     val feedJson =
       request.setEntity(new StringEntity(Json.toJson(feed).toString()))
 
-    val response = httpClient.execute(request)
+    val response    = httpClient.execute(request)
     val status_code = response.getStatusLine().getStatusCode()
-    val message = EntityUtils.toString(response.getEntity())
+    val message     = EntityUtils.toString(response.getEntity())
     status_code match {
       case 200 =>
         logger.info(s"Saved feed with message $message")
@@ -181,7 +181,7 @@ class DocumentStore {
     val request = new HttpDelete(url)
     addAuth(request)
 
-    val response = httpClient.execute(request)
+    val response    = httpClient.execute(request)
     val status_code = response.getStatusLine().getStatusCode()
     status_code match {
       case 204 =>

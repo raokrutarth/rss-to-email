@@ -27,7 +27,6 @@ import com.johnsnowlabs.nlp.LightPipeline
 import com.johnsnowlabs.nlp.annotators.sentence_detector_dl.SentenceDetectorDLModel
 import com.typesafe.scalalogging.Logger
 
-
 @Singleton
 class Analysis() {
   val log: Logger = Logger(this.getClass())
@@ -40,9 +39,9 @@ class Analysis() {
         "spark.serializer",
         "org.apache.spark.serializer.KryoSerializer"
       )
-      .config("spark.kryoserializer.buffer.max", "100M")
+      // .config("spark.kryoserializer.buffer.max", "100M")
       .master("local[*]")
-      .config("spark.driver.memory", "100M")
+      // .config("spark.driver.memory", "100M")
       .getOrCreate()
   import spark.implicits._
 
@@ -128,8 +127,6 @@ class Analysis() {
   private def constructContentsDf(
       contents: Seq[FeedContent]
   ): DataFrame = {
-    //
-
     // Break down descriptions into clean sentences
     val descriptionsDf = spark.sparkContext
       .parallelize(contents.map { c => c.body })
@@ -177,7 +174,7 @@ class Analysis() {
     log.info(
       s"Extracted a total of ${contentsDf.count()} sentences from titles and descriptions."
     )
-    contentsDf.sample(5f / contentsDf.count()).show(false)
+    contentsDf.sample(5f / math.max(5, contentsDf.count())).show(false)
     contentsDf
   }
 
@@ -186,14 +183,16 @@ class Analysis() {
     log.info(s"Performing analysis for ${contents.size} articles.")
 
     /* TODO
-    - seperate descriptions to sentences with a pipeline. (mindful of text IDs)
     - get counts per (entity, ET, sentiment)
     - get rows of (E, ET, neg-sentences, pos-sentences, n-count, p-count)
      */
     val contentsDf = constructContentsDf(contents)
     contentsDf.cache()
-    val entitiesDf = getEntities(contentsDf)
+    val entitiesDf  = getEntities(contentsDf)
     val sentimentDf = getSentiment(contentsDf)
+
+    entitiesDf.cache()
+    sentimentDf.cache()
     val expandedDf = entitiesDf
       .join(
         sentimentDf,
@@ -211,18 +210,32 @@ class Analysis() {
         col("sentimentBlockLength"),
         col("text")
       )
+    log.info(
+      s"Constructed expanded result of ${expandedDf.count()} entities and their accompnying texts."
+    )
     expandedDf
-      .sample(0.5)
+      .sample(5f / math.max(5, expandedDf.count()))
       .show()
 
     contentsDf.unpersist()
+    entitiesDf.unpersist()
+    sentimentDf.unpersist()
+
+    val negCondition = col("sentiment") === "negative"
+    val posCondition = col("sentiment") === "positive"
 
     val resultDf = expandedDf
-      .groupBy("entityName", "entityType", "sentiment")
+      .groupBy("entityName", "entityType")
       .agg(
-        // collect_set("text").as("texts"),
-        countDistinct("text")
-          .as("numTexts"),
+        // get sentiment counts
+        sum(when(negCondition, 1).otherwise(0)).as("negativeMentions"),
+        sum(when(posCondition, 1).otherwise(0)).as("positiveMentions"),
+        // collect relevant texts
+        collect_set(when(posCondition, $"textId")).as("positiveTextIds"),
+        collect_set(when(negCondition, $"textId")).as("negativeTextIds"),
+        // count total mentions
+        countDistinct("textId").as("totalNumTexts"),
+        // get approximate confidence of sentiment labeling.
         (sum("confidence") * sum("sentimentBlockLength"))
           .as("aggregateConfidence")
       )
@@ -231,11 +244,12 @@ class Analysis() {
         and entityType != 'ORDINAL' 
         and aggregateConfidence > 0
       """)
-      .orderBy(col("numTexts").desc)
+      .orderBy(col("totalNumTexts").desc)
       .na
       .drop("any")
 
-    resultDf.sample(5f / resultDf.count()).show()
+    log.info(s"Analysis resulted in ${resultDf.count()} results")
+    resultDf.sample(5f / math.max(5, resultDf.count())).show()
     resultDf
       .as[AnalysisRow]
       .collect()
