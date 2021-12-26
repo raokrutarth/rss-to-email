@@ -20,7 +20,12 @@ case class FeedURL(url: String) {
     )
   }
 }
-case class FeedContent(url: String, processed: Boolean = false)
+case class FeedContent(
+    url: String,
+    title: String,
+    body: String,
+    processed: Boolean = false
+)
 
 case class Feed(
     url: FeedURL,
@@ -28,7 +33,7 @@ case class Feed(
     lastScraped: Option[LocalDate]
 )
 
-// conmpanion objects needed for json parsing to object
+// companion objects needed for json parsing to object
 object FeedURL {
   implicit val feedUrlFormat = Json.format[FeedURL]
 }

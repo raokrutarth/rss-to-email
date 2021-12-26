@@ -31,10 +31,6 @@ import org.apache.http.entity.StringEntity
 import models.FeedContent
 import play.api.Logger
 
-case class DxResponse(documentId: String, data: Feed)
-object DxResponse {
-  implicit val dxResponseFormat = Json.format[DxResponse]
-}
 // https://stargate.io/docs/stargate/1.0/developers-guide/document-using.html#_retrieving_a_document_using_a_where_clause
 
 // temporary json based cloud storage layer.
@@ -45,7 +41,7 @@ class DocumentStore @Inject() (lifecycle: ApplicationLifecycle) {
 
   // default userd ID used until login
   // and session management is added
-  private val dummyUserID = "dummy@user.com"
+  private val dummyUserID = "first@user.com"
 
   private val httpClient = HttpClientBuilder.create().build()
 
@@ -64,31 +60,47 @@ class DocumentStore @Inject() (lifecycle: ApplicationLifecycle) {
     request.setHeader("Accept", "application/json")
   }
 
-  def getFeedURLs(userID: String = dummyUserID): Try[Seq[FeedURL]] = {
+  def init() = {
+    logger.info(
+      s"Starting data layer with namespace $keySpace and collection $feedsCollection"
+    )
+  }
+
+  def getUser(): String = dummyUserID
+
+  /** Get the feeds for the given user. * */
+  def getFeeds(userID: String = dummyUserID): Try[Seq[Feed]] = {
     val url = AppConfig.settings.database.url + apiPath + s"/$feedsCollection"
-    logger.info(s"Getting feed URLs for user $userID from url $url")
+    logger.info(s"Getting feed URLs for user $userID from DB API $url")
     val request = new HttpGet(url)
     addAuth(request)
 
-    // execute the request
     val response = httpClient.execute(request)
     val status_code = response.getStatusLine().getStatusCode()
-    val message = EntityUtils.toString(response.getEntity())
+    val payload = EntityUtils.toString(response.getEntity())
 
     status_code match {
       case 200 =>
-        val content = Json.parse(EntityUtils.toString(response.getEntity()))
-        logger.info(s"Got payload $content")
-        // val feed: DxResponse = Json.parse(content).as[DxResponse]
-        Success(Seq())
+        val content = Json.parse(payload)
+        // the data field has a mapping from doc-id to feed
+        val docIdToFeed = content("data").as[Map[String, Feed]]
+        logger.info(s"Fetched ${docIdToFeed.size} feeds for user $userID")
+        Success(docIdToFeed.values.toSeq)
     }
   }
 
+  /** Add or update an existing feed
+    *
+    * @param feed
+    *   @param userID
+    * @return
+    *   the document ID of the feed.
+    */
   def upsertFeed(feed: Feed, userID: String = dummyUserID): Try[String] = {
     val docId = feed.url.digest()
     val url =
       AppConfig.settings.database.url + apiPath + s"/$feedsCollection/$docId"
-    logger.info(s"Storing feed $feed with URL $url for user $userID")
+    logger.info(s"Storing feed $feed with DB API $url for user $userID")
     val request = new HttpPut(url)
     addAuth(request)
     val feedJson =
@@ -105,8 +117,22 @@ class DocumentStore @Inject() (lifecycle: ApplicationLifecycle) {
     }
   }
 
-  def deleteFeed(feed: Feed) =
-    0
+  def deleteFeed(feed: Feed): Try[Boolean] = {
+    val docId = feed.url.digest()
+    val url =
+      AppConfig.settings.database.url + apiPath + s"/$feedsCollection/$docId"
+    logger.info(s"Deleting feed $feed with URL $url")
+    val request = new HttpDelete(url)
+    addAuth(request)
+
+    val response = httpClient.execute(request)
+    val status_code = response.getStatusLine().getStatusCode()
+    status_code match {
+      case 204 =>
+        logger.info(s"Deleted feed ${feed.url}")
+        Success(true)
+    }
+  }
 
   lifecycle.addStopHook { () =>
     Future.successful(logger.info("Application db end hook called"))

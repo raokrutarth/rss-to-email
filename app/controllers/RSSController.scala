@@ -6,8 +6,7 @@ import play.api._
 import play.api.inject.SimpleModule
 import play.api.inject._
 import play.api.libs.concurrent.CustomExecutionContext
-import play.api.libs.json.JsPath
-import play.api.libs.json.JsValue
+import play.api.libs.json._
 import play.api.mvc._
 import play.api.mvc._
 import play.libs.Akka
@@ -24,13 +23,46 @@ import models.FeedContent
 import java.time.LocalDate
 import akka.actor
 import play.api.Logger
+import core.FeedValidator
 
 @Singleton
 class RSSController @Inject() (
     val controllerComponents: ControllerComponents,
     val db: DocumentStore
 ) extends BaseController {
+
   val logger: Logger = Logger(this.getClass())
+
+  def addURL() = Action(parse.json) { request =>
+    val feedUrl: FeedURL = request.body.as[FeedURL]
+
+    if (FeedValidator.isValid(feedUrl)) {
+      val uTry = db.upsertFeed(
+        Feed(feedUrl, None, None)
+      )
+      uTry match {
+        case Success(_) =>
+          Ok(
+            Json.obj("message" -> s"${feedUrl.url} added.")
+          )
+        case Failure(_) =>
+          ServiceUnavailable(s"Unable to save ${feedUrl.url}")
+      }
+    } else
+      BadRequest(s"${feedUrl.url} is not a valid RSS feed URL.")
+  }
+
+  def listURLs() = Action { implicit request: Request[AnyContent] =>
+    val feedsTry: Try[Seq[Feed]] = db.getFeeds()
+    feedsTry match {
+      case Success(feeds) =>
+        Ok(
+          Json.obj("urls" -> feeds.map(f => f.url.url))
+        )
+      case Failure(exception) =>
+        InternalServerError("Unable to get URLs for current user")
+    }
+  }
 
   def triggerReport(lookback: String) = Action {
     implicit request: Request[AnyContent] =>
@@ -45,30 +77,17 @@ class RSSController @Inject() (
       - send report to email and return OK
         - report contains new articles with links.
        */
-      val insertRes = db.upsertFeed(Feed(FeedURL("abc-test.com"), None, None))
-      logger.info(s"Upsert returned $insertRes")
-
-      val dbUrl: Try[Seq[FeedURL]] = db.getFeedURLs()
-      dbUrl match {
-        case Success(urls) =>
+      val userId = db.getUser()
+      logger.info(s"Generating feeds report for user $userId")
+      val feedsTry: Try[Seq[Feed]] = db.getFeeds(userId)
+      feedsTry match {
+        case Success(feeds) =>
           Ok(
-            s"lookback: $lookback got urls $urls"
+            s"lookback: $lookback got urls $feeds"
           )
         case Failure(exception) =>
           InternalServerError("Unable to get URLs for current user")
       }
-  }
-
-  def listURLs() = Action { implicit request: Request[AnyContent] =>
-    Ok("list of urls")
-  }
-
-  def addURL() = Action(parse.json) { request =>
-    val reqData: JsValue = request.body
-    val url = (reqData \ "url").as[String]
-    Ok(
-      s"added $url"
-    )
   }
 
   def removeURL() = Action(parse.json) { request =>

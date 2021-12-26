@@ -4,11 +4,10 @@
         // Main class configuration
         {
             "type": "scala",
+            "name": "Launch Play",
             "request": "launch",
-            // configuration name visible for the user
-            "name": "Launch Main",
-            // full name of the class to run
-            "mainClass": "datastore.Debug",
+            "mainClass": "play.server.Server",
+            // "projectName": "rss-to-email",
             // optional arguments for the main class
             "args": [],
             // optional jvm properties to use
