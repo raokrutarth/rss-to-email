@@ -4,5 +4,8 @@
     "python.linting.enabled": true,
     "python.pythonPath": ".venv/bin/python",
     "editor.formatOnSave": true,
-    "python.formatting.provider": "black"
+    "python.formatting.provider": "black",
+    "files.watcherExclude": {
+        "**/target": true
+    }
 }
