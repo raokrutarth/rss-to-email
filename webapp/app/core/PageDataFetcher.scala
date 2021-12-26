@@ -37,7 +37,7 @@ case class EntityTextsPageData(
 @Singleton
 class PageDataFetcher() {
   private val log: Logger = Logger("app." + this.getClass().toString())
-  val db                  = DatastaxCassandra
+  lazy val db             = DatastaxCassandra
 
   // redis + db read timeout for dataframes
   private val dataStoreWaitTime = if (AppConfig.settings.inProd) { 5.second }

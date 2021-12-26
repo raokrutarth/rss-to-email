@@ -11,6 +11,16 @@ import com.johnsnowlabs.nlp.LightPipeline
 
 import com.typesafe.scalalogging.Logger
 import fyi.newssnips.shared.DfUtils
+import com.johnsnowlabs.nlp.annotator._
+import com.johnsnowlabs.nlp.base._
+import org.apache.spark.ml.Pipeline
+import org.apache.spark.sql.SparkSession
+import com.johnsnowlabs.nlp.annotator._
+import com.johnsnowlabs.nlp.base._
+import com.johnsnowlabs.nlp.DocumentAssembler
+import org.apache.spark.sql.functions._
+import com.johnsnowlabs.nlp.LightPipeline
+import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
 
 @Singleton
 class Analysis(spark: SparkSession) {
@@ -22,19 +32,34 @@ class Analysis(spark: SparkSession) {
 
   log.info("Initalizing analysis pipelines.")
   log.info("Initalizing sentiment pipeline.")
-  private val sentimetPipeline =
+  
+  private lazy val sentimentPipeline =
     new LightPipeline(
-      new PretrainedPipeline(
-        "analyze_sentiment",
-        lang = "en"
-      ).model
+      new Pipeline()
+        .setStages(
+          Array(
+            new DocumentAssembler()
+              .setInputCol("text")
+              .setOutputCol("document"),
+            new Tokenizer()
+              .setInputCols("document")
+              .setOutputCol("token"),
+            BertForSequenceClassification
+              .pretrained("bert_sequence_classifier_finbert", "en")
+              .setInputCols("document", "token")
+              .setOutputCol("sentiment")
+              .setCaseSensitive(true)
+              .setMaxSentenceLength(512)
+          )
+        )
+        .fit(Seq[String]().toDF("text"))
     )
 
   log.info("Initalizing entity pipeline.")
-  private val entityRecognitionPipeline =
+  private lazy val entityRecognitionPipeline =
     new LightPipeline(
       new PretrainedPipeline(
-        "onto_recognize_entities_electra_small",
+        "onto_recognize_entities_electra_base",
         lang = "en"
       ).model
     )
@@ -76,8 +101,10 @@ class Analysis(spark: SparkSession) {
 
   private def getSentiment(contentsDf: DataFrame): DataFrame = {
     val transformed =
-      sentimetPipeline.transform(contentsDf)
+      sentimentPipeline.transform(contentsDf)
     log.info(s"Extracted sentiment from blocks of text.")
+    transformed.printSchema()
+    transformed.show(false)
 
     val sentimentDf = transformed
       .select(
@@ -87,13 +114,15 @@ class Analysis(spark: SparkSession) {
       .select(
         col("text_id"),
         col("sentiment.result").as("sentiment"),
-        col("sentiment.metadata.confidence").as("confidence"),
+        element_at(col("sentiment.metadata"), col("sentiment.result"))
+          .as("confidence"),
         (col("sentiment.end") - col("sentiment.begin"))
           .as("sentimentBlockLength")
       )
-
     log.info(s"Extracted sentiment blocks.")
+    sentimentDf.show(false)
     DfUtils.showSample(sentimentDf, 5f)
+    sys.exit(1)
 
     sentimentDf
   }
@@ -102,8 +131,8 @@ class Analysis(spark: SparkSession) {
 
     log.info(s"Performing analysis on ${contentsDf.count()} mentions.")
 
-    val entitiesDf  = getEntities(contentsDf)
     val sentimentDf = getSentiment(contentsDf)
+    val entitiesDf  = getEntities(contentsDf)
 
     val expandedDf = entitiesDf
       .join(

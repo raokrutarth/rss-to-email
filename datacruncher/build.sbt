@@ -30,7 +30,7 @@ scalafmtOnCompile := true
 scalafixOnCompile := true
 scalacOptions += "-Ywarn-unused"
 
-// export JAVA_OPTS="-XX:+AggressiveHeap -Xms512M -Xmx6048M"
+// export JAVA_OPTS="-XX:+AggressiveHeap -Xms512M -Xmx8048M"
 lazy val root = (project in file(".")).settings(
   javaOptions ++= Seq(
     "-Xms512M",

@@ -150,73 +150,19 @@ scala + play tutorials: https://www.youtube.com/watch?v=FqMDHsFNlxQ&list=PLLMXbk
 - async rest client within play <https://www.playframework.com/documentation/2.8.x/ScalaWS>
 - 2gb ram <https://www.koyeb.com/pricing>
 - sentiment analysis models:
-  - https://nlp.johnsnowlabs.com/2021/11/01/bert_base_sequence_classifier_dbpedia_14_en.html
-  - https://nlp.johnsnowlabs.com/2021/11/02/bert_base_sequence_classifier_ag_news_en.html
-  - https://nlp.johnsnowlabs.com/2021/11/01/bert_base_sequence_classifier_imdb_en.html
-  - https://nlp.johnsnowlabs.com/2021/11/03/bert_sequence_classifier_finbert_en.html
-  - https://nlp.johnsnowlabs.com/2021/09/28/classifierdl_bertwiki_finance_sentiment_en.html
+  - `https://nlp.johnsnowlabs.com/2021/11/01/bert_base_sequence_classifier_dbpedia_14_en.html`
+  - `https://nlp.johnsnowlabs.com/2021/11/02/bert_base_sequence_classifier_ag_news_en.html`
+  - `https://nlp.johnsnowlabs.com/2021/11/01/bert_base_sequence_classifier_imdb_en.html`
+  - `https://nlp.johnsnowlabs.com/2021/11/03/bert_sequence_classifier_finbert_en.html`
+  - `https://nlp.johnsnowlabs.com/2021/09/28/classifierdl_bertwiki_finance_sentiment_en.html`
 - percentile filter
-  - https://spark.apache.org/docs/3.1.1/api/python/reference/api/pyspark.sql.functions.percentile_approx.html
-
-- caching: https://github.com/search?q=RedisStandalone&type=code
-names:
-- sentimetrics
-- news snack
-- metricsfeed
-- smetrics
-- timelymetrics
-- metrics-of-now
-- buzzatory
-- hype snack
-- newsnips
-- uptickmetrics
-- news pulse
-- report pulse
-- feed pulse
-- news net
-- metrics buzz
-- nautnews
-- think news
-- reporteer metrics
-- daily metrics
-- BUZZLYTICS.COM
-- dalylitics
-- METRICSLY
-- news-keep
-- news-report
-- newsscreen
-- feedscreen
-- mainstream metrics
-- informed.me
-- mnmts
-- feedish
-- feed-slice
-- feed-xray
-- scoop-metrics
-- newsmetry
-- news-decrypt
-- news-untangle
-- decrypt-metrics
-- sentiment-decrypt
-- sentiment-inspect
-- news inspect
-- news elucidate
-- news assort
-- sentimen assort
-- news guage
-- news nick
-- news appraise
-- sentiment assay
-- feed reckon
-- sentiguage
-- sentitally
-- news docket
-- senti-brief
-- sentipeg
-- news condense
-- sentiment netshell
-- news confab
-- news chews
-- news dissect
-- scrutinize.news
-- news intervene
+  - `https://spark.apache.org/docs/3.1.1/api/python/reference/api/pyspark.sql.functions.percentile_approx.html`
+- caching: `https://github.com/search?q=RedisStandalone&type=code`
+- serverless container hosting:
+  - `https://developers.cloudflare.com/load-balancing/additional-options/deploy-containerized-applications`
+  - `https://docs.cloudfoundry.org/devguide/deploy-apps/push-docker.html`
+  - `https://www.alibabacloud.com/product/swas`
+  - `https://docs.microsoft.com/en-us/azure/container-instances/container-instances-quickstart`
+  - `https://www.redhat.com/en/technologies/cloud-computing/openshift/container-platform`
+  - `https://news.ycombinator.com/item?id=28841292`
+  - `https://direktiv.io/`

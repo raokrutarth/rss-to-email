@@ -11,15 +11,21 @@ import org.apache.spark.sql.functions._
 import com.johnsnowlabs.nlp.LightPipeline
 import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
 
+// loading models from HF (see colabs)
+// https://nlp.johnsnowlabs.com/docs/en/transformers
+
 class data(spark: SparkSession) {
   import spark.implicits._
   val example = Seq(
-    "Wyoming GOP votes to no longer recognize Rep. Liz Cheney as a Republican.",
-    "Aung San Suu Kyi being treated well: Myanmar army (BBC).",
-    "Jeremy was positive but the federal reserver thought people are wrong.",
-    "Plus, Chris talks about the battle for the living room with NYU Professor Scott Galloway, author of The Four: The Hidden DNA of Amazon, Apple, Facebook, and Google.",
-    "Google has its best week in more than ten years.",
-    "Is Amazon's new venture with Google a serious threat to Apple?"
+    "Wyoming GOP votes to no longer recognize Rep. Liz Cheney as a Republican.", // neg
+    "Aung San Suu Kyi being treated well: Myanmar army (BBC).", // pos
+    "Jeremy was positive but the federal reserver thought people are wrong.", // neg or neutral
+    "Plus, Chris talks about the battle for the living room with NYU Professor Scott Galloway, author of The Four: The Hidden DNA of Amazon, Apple, Facebook, and Google.", // neutral
+    "Google has its best week in more than ten years.",              // pos
+    "Is Amazon's new venture with Google a serious threat to Apple?", // neg
+    "Covid-19 Surge Prompts Renewed Lockdown in Parts of Europe",
+    "Biden Says U.S. Weighing Diplomatic Boycott of Beijing Olympics",
+    
   ).toDS.toDF("text")
 }
 
@@ -30,7 +36,6 @@ class data(spark: SparkSession) {
         sent_bert_wiki_books_sst2 (neutral more often. wrong. can try with other embeddings.)
         bert_large_sequence_classifier_imdb ( 6 gb memory usage)
         analyze_sentimentdl_use_twitter (5/6 6gb memory usage)
-
  */
 
 object Sentiment1 {
@@ -45,28 +50,8 @@ object Sentiment1 {
       .master("local[*]")
       .getOrCreate()
 
-//   val document_assembler = new DocumentAssembler()
-//     .setInputCol("text")
-//     .setOutputCol("document")
-
-//   val tokenizer = new Tokenizer()
-//     .setInputCols("document")
-//     .setOutputCol("token")
-
-//   val tokenClassifier =
-//     BertForSequenceClassification
-//       .pretrained("bert_large_sequence_classifier_imdb", "en") //
-//       .setInputCols("document", "token")
-//       .setOutputCol("class")
-//       .setCaseSensitive(true)
-//       .setMaxSentenceLength(512)
-
   val pipeline =
     new PretrainedPipeline("analyze_sentimentdl_use_twitter", lang = "en")
-
-//       new Pipeline().setStages(
-//     Array(document_assembler, tokenizer, tokenClassifier)
-//   )
 
   val input = new data(spark).example
 //   val result = pipeline.fit(input).transform(input)
@@ -123,4 +108,12 @@ object EntityScratch {
   // TODO
   // (sp) https://nlp.johnsnowlabs.com/2021/10/03/xlm_roberta_base_token_classifier_conll03_en.html
   // https://nlp.johnsnowlabs.com/models?edition=Spark+NLP+3.3&language=en&q=robert
+  // https://nlp.johnsnowlabs.com/models?language=en&edition=Spark+NLP+3.3&q=Recognize+Entities
+  // https://nlp.johnsnowlabs.com/2021/08/05/distilbert_base_token_classifier_ontonotes_en.html
+  // https://nlp.johnsnowlabs.com/2021/09/26/roberta_base_token_classifier_ontonotes_en.html
+
+  // https://nlp.johnsnowlabs.com/2021/03/23/onto_recognize_entities_bert_mini_en.html
+  // https://nlp.johnsnowlabs.com/2021/03/23/onto_recognize_entities_electra_base_en.html
+  // https://nlp.johnsnowlabs.com/2021/09/26/distilroberta_base_token_classifier_ontonotes_en.html
+  // https://nlp.johnsnowlabs.com/2021/10/03/xlm_roberta_base_token_classifier_ontonotes_en.html
 }
