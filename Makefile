@@ -20,6 +20,16 @@ aws:
 		-v ${PWD}:/aws \
 		amazon/aws-cli:2.3.0 iam list-users
 
+aws-s3:
+	# upload public to s3 bucket
+	-docker run \
+		--rm -it \
+		-v ~/.aws:/root/.aws \
+		-v ${PWD}:/aws \
+		amazon/aws-cli:2.3.0 s3 \
+		cp ./webapp/public s3://newssnips-fyi/public \
+		--exclude "*.md" --acl public-read --recursive
+
 # start:
 # 	$(KCTL) apply -f deploy/rte-ns.yaml
 # 	$(KCTL) apply -f deploy/app.yaml

@@ -21,6 +21,7 @@ import play.api.Logger
 import fyi.newssnips.datastore.DatastaxCassandra
 
 import DatastaxCassandra.spark.implicits._
+import fyi.newssnips.webapp.datastore.Cache
 
 @Singleton
 class FeedsController @Inject() (
@@ -28,28 +29,44 @@ class FeedsController @Inject() (
 ) extends BaseController {
 
   val log: Logger = Logger(this.getClass())
+  val cache       = new Cache(DatastaxCassandra.spark)
 
   def hp() = Action { implicit request: Request[AnyContent] =>
     val homePageTable = "home_page_analysis_results"
 
-    DatastaxCassandra.getDataframe(homePageTable) match {
-      case Success(df) =>
-        val resDf = df.sort($"totalNumTexts".desc).as[AnalysisRow]
-        log.info(s"Found home page results from table $homePageTable.")
-        resDf.show()
-        log.info(s"Parsing ${resDf.count()} rows into HTML template.")
-
-        // TODO progress bar for sentiment scale
-        // https://www.w3schools.com/bootstrap/bootstrap_progressbars.asp
-        Ok(
-          views.html.index(
-            resDf.collect(),
-            Seq("rss://a.com", "rss://b.com")
-          )
-        ).as("text/html")
-
-      case _ => InternalServerError("A server error occurred: ")
+    cache.getDf(homePageTable) match {
+      case Failure(exception) => log.error(s"Failed fetch from cache with error $exception")
+      case _                  => log.info("Saved result to cache.")
     }
+    Ok("err")
+
+  // DatastaxCassandra.getDataframe(homePageTable) match {
+  //   case Success(df) =>
+  //     val resDf = df.sort($"totalNumTexts".desc).as[AnalysisRow]
+  //     log.info(s"Found home page results from table $homePageTable.")
+  //     resDf.show()
+
+  //     cache.putDf(homePageTable, df, 60) match {
+  //       case Failure(exception) => log.error(s"Failed to save to cache with error $exception")
+  //       case _                  => log.info("Saved result to cache.")
+  //     }
+
+  //     val rows = resDf.collect()
+  //     log.info(s"Parsing ${rows.size} rows into HTML template.")
+
+  //     // TODO progress bar for sentiment scale
+  //     // https://www.w3schools.com/bootstrap/bootstrap_progressbars.asp
+
+  //     Ok(
+  //       views.html.tablePage(
+  //         rows,
+  //         Seq("rss://a.com", "rss://b.com"),
+  //         true
+  //       )
+  //     ).as("text/html")
+
+  //   case _ => InternalServerError("A server error occurred: ")
+  // }
   }
 
   def getReport() = Action(parse.json) { request =>

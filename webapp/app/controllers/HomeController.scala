@@ -33,6 +33,12 @@ class HomeController @Inject() (val controllerComponents: ControllerComponents)
     Redirect("/v1/home")
   }
 
+  def about() = Action { implicit request: Request[AnyContent] =>
+    Ok(
+      views.html.about()
+    ).as("text/html")
+  }
+
   def testSpark() = Action { implicit request: Request[AnyContent] =>
     val spark: SparkSession =
       SparkSession

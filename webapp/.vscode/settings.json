@@ -1,5 +1,7 @@
 {
     "files.watcherExclude": {
         "**/target": true
-    }
+    },
+    "remote.autoForwardPorts": false,
+    "remote.restoreForwardedPorts": true
 }

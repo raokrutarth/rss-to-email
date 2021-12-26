@@ -19,6 +19,10 @@ libraryDependencies += "com.typesafe" % "config" % "1.4.1"
 // https://stackoverflow.com/questions/49760733/caused-by-java-lang-classnotfoundexception-com-sun-tools-javac-code-typetags-w
 libraryDependencies += "org.projectlombok" % "lombok" % "1.18.2"
 
+libraryDependencies += "com.redislabs" %% "spark-redis" % "3.0.0"
+// libraryDependencies += "redis.clients" % "jedis" % "3.7.0"
+
+
 // libraryDependencies += "org.webjars" % "swagger-ui" % "3.43.0"
 lazy val root = (project in file(".")).enablePlugins(
   PlayScala

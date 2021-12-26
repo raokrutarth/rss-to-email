@@ -6,7 +6,7 @@
 <head>
     @* Here's where we render the page title `String`. *@
     <title>@title</title>
-    <link rel="shortcut icon" type="image/png" href='@routes.Assets.versioned("images/favicon.png")'>
+    <link rel="shortcut icon" type="image/png" href='https://newssnips-fyi.s3.us-west-1.amazonaws.com/public/images/favicon.png'>
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -20,8 +20,8 @@
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">
-            <img src='@routes.Assets.versioned("images/favicon-highres.png")' width="30" height="30"
+        <a class="navbar-brand" href="/">
+            <img src='https://newssnips-fyi.s3.us-west-1.amazonaws.com/public/images/favicon-highres.png' width="30" height="30"
                 class="d-inline-block align-top" alt="">
             NewsSnips.fyi
         </a>
@@ -31,22 +31,28 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
-                <a class="nav-item nav-link" href="#">Home</a>
+                <a class="nav-item nav-link" href="/">Home</a>
                 <a class="nav-item nav-link" href="#">Markets</a>
                 <a class="nav-item nav-link" href="#">Politics</a>
                 <a class="nav-item nav-link" href="#">Entertainment</a>
-                <a class="nav-item nav-link" href="#"><strong>About</strong></a>
+                <a class="nav-item nav-link" href="/about"><strong>About</strong></a>
                 <!-- <a class="nav-item nav-link disabled" href="#">Disabled</a> -->
             </div>
         </div>
         <a href="https://www.promptapi.com" target="_blank" role="button"
             class="btn btn-primary btn-lg active navbar-btn">API</a>
     </nav>
+    <br>
 
     @* And here's where we render the `Html` object containing
     * the page content. *@
-    <br>
     @content
+
+    <br>
+    <footer class="container">
+        <p class="float-right"><a href="#">Back to top</a></p>
+        <p>© 2017-2018 Company, Inc. · <a href="#">Privacy</a> · <a href="#">Terms</a></p>
+    </footer>
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->

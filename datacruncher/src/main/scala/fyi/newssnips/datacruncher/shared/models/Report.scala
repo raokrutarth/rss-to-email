@@ -5,8 +5,8 @@ case class AnalysisRow(
     entityType: Option[String],
     negativeMentions: Option[Long],
     positiveMentions: Option[Long],
-    positiveTextIds: Option[Array[Long]],
-    negativeTextIds: Option[Array[Long]],
+    positiveTextIds: Option[List[Long]],
+    negativeTextIds: Option[List[Long]],
     totalNumTexts: Option[Long],
     aggregateConfidence: Option[Double]
 )

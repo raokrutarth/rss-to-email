@@ -5,8 +5,7 @@ sends periodic emails to the configured destination email address.
 
 ## TODO
 
-- make shared dir in both projects.
-- create non banner version pages for hoh-home pages.
+- create non banner version pages for non-home pages.
 - write v1 of about page.
 - setup last updated for all pages.
 - find one feed for each category.
@@ -157,6 +156,7 @@ scala + play tutorials: https://www.youtube.com/watch?v=FqMDHsFNlxQ&list=PLLMXbk
 - spark advanced <https://medium.com/@vladimir.prus/advanced-custom-operators-in-spark-79b12da61ca7>
 - ms how tos <https://docs.microsoft.com/en-us/azure/cosmos-db/cassandra/spark-upsert-operations>
 - spark cassandra basics <https://itnext.io/spark-cassandra-all-you-need-to-know-tips-and-optimizations-d3810cc0bd4e>
+- nice font and color scheme: <https://getbootstrap.com/docs/4.0/examples/blog/#>
 
 names:
 - sentimetrics
