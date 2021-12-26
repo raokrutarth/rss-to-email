@@ -8,10 +8,15 @@ libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0
 
 val sparkVersion = "3.1.2"
 libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion
+libraryDependencies += "org.apache.spark" %% "spark-mllib" % sparkVersion
+// libraryDependencies += "org.apache.spark" %% "spark-ml" % sparkVersion
+// https://mvnrepository.com/artifact/com.johnsnowlabs.nlp/spark-nlp
+libraryDependencies += "com.johnsnowlabs.nlp" %% "spark-nlp" % "3.3.0"
 
 // libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.3"
 
 libraryDependencies += "com.typesafe" % "config" % "1.4.1"
+
 // libraryDependencies += "org.webjars" % "swagger-ui" % "3.43.0"
 lazy val root = (project in file(".")).enablePlugins(
   PlayScala

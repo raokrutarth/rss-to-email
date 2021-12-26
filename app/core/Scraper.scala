@@ -23,8 +23,6 @@ object Scraper {
     log.info(s"Fetching XML from feed $url")
     val request = new HttpGet(
       url.strip()
-      // "http://rss.cnn.com/rss/money_latest.rss"
-      // "http://www.chicagotribune.com/sports/rss2.0.xml"
     )
     val response = httpClient.execute(request)
     request.setHeader(
@@ -47,10 +45,13 @@ object Scraper {
     }
   }
 
-  def getContent(feed: Feed): Option[Seq[FeedContent]] = {
-    getXML(feed.url.url) match {
+  def getContent(feedUrl: FeedURL): Option[Seq[FeedContent]] = {
+    getXML(feedUrl.url) match {
       case Success(payload) =>
         val xml = XML.loadString(payload)
+
+        val feedTitle = (xml \ "channel" \ "title").text // .as[Option[String]]
+        log.info(f"Found feed with title: $feedTitle")
 
         val contents = for {
           xmlItems <- (xml \\ "item")
@@ -63,8 +64,8 @@ object Scraper {
           description,
           false
         )
-        log.info(s"Extracted ${contents.size} items from $feed")
-        log.info(s"${contents.head}")
+        log.info(s"Extracted ${contents.size} items from $feedUrl")
+        // TODO when lenght is 0, return failure
         Some(contents)
 
       case Failure(s) =>

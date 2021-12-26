@@ -5,10 +5,8 @@
 
 # An example controller showing a sample home page
 GET     /                           controllers.HomeController.index()
-GET     /rss/report/:lookback    controllers.RSSController.triggerReport(lookback: String)
-GET     /rss/urls               controllers.RSSController.listURLs()
-POST     /rss/url                  controllers.RSSController.addURL()
-DELETE     /rss/url                 controllers.RSSController.removeURL()
+
+POST /v1/rss/report controllers.v1.FeedsController.getReport()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

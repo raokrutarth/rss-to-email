@@ -6,7 +6,9 @@ docker exec rss-dev \
     bash -c "pushd /home/dev/work && /home/dev/.local/share/coursier/bin/sbt Docker/stage"
 
 # point docker to minikube for registry-free image transfer
-eval $(minikube -p minikube docker-env)
+if [[ ! -v RUN ]]; then
+    eval $(minikube -p minikube docker-env)
+fi
 
 docker build \
     -t rss-to-email:latest \
@@ -17,7 +19,7 @@ if [[ -v RUN ]]; then
     # test the image locally if needed.
     # FIXME need to disable minikube when mounting local files
     # test local with:  curl -X GET "$(minikube ip)":9001/rss/report/24h
-    docker run --entrypoint bash \
+    docker run \
     --rm \
     -it \
     -p 9001:9000 \
@@ -25,4 +27,7 @@ if [[ -v RUN ]]; then
     --mount type=bind,source="$(pwd)/secrets.conf",target=/etc/secrets.conf \
     rss-to-email:latest
 fi
-eval $(minikube -p minikube docker-env -u)
+
+if [[ ! -v RUN ]]; then
+    eval $(minikube -p minikube docker-env -u)
+fi

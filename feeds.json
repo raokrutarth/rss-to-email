@@ -1,18 +1,11 @@
-[
-    {
-        "url": "https://planetpython.org/rss20.xml",
-        "description": "Python blog aggregation site."
-    },
-    {
-        "url": "https://www.nasdaq.com/feed/rssoutbound",
-        "description": "Nasdaq headlines."
-    },
-    {
-        "url": "https://seekingalpha.com/market_currents.xml",
-        "description": "SA current markets."
-    },
-    {
-        "url": "http://feeds.feedburner.com/TradingVolatility",
-        "description": "market signals"
-    }
-]
+{
+    "urls": [
+        "https://planetpython.org/rss20.xml",
+        "https://www.nasdaq.com/feed/rssoutbound",
+        "https://seekingalpha.com/market_currents.xml",
+        "https://feeds.transistor.fm/screaming-in-the-cloud",
+        "http://rss.cnn.com/rss/money_latest.rss",
+        "http://www.chicagotribune.com/sports/rss2.0.xml",
+        "http://feeds.feedburner.com/TradingVolatility"
+    ]
+}

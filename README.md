@@ -13,7 +13,7 @@ TODO: k8s, minikube, docker images, scale, apache spark, batch/stream.
 
 ## Development
 
-Secton covers items and resources used during development.
+Section covers items and resources used during development.
 
 ### Ideas
 
@@ -48,6 +48,24 @@ annual fees.
 - DB connection performance: <https://www.playframework.com/documentation/2.1.0/ThreadPools>
 - cassandra datastax ORM <https://github.com/DataStax-Examples/object-mapper-jvm>
 - <https://github.com/lauris/awesome-scala>
-- Feeds to explore: <https://rss.com/blog/popular-rss-feeds/>
+- Feeds to explore: 
+  - <https://rss.com/blog/popular-rss-feeds/>
+  - <https://www.feedspot.com/?continue=brandmonitoring>
 - Scala/Java NLP librarier: <https://www.predictiveanalyticstoday.com/top-free-software-for-text-analysis-text-mining-text-analytics/>
 - monitoring <https://medium.com/i-love-my-local-farmer-engineering-blog/monitoring-serverless-java-applications-b0f15c487364>
+- proxy apis <https://rapidapi.com/collection/proxy>
+- report ideas (see DS blogs and sites (kaggle)): 
+  - <https://www.luminoso.com/>
+  - <https://www.lexalytics.com/ssv>
+  - <https://blog.hubspot.com/service/sentiment-analysis-tools>
+- Similar: <https://mailbrew.com/>
+- affiliate website book:
+  - <https://english.api.rakuten.net/raygorodskij/api/GoogleBooks>
+  - <https://english.api.rakuten.net/raygorodskij/api/Goodreads>
+- account based:
+  - send user-key and recovery key to email address.
+  - if recovery key is used, assign new key and replace key in DB.
+- Similar APIs:
+  - <https://rapidapi.com/twinword/api/twinword-text-analysis-bundle/details>
+  - <https://rapidapi.com/blog/sentiment-analysis-apis/>
+- ML module design idea: <https://www.kaggle.com/general/202189>
