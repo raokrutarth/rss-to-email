@@ -1,0 +1,15 @@
+{
+    "urls": [
+        "http://rss.cnn.com/rss/cnn_topstories.rss",
+        "http://rss.cnn.com/rss/cnn_world.rss",
+        "http://rss.cnn.com/rss/cnn_us.rss",
+        "http://rss.cnn.com/rss/cnn_latest.rss",
+        "https://rss.politico.com/congress.xml",
+        "http://rss.politico.com/politics.xml",
+        "https://feeds.a.dj.com/rss/RSSWorldNews.xml",
+        "http://feeds.feedburner.com/zerohedge/feed",
+        "http://thehill.com/rss/syndicator/19110",
+        "http://thehill.com/taxonomy/term/1778/feed",
+        "https://nypost.com/feed"
+    ]
+}

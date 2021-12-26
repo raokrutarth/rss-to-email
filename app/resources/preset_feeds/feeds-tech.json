@@ -1,0 +1,15 @@
+{
+  "urls": [
+    "https://planetpython.org/rss20.xml",
+    "https://feeds.transistor.fm/screaming-in-the-cloud",
+    "http://rss.politico.com/morningcybersecurity.xml",
+    "http://feeds.dzone.com/home",
+    "https://insights.sei.cmu.edu/blog/feeds/latest/rss/",
+    "https://changelog.com/master/feed",
+    "http://feeds.feedburner.com/se-radio",
+    "https://feeds.simplecast.com/oCXij9l2",
+    "https://feeds.simplecast.com/K1_mv0CJ",
+    "https://cynicaldeveloper.com/feed/podcast",
+    "https://shoptalkshow.com/feed/podcast/"
+  ]
+}

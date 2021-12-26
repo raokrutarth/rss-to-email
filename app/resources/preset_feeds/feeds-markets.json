@@ -1,0 +1,21 @@
+{
+  "urls": [
+    "https://www.nasdaq.com/feed/rssoutbound",
+    "https://seekingalpha.com/market_currents.xml",
+    "https://seekingalpha.com/feed.xml",
+    "http://feeds.feedburner.com/TradingVolatility",
+    "http://rss.politico.com/economy.xml",
+    "https://feeds.a.dj.com/rss/RSSMarketsMain.xml",
+    "http://thehill.com/taxonomy/term/30/feed",
+    "http://thehill.com/taxonomy/term/20/feed",
+    "https://nypost.com/business/feed/",
+    "http://feeds.marketwatch.com/marketwatch/topstories/",
+    "https://fool.libsyn.com/rss",
+    "https://www.cnbc.com/id/20409666/device/rss/rss.html?x=1",
+    "https://www.wallstreetsurvivor.com/feed/",
+    "https://www.investing.com/rss/news_25.rss",
+    "https://www.reddit.com/r/StockMarket/.rss",
+    "https://www.reddit.com/r/wallstreetbets/.rss",
+    "https://www.reddit.com/r/stocks/.rss"
+  ]
+}

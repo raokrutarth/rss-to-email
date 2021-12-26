@@ -19,6 +19,9 @@
 
   <logger name="play" level="INFO" />
   <logger name="application" level="DEBUG" />
+  <logger name="org.apache.spark" level="WARN" />
+  <logger name="o.a.spark" level="WARN" />
+  <logger name="o.a.hadoop" level="WARN" />
 
   <root level="INFO">
     <appender-ref ref="ASYNCSTDOUT" />

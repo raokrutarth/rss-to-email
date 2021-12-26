@@ -69,3 +69,4 @@ annual fees.
   - <https://rapidapi.com/twinword/api/twinword-text-analysis-bundle/details>
   - <https://rapidapi.com/blog/sentiment-analysis-apis/>
 - ML module design idea: <https://www.kaggle.com/general/202189>
+- Top rss feed finder <https://eztoolset.com/>
