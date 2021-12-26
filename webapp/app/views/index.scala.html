@@ -1,4 +1,6 @@
-@(analysisRows: Array[AnalysisRow])
+@import fyi.newssnips.models.AnalysisRow
+
+@(analysisDf: Array[AnalysisRow], sourceFeeds: Seq[String])
 
 @main("RSS Analysis") {
 <div class="container">
@@ -34,15 +36,10 @@
         <div class="card card-body">
 
           <ul class="list-group list-group-flush">
-            <li class="list-group-item">Cras justo odio</li>
-            <li class="list-group-item">Dapibus ac facilisis in</li>
-            <li class="list-group-item">Vestibulum at eros</li>
-            <li class="list-group-item">Vestibulum at eros</li>
-            <li class="list-group-item">Vestibulum at eros</li>
-            <li class="list-group-item">Vestibulum at eros</li>
-            <li class="list-group-item">Vestibulum at eros</li>
-            <li class="list-group-item">Vestibulum at eros</li>
-            <li class="list-group-item">Vestibulum at eros</li>
+            @for(sf <- sourceFeeds) {<tr>
+              <li class="list-group-item">@sf</li>
+              }
+            <li class="list-group-item">test item</li>
           </ul>
 
         </div>
@@ -59,23 +56,22 @@
               <tr>
                 <th>Entity</th>
                 <th>Entity Type</th>
-                <th>No. Samples</th>
-                <th>Sentiment Strength</th>
-                <th>Sentiment</th>
+                <th># Mentions</th>
+                <th># Positive</th>
+                <th># Negative</th>
+                <th>Confidence</th>
               </tr>
             </thead>
             <tbody>
-              @for(t <- analysisRows) {<tr>
+              @for(t <- analysisDf) {<tr>
                 <th scope="row">@t.entityName</th>
                 <td>@t.entityType</td>
-                <td>@t.numTexts</td>
-                <td>@t.aggregateConfidence</td>
+                <td>@t.totalNumTexts</td>
 
-                @t.sentiment match {
-                case Some("negative") => {<td><button type="button" class="btn btn-outline-danger">Negative</button>
-                </td>}
-                case Some("positive") => {<td><a href="#" class="btn btn-outline-success">Positive</a></td>}
-                }
+                <td><a href="#" class="btn btn-outline-success">@t.positiveMentions</a></td>
+                <td><a href="#" class="btn btn-outline-danger">@t.negativeMentions</a></td>
+
+                <td>@t.aggregateConfidence</td>
                 </tr>
                 }
             </tbody>

@@ -99,7 +99,7 @@ WORKDIR /usr/local
 
 # Configure Spark
 ENV SPARK_HOME=/usr/local/spark
-ENV SPARK_OPTS="--driver-java-options=-Xms1024M --driver-java-options=-Xmx4096M --driver-java-options=-Dlog4j.logLevel=info" \
+ENV SPARK_OPTS="--driver-java-options=-Dlog4j.logLevel=info" \
     PATH="${PATH}:${SPARK_HOME}/bin"
 
 RUN ln -s "spark-${APACHE_SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}" spark && \
@@ -124,7 +124,7 @@ RUN set -x && curl -fLo /tmp/cs https://git.io/coursier-cli-"$(uname | tr LD ld)
 
 ENV PATH="/home/${NB_USER}/.local/share/coursier/bin:$PATH"
 
-ENV JAVA_OPTS="-Xmx1G -Xms100M -XX:+UseG1GC"
+# ENV JAVA_OPTS="-Xmx1G -Xms100M -XX:+UseG1GC"
 
 # Setup work directory for backward-compatibility
 RUN mkdir "/home/${NB_USER}/work" && \

@@ -30,7 +30,7 @@ class HomeController @Inject() (val controllerComponents: ControllerComponents)
     extends BaseController {
 
   def index() = Action { implicit request: Request[AnyContent] =>
-    Redirect("/v1/rss/home")
+    Redirect("/v1/home")
   }
 
   def testSpark() = Action { implicit request: Request[AnyContent] =>
@@ -45,8 +45,8 @@ class HomeController @Inject() (val controllerComponents: ControllerComponents)
     println(s"Conencted to spark with version $sv")
 
     val logData = spark.read.textFile("/opt/docker/conf/logback.xml").cache()
-    val numAs = logData.filter(line => line.contains("a")).count()
-    val numBs = logData.filter(line => line.contains("b")).count()
+    val numAs   = logData.filter(line => line.contains("a")).count()
+    val numBs   = logData.filter(line => line.contains("b")).count()
     spark.stop()
 
     Ok(s"Lines with a: $numAs, Lines with b: $numBs")

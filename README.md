@@ -5,11 +5,18 @@ sends periodic emails to the configured destination email address.
 
 ## TODO
 
-- setup k8s worker cron job.
-- setup heroku secrets and local dynamic secrets.
-- makefile for deployments and management.
+- make shared dir in both projects.
+- create non banner version pages for hoh-home pages.
+- write v1 of about page.
+- setup last updated for all pages.
+- find one feed for each category.
+- store feed ID/links for each text ID.
+- design text display page.
+- enable pagination for text and entity pages.
+- add entity type description link to banner note.
+- write book scraper.
+- add dummy books and talks column to DF (context column)
 
-- use link in feedCOntent object to link to a given text.
 
 ## Usage
 

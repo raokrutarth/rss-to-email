@@ -6,8 +6,7 @@
 # An example controller showing a sample home page
 GET     /         controllers.HomeController.index()
 
-GET /v1/rss/home     controllers.v1.FeedsController.hp()
-POST /v1/rss/report         controllers.v1.FeedsController.getReport()
+GET /v1/home     controllers.v1.FeedsController.hp()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

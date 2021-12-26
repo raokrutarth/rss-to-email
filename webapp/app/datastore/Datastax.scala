@@ -1,18 +1,17 @@
 package datastore
 
-import scala.util.{Try, Success, Failure}
-import models.{Feed, FeedURL}
+import scala.util.{Failure, Success, Try}
 import java.time.LocalDate
 import java.io._
 import org.apache.commons._
 import org.apache.http._
 import org.apache.http.client._
 import org.apache.http.client.methods.{
+  HttpDelete,
+  HttpGet,
+  HttpPatch,
   HttpPost,
   HttpPut,
-  HttpDelete,
-  HttpPatch,
-  HttpGet,
   HttpRequestBase
 }
 
@@ -32,11 +31,10 @@ import play.api.libs.json._
 import org.apache.http.client.methods.HttpPut
 import org.apache.http.util.EntityUtils
 import org.apache.http.entity.StringEntity
-import models.FeedContent
+import fyi.newssnips.models.{AnalysisRow, Feed, FeedContent, FeedURL}
 import play.api.Logger
-import models.AnalysisRow
 
-// https://stargate.io/docs/stargate/1.0/developers-guide/document-using.html#_retrieving_a_document_using_a_where_clause
+/* https://stargate.io/docs/stargate/1.0/developers-guide/document-using.html#_retrieving_a_document_using_a_where_clause */
 
 // temporary json based cloud storage layer.
 @Singleton
@@ -60,6 +58,9 @@ class DocumentStore @Inject() (lifecycle: ApplicationLifecycle) {
   private val userToFeedsCollections = "user-to-feeds"
 
   implicit val analysisRowFormat = Json.format[AnalysisRow]
+  implicit val feedUrlFormat     = Json.format[FeedURL]
+  implicit val feedContentFormat = Json.format[FeedContent]
+  implicit val feedFormat        = Json.format[Feed]
 
   private def addAuth(request: HttpRequestBase): Unit = {
     request.setHeader("X-Cassandra-Token", AppConfig.settings.database.appToken)
@@ -82,9 +83,9 @@ class DocumentStore @Inject() (lifecycle: ApplicationLifecycle) {
     val request = new HttpGet(url)
     addAuth(request)
 
-    val response = httpClient.execute(request)
+    val response    = httpClient.execute(request)
     val status_code = response.getStatusLine().getStatusCode()
-    val payload = EntityUtils.toString(response.getEntity())
+    val payload     = EntityUtils.toString(response.getEntity())
 
     status_code match {
       case 200 =>
@@ -102,9 +103,9 @@ class DocumentStore @Inject() (lifecycle: ApplicationLifecycle) {
     val request = new HttpGet(url)
     addAuth(request)
 
-    val response = httpClient.execute(request)
+    val response    = httpClient.execute(request)
     val status_code = response.getStatusLine().getStatusCode()
-    val payload = EntityUtils.toString(response.getEntity())
+    val payload     = EntityUtils.toString(response.getEntity())
 
     status_code match {
       case 200 =>
@@ -127,9 +128,9 @@ class DocumentStore @Inject() (lifecycle: ApplicationLifecycle) {
     val feedJson =
       request.setEntity(new StringEntity(Json.toJson(rows).toString()))
 
-    val response = httpClient.execute(request)
+    val response    = httpClient.execute(request)
     val status_code = response.getStatusLine().getStatusCode()
-    val message = EntityUtils.toString(response.getEntity())
+    val message     = EntityUtils.toString(response.getEntity())
     status_code match {
       case 200 =>
         logger.info(s"Saved dataframe with message $message")
@@ -146,7 +147,7 @@ class DocumentStore @Inject() (lifecycle: ApplicationLifecycle) {
   /** Add or update an existing feed
     *
     * @param feed
-    *   @param userID
+    * @param userID
     * @return
     *   the document ID of the feed.
     */
@@ -160,9 +161,9 @@ class DocumentStore @Inject() (lifecycle: ApplicationLifecycle) {
     val feedJson =
       request.setEntity(new StringEntity(Json.toJson(feed).toString()))
 
-    val response = httpClient.execute(request)
+    val response    = httpClient.execute(request)
     val status_code = response.getStatusLine().getStatusCode()
-    val message = EntityUtils.toString(response.getEntity())
+    val message     = EntityUtils.toString(response.getEntity())
     status_code match {
       case 200 =>
         logger.info(s"Saved feed with message $message")
@@ -179,7 +180,7 @@ class DocumentStore @Inject() (lifecycle: ApplicationLifecycle) {
     val request = new HttpDelete(url)
     addAuth(request)
 
-    val response = httpClient.execute(request)
+    val response    = httpClient.execute(request)
     val status_code = response.getStatusLine().getStatusCode()
     status_code match {
       case 204 =>

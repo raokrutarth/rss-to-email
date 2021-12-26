@@ -1,11 +1,17 @@
-import com.johnsnowlabs.nlp.pretrained.ResourceDownloader
+import java.util.Base64
+import java.nio.charset.StandardCharsets
+import java.io.{File, FileOutputStream, DataOutputStream}
+import scala.io.Source
+import java.nio.file.{Paths, Files}
+import java.io.PrintWriter
 
-// ResourceDownloader.showPublicPipelines(lang = "en")
+// val f = new File("db.zip.b64")
+// val contents = Source.fromFile("db.zip.b64").getLines.mkString
 
-import scala.xml.Utility.unescape
+// val os = new FileOutputStream("./t/test-db-z.zip")
+// os.write(Base64.getDecoder.decode("").toArray)
+// os.close()
+// new PrintWriter("test-db-z.zip") { write(Base64.getDecoder.decode(contents).toVector); close }
 
-val sb = new StringBuilder
-val s =
-  "Gottlieb: Potential vaccine mandate for young children &#039;a long way off&#039;"
 
-unescape(s, sb)
+

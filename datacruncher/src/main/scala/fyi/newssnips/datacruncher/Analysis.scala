@@ -26,21 +26,8 @@ import com.johnsnowlabs.nlp.annotators.sentence_detector_dl.SentenceDetectorDLMo
 import com.typesafe.scalalogging.Logger
 
 @Singleton
-class Analysis() {
+class Analysis(spark: SparkSession) {
   val log: Logger = Logger(this.getClass())
-
-  private val spark: SparkSession =
-    SparkSession
-      .builder()
-      .appName("RSS to Email")
-      .config(
-        "spark.serializer",
-        "org.apache.spark.serializer.KryoSerializer"
-      )
-      // .config("spark.kryoserializer.buffer.max", "100M")
-      .master("local[*]")
-      // .config("spark.driver.memory", "100M")
-      .getOrCreate()
   import spark.implicits._
 
   // https://nlp.johnsnowlabs.com/docs/en/pipelines#recognizeentitiesdl
@@ -176,7 +163,7 @@ class Analysis() {
     contentsDf
   }
 
-  def generateReport(contents: Seq[FeedContent]): Array[AnalysisRow] = {
+  def generateReport(contents: Seq[FeedContent]): Option[DataFrame] = {
 
     log.info(s"Performing analysis for ${contents.size} articles.")
 
@@ -247,13 +234,8 @@ class Analysis() {
 
     log.info(s"Analysis resulted in ${resultDf.count()} results")
     resultDf.sample(5f / math.max(5, resultDf.count())).show()
-    resultDf
-      .as[AnalysisRow]
-      .collect()
-
+    Some(resultDf)
   }
-
-  def cleanup() = spark.stop()
 
   // lifecycle.addStopHook { () =>
   //   Future.successful {

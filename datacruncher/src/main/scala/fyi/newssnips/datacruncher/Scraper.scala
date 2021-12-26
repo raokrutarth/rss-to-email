@@ -52,11 +52,12 @@ object Scraper {
         log.info(f"Found feed with title: $feedTitle")
 
         val itemTag = if (feedUrl.url.contains("reddit.com")) "entry" else "item"
+        val contentTag = if (feedUrl.url.contains("reddit.com")) "content" else "description"
 
         val contents = for {
           xmlItems <- (xml \\ itemTag)
           title       = (xmlItems \\ "title").text
-          description = (xmlItems \\ "description").text
+          description = (xmlItems \\ contentTag).text
           link        = (xmlItems \\ "link").text
         } yield FeedContent(
           link,

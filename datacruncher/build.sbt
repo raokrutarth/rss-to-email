@@ -16,56 +16,17 @@ libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.2"
 
 libraryDependencies += "com.datastax.spark" % "spark-cassandra-connector_2.12" % "3.1.0"
 
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.1" % "test"
 
 scalafmtOnCompile := true
 
 lazy val root = (project in file(".")).settings(
-  // inThisBuild(
-  //   List(
-  //     organization := "fyi.newssnips",
-  //     scalaVersion := "2.12.13"
-  //   )
-  // ),
-  // sparkComponents := Seq(),
-  // javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
   javaOptions ++= Seq(
     "-Xms512M",
     "-Xmx4048M",
     "-XX:MaxPermSize=4048M",
     "-XX:+CMSClassUnloadingEnabled"
   )
-  // scalacOptions ++= Seq("-deprecation", "-unchecked")
-  // parallelExecution in Test := false,
-  // fork := true,
-  // coverageHighlighting := true,
-
-  // uses compile classpath for the run task, including "provided"
-  // jar (cf http://stackoverflow.com/a/21803413/3827)
-  // run in Compile := Defaults
-  //   .runTask(
-  //     fullClasspath in Compile,
-  //     mainClass in (Compile, run),
-  //     runner in (Compile, run)
-  //   )
-  //   .evaluated,
-  // scalacOptions ++= Seq("-deprecation", "-unchecked"),
-  // pomIncludeRepository := { x => false },
-  // resolvers ++= Seq(
-  //   "sonatype-releases" at "https://oss.sonatype.org/content/repositories/releases/",
-  //   "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/",
-  //   "Second Typesafe repo" at "https://repo.typesafe.com/typesafe/maven-releases/",
-  //   Resolver.sonatypeRepo("public")
-  // ),
-  // pomIncludeRepository := { _ => false }
-
-  // publish settings
-  // publishTo := {
-  //   val nexus = "https://oss.sonatype.org/"
-  //   if (isSnapshot.value)
-  //     Some("snapshots" at nexus + "content/repositories/snapshots")
-  //   else
-  //     Some("releases" at nexus + "service/local/staging/deploy/maven2")
-  // }
 )
 
 // https://sbt-native-packager.readthedocs.io/en/latest/formats/docker.html#requirements
