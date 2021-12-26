@@ -103,7 +103,10 @@ object SharedConfig {
     )
   }
 
-  private def extractRedisConfig(config: Config, inProd: Boolean): RedisConfig = {
+  private def extractRedisConfig(
+      config: Config,
+      inProd: Boolean
+  ): RedisConfig = {
     // TODO move to redis case class
     // convert the redis connection URL provided by heroku to
     // it's individual parts to feed into spark config.

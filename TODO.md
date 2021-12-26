@@ -2,9 +2,10 @@
 
 
 ## both
+
+- switch toggled home page.
 - music background video.
 - launch checklist.
-- shared config class.
 
 ## wa
 
@@ -13,6 +14,7 @@
 
 ## dc
 
+- twitter bot for daily post. (WIP)
 - Hardcoded books links for each category.
 - scrape entrypoint router for xml vs REST scrape.
 - manual exceptions:
@@ -20,11 +22,11 @@
     - feed url class's descriptionClean flag.
   - set category of feed URL in class.
   - remove mfool descriptions due to reporter name. 
-- twitter bot for daily post. (WIP)
 - call cache warm after update.
 
 ## non-urgent
 
+- add admin dashboard.
 - paginated analysis page view.
 - Add news API to scraper. (not a lot of data, needs scraper router).
 - Precomputing texts for top x topics in each category and add to cache.

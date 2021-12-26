@@ -239,7 +239,7 @@ object AnalysisCycle {
             }
             db.upsertKV(
               categoryMetadata.lastUpdateKey,
-              DateTimeUtils.getDateAsString(DateTimeUtils.now())
+              DateTimeUtils.getDateAsStringUi(DateTimeUtils.now())
             ) match {
               case Failure(_) =>
                 log.error(
@@ -275,26 +275,39 @@ object ScratchCode {
   import spark.implicits._
 
   val origDf = Seq(
-    ("U.S.", "abc1", 1),
-    ("U.S", "abc99", 1),
-    ("General Electric", "abc2", 1),
-    ("GE", "abc3", 1),
-    ("the U.S.", "abc4", 1),
-    ("US", "abc5", 1),
-    ("Unites States", "iio", 6),
-    ("The Em States", "iio", 6),
-    ("The Em State's", "iio", 6),
-    ("abc ts's", "iio", 6),
-    ("it's", "iio", 6)
-  ).toDF("entityName", "entityType", "count")
+    ("abc &esjnjd;Tr", "http://rhty.gon"),
+    (
+      " 2022&quot;As we get back to normal, expect that to end,&quot; Treasury",
+      "http://rhty.gon"
+    ),
+    (
+      "(marketscreener.com) CHING https://www.marketscreener.com/news/l-37219246/?utm_medium=RSS&utm_content=20211205 yu",
+      "h.com"
+    ),
+    ("(marketscreener.com) EMMAR INVESTMENTS &amp; REAL", "o.pol")
+  ).toDF("text", "url")
 
   origDf.show(false)
 
   origDf
+    .withColumn("text", regexp_replace(col("text"), "\\s*&\\S*;\\s*", " "))
+    // remove URLs
     .withColumn(
-      "entityName",
-      NerHelper.entityNameNormalizeUdf(col("entityName"))
+      "text",
+      regexp_replace(
+        col("text"),
+        "\\bhttps?://\\S+\\b",
+        " "
+      )
     )
+    .select(
+      monotonically_increasing_id().as("id"),
+      // replace html escape tags and trim whitespace.
+      // TODO escape URLs
+      trim(col("text")).as("text"),
+      col("url")
+    )
+    .filter("text != ''")
     .show(false)
 
   spark.stop

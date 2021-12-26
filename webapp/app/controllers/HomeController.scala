@@ -29,9 +29,9 @@ class HomeController @Inject() (
   def robotsTxt() = Action { _ =>
     // TODO add sitemap.
     Ok("""
-    User-agent: *
-    Allow: /
-    Disallow: */mentions/*
+User-agent: *
+Allow: /
+Disallow: */mentions/*
     """).as("text/plain")
   }
 

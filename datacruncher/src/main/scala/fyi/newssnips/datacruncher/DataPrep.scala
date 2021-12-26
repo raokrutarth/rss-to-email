@@ -82,12 +82,22 @@ class DataPrep(spark: SparkSession) {
     val contentsDf =
       cleanTitlesDf
         .union(descriptionSentencesDf)
+        // remove html escape tags.
+        .withColumn("text", regexp_replace(col("text"), "\\s*&\\S*;\\s*", " "))
+        // remove URLs
+        .withColumn(
+          "text",
+          regexp_replace(
+            col("text"),
+            "\\bhttps?://\\S+\\b",
+            " "
+          )
+        )
         .select(
           monotonically_increasing_id().as("id"),
-
           // replace html escape tags and trim whitespace.
           // TODO escape URLs
-          trim(regexp_replace(col("text"), "&#\\S*", "")).as("text"),
+          trim(col("text")).as("text"),
           col("url")
         )
         .filter("text != ''")
