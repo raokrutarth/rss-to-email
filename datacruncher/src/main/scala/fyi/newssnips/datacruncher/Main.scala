@@ -15,12 +15,14 @@ import scala.util.Failure
 import fyi.newssnips.datacruncher.core.Analysis
 
 import fyi.newssnips.models.Feed
+import fyi.newssnips.datastore.Cache
 
 object AnalysisCycle {
   private val log = Logger("app." + this.getClass().toString())
 
   private val db = DatastaxCassandra
   import db.spark.implicits._
+  private val cache = new Cache()
 
   private val analysis = new Analysis(db.spark)
   log.info("Initalized analysis module.")
@@ -188,13 +190,15 @@ object AnalysisCycle {
     }
     contentsDf.unpersist()
   }
-
+  cache.flushCache()
+  cache.cleanup()
   db.cleanup()
 }
 
 object Main extends App {
   val log = Logger("app." + this.getClass().toString())
   log.info("Running analysis cycle.")
-  AnalysisCycle
+  // AnalysisCycle
+  Sentiment1
   log.info("Analysis cycle finished.")
 }

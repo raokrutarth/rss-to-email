@@ -18,6 +18,7 @@ case class AppConfig(
     runtimeEnv: String,
     inProd: Boolean,
     httpClientConfig: RequestConfig,
+    redis: RedisConfig,
 
     // timezone of app from
     /* https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/ZoneId.html */
@@ -34,6 +35,14 @@ case class DatastaxConfig(
     clientId: String,
     clientSecret: String,
     connectionPackagePath: String
+)
+
+case class RedisConfig(
+    url: String,
+    host: String,
+    port: Int,
+    password: String,
+    useTls: Boolean
 )
 
 case class SendgridConfig(
@@ -77,6 +86,30 @@ object AppConfig {
     }
   }
 
+  private def extractRedisConfig(config: Config): RedisConfig = {
+    // convert the redis connection URL provided by heroku to
+    // it's individual parts to feed into spark config.
+    // e.g. rediss://:ioiuiy67t@ecty6.compute-1.amazonaws.com:28798
+    val connUrl: String = Properties.envOrNone("REDIS_URL") match {
+      case Some(url) =>
+        url
+      case _ => config.getString("secrets.cache.redis.http_url")
+    }
+
+    val halfs    = connUrl.split("@")
+    val password = halfs(0).split(":").last.strip()
+    val host     = halfs(1).split(":").head.strip()
+    val port     = halfs(1).split(":").last.strip().toInt
+
+    RedisConfig(
+      url = connUrl,
+      host = host,
+      port = port,
+      password = password,
+      useTls = false
+    )
+  }
+
   /** Load from a given Typesafe Config object */
   def load(config: Config): AppConfig = {
     val runtime: String = Properties.envOrElse("RUNTIME_ENV", "development")
@@ -108,6 +141,7 @@ object AppConfig {
       } else false,
       httpClientConfig = requestConfig,
       timezone = Properties.envOrElse("TZ", "America/Los_Angeles"),
+      redis = extractRedisConfig(config),
       sampleDfs =
         if (Properties.envOrNone("SAMPLE_DFS").isEmpty) false else true
     )

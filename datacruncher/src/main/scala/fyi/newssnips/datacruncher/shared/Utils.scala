@@ -11,8 +11,8 @@ import com.typesafe.scalalogging.Logger
 object DfUtils {
   private val log: Logger = Logger("app." + this.getClass().toString())
 
-  /** Log n random values from the dataframe if the envorinment variable for df sampeling is
-    * enabled. Can reduce performance.
+  /** Log n random values from the dataframe if the envorinment variable for df
+    * sampeling is enabled. Can reduce performance.
     */
   def showSample(
       df: DataFrame,

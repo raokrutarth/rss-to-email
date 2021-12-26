@@ -24,6 +24,7 @@ libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.2"
 libraryDependencies += "com.datastax.spark" % "spark-cassandra-connector_2.12" % "3.1.0"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.1" % "test"
+libraryDependencies +=  "redis.clients" % "jedis" % "3.7.0"
 
 scalafmtOnCompile := true
 scalafixOnCompile := true

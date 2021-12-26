@@ -1,13 +1,13 @@
 # TODO
 
 ## both
-- move cache layer to shared with redis collected array store and DC cache clear.
 
 ## wa
 - add context column.
 
 ## dc
 
+- call cache flush & warm after update.
 - Add news API to scraper.
 - description exceptions:
   - remove zeroedge. invalid text skil description load on zerohedge.com.

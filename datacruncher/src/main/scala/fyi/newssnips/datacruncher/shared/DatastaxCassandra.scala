@@ -25,7 +25,7 @@ object DatastaxCassandra {
   /* https://spark.apache.org/docs/latest/api/scala/org/apache/spark/sql/DataFrameWriterV2.html */
   /* https://docs.microsoft.com/en-us/azure/cosmos-db/cassandra/spark-create-operations */
   /* https://docs.datastax.com/en/dse/6.8/dse-dev/datastax_enterprise/spark/sparkSqlJava.html */
-  private val keySpace             = if (AppConfig.settings.inProd) "prod" else "dev"
+  private val keySpace = if (AppConfig.settings.inProd) "prod" else "dev"
   private val cassandraCatalogName = "datastaxCassandra"
   private val KVTableName          = "key_value_udepqrn4g8s"
   val log                          = Logger("app." + this.getClass().toString())
