@@ -7,9 +7,11 @@
 
 docker rm -f rss-dev || true
 
-# docker build \
-#   --file dev-env/Dockerfile \
-#   --tag rss-dev-img:v2 ./dev-env
+if [[ -v BUILD ]]; then
+	docker build \
+	--file dev-env/Dockerfile \
+	--tag rss-dev-img:v2 ./dev-env
+fi
 
 docker run \
   -d \

@@ -74,7 +74,9 @@ class Analysis(spark: SparkSession) {
         col("entity.metadata.entity").as("entityType")
       )
       .filter(!col("entityType").isInCollection(ManualOverrides.typesToSkip))
-      .filter(!lower(col("entityName")).isInCollection(ManualOverrides.entitiesToSkip))
+      .filter(
+        !lower(col("entityName")).isInCollection(ManualOverrides.entitiesToSkip)
+      )
       .withColumn(
         "entityName",
         NerHelper.entityNameNormalizeUdf(col("entityName"))

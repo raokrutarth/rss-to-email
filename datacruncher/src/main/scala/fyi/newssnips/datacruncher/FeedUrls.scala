@@ -41,7 +41,7 @@ object FeedUrls {
       "https://www.upworthy.com/feeds/feed.rss",
       "https://feeds.npr.org/1001/rss.xml",
       "https://feeds.npr.org/1004/rss.xml",
-      "https://www.express.co.uk/posts/rss/78/world",
+      "https://www.express.co.uk/posts/rss/78/world"
     ),
     "markets" -> Seq(
       "https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGx6TVdZU0FtVnVHZ0pWVXlnQVAB?hl=en-US&gl=US&ceid=US%3Aen&oc=11",
