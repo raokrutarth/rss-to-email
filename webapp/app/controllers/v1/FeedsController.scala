@@ -29,44 +29,52 @@ class FeedsController @Inject() (
 ) extends BaseController {
 
   val log: Logger = Logger(this.getClass())
-  val cache       = new Cache(DatastaxCassandra.spark)
+  // val cache       = new Cache(DatastaxCassandra.spark)
 
   def hp() = Action { implicit request: Request[AnyContent] =>
     val homePageTable = "home_page_analysis_results"
 
-    cache.getDf(homePageTable) match {
-      case Failure(exception) => log.error(s"Failed fetch from cache with error $exception")
-      case _                  => log.info("Saved result to cache.")
+    DatastaxCassandra.getDataframe(homePageTable) match {
+      case Success(df) =>
+        val resDf = df.sort($"totalNumTexts".desc).as[AnalysisRow]
+        log.info(s"Found home page results from table $homePageTable.")
+        resDf.show()
+
+        val rows: Array[AnalysisRow] = resDf.collect()
+        log.info(s"Parsing ${rows.size} rows into HTML template.")
+
+        // TODO progress bar for sentiment scale
+        // https://www.w3schools.com/bootstrap/bootstrap_progressbars.asp
+
+        Ok(
+          views.html.tablePage(
+            rows,
+            Seq("rss://a.com", "rss://b.com"),
+            true
+          )
+        ).as("text/html")
+
+      case _ => InternalServerError("A server error occurred: ")
     }
-    Ok("err")
+  }
 
-  // DatastaxCassandra.getDataframe(homePageTable) match {
-  //   case Success(df) =>
-  //     val resDf = df.sort($"totalNumTexts".desc).as[AnalysisRow]
-  //     log.info(s"Found home page results from table $homePageTable.")
-  //     resDf.show()
-
-  //     cache.putDf(homePageTable, df, 60) match {
-  //       case Failure(exception) => log.error(s"Failed to save to cache with error $exception")
-  //       case _                  => log.info("Saved result to cache.")
-  //     }
-
-  //     val rows = resDf.collect()
-  //     log.info(s"Parsing ${rows.size} rows into HTML template.")
-
-  //     // TODO progress bar for sentiment scale
-  //     // https://www.w3schools.com/bootstrap/bootstrap_progressbars.asp
-
-  //     Ok(
-  //       views.html.tablePage(
-  //         rows,
-  //         Seq("rss://a.com", "rss://b.com"),
-  //         true
-  //       )
-  //     ).as("text/html")
-
-  //   case _ => InternalServerError("A server error occurred: ")
-  // }
+  def category(categoryId: String) = Action { implicit request: Request[AnyContent] =>
+    val m = Map(
+      "markets"       -> "",
+      "politics"      -> "",
+      "entertainment" -> ""
+    )
+    if (!(m contains categoryId)) {
+      BadRequest(s"$categoryId is not a supported category.")
+    } else {
+      Ok(
+        views.html.tablePage(
+          Array(),
+          Seq("rss://a.com", "rss://b.com"),
+          false
+        )
+      )
+    }
   }
 
   def getReport() = Action(parse.json) { request =>

@@ -23,7 +23,7 @@
   <logger name="o.a.spark" level="WARN" />
   <logger name="o.a.hadoop" level="WARN" />
 
-  <root level="DEBUG">
+  <root level="INFO">
     <appender-ref ref="ASYNCSTDOUT" />
   </root>
 

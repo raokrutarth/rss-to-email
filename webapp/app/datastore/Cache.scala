@@ -23,6 +23,7 @@ import com.redislabs.provider.redis._
 class Cache(spark: SparkSession) {
   // FIXME: not working with exception:
   // redis.clients.jedis.exceptions.JedisConnectionException: Could not get a resource from the pool
+  // https://github.com/RedisLabs/spark-redis/issues/325
   val log = Logger(this.getClass())
 
   // https://github.com/RedisLabs/spark-redis/blob/master/doc/dataframe.md
