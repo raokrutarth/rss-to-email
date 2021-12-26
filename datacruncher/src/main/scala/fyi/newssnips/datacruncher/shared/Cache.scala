@@ -6,6 +6,7 @@ import scala.util.Try
 import javax.inject._
 import configuration.AppConfig
 import _root_.redis.clients.jedis.JedisPool
+import _root_.redis.clients.jedis.Jedis
 import scala.collection.JavaConverters._
 
 // TODO: move to play redis cache for simpler APIs
@@ -22,20 +23,29 @@ class Cache() {
   private val keyspace: String =
     if (AppConfig.settings.inProd) "prod." else "dev."
 
-  val redisPool = new JedisPool(AppConfig.settings.redis.url)
+  // https://www.javadoc.io/doc/redis.clients/jedis/3.7.0/redis/clients/jedis/Jedis.html
+  val redisPool = {
+    log.info("Initiating cache connection pool.")
+    new JedisPool(AppConfig.settings.redis.url)
+  }
 
-  def set(key: String, value: String) = Try {
-    redisPool
-      .getResource()
-      .set(
-        keyspace + key,
-        value
-      )
+  // https://github.com/redis/jedis/issues/2708
+  def set(key: String, value: String, exSec: java.lang.Integer = 0) = Try {
+    val r: Jedis = redisPool.getResource()
+    if (exSec > 0) {
+      r.setex(keyspace + key, exSec, value)
+    } else {
+      r.set(keyspace + key, value)
+    }
+  }
+
+  def delete(key: String) = Try {
+    redisPool.getResource().del(keyspace + key)
   }
 
   def get(key: String) = Try {
     val v = redisPool.getResource().get(keyspace + key)
-    if (v.isEmpty) throw new RuntimeException(s"$key in cache empty")
+    if (v.isEmpty) throw new RuntimeException(s"No value for $key in cache.")
     v
   }
 

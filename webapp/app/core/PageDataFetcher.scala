@@ -13,8 +13,8 @@ import scala.concurrent.duration._
 import configuration.AppConfig
 import fyi.newssnips.datastore.Cache
 import play.api.libs.json._
-import fyi.newssnips.webapp.core._
-import akka.parboiled2.Parser
+import fyi.newssnips.webapp.core.dal._
+import fyi.newssnips.webapp.core.db._
 
 case class CategoryAnalysisPageData(
     analysisRows: Array[AnalysisRow],
@@ -28,7 +28,7 @@ case class EntityTextsPageData(
 @Singleton
 class PageDataFetcher() {
   private val log: Logger = Logger("app." + this.getClass().toString())
-  lazy val db             = Postgres
+  lazy val dal            = PgAccess
 
   // redis + db read timeout for dataframes
   private val dataStoreWaitTime = if (AppConfig.settings.inProd) { 5.second }
@@ -46,8 +46,8 @@ class PageDataFetcher() {
     Try {
       log.info(s"Getting analysis page data for category ${categoryMetadata.toString}")
 
-      val analysisTry    = Postgres.getAnalysisRows(categoryMetadata)
-      val feedsTry       = Postgres.getFeedsRows(categoryMetadata)
+      val analysisTry    = dal.getAnalysisRows(categoryMetadata)
+      val feedsTry       = dal.getFeedsRows(categoryMetadata)
       val lastUpdatedTry = Postgres.getKv(categoryMetadata.lastUpdateKey)
 
       (analysisTry, feedsTry, lastUpdatedTry) match {
@@ -106,7 +106,7 @@ class PageDataFetcher() {
       sentiment: String
   ): Try[EntityTextsPageData] =
     Try {
-      Postgres.getTexts(
+      dal.getTexts(
         categoryMetadata,
         entityName,
         entityType,

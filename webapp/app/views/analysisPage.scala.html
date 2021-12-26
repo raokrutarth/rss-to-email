@@ -2,7 +2,7 @@
 @import fyi.newssnips.shared.EntityTypeDescriptions
 
 
-@(analysisDf: Array[AnalysisRow], sourceFeeds: Array[FeedRow], lastUpdated: String, categroyId: String)
+@(analysisRows: Array[AnalysisRow], sourceFeeds: Array[FeedRow], lastUpdated: String, categroyId: String)
 
 @siteTemplate("NewsSnips") {
 <div class="container">
@@ -64,7 +64,7 @@
               </tr>
             </thead>
             <tbody>
-              @for(t <- analysisDf) {<tr>
+              @for(t <- analysisRows) {<tr>
                 <th scope="row" style="font-style: italic;" data-toggle="popover" data-trigger="focus click hover"
                   data-placement="top auto"
                   title='@t.entityType (@{EntityTypeDescriptions.descriptions getOrElse(t.entityType, "")})'>

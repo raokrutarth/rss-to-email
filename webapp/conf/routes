@@ -5,6 +5,7 @@
 
 # An example controller showing a sample home page
 GET     /         controllers.HomeController.index()
+GET     /admin         controllers.HomeController.adminDash()
 GET     /about     controllers.HomeController.about()
 
 GET /v1/home     controllers.v1.FeedsController.home()
@@ -13,7 +14,7 @@ GET /v1/category/:categoryId                                  controllers.v1.Fee
 
 GET /v1/:categoryId/mentions/:entityName/:entityType/:sentiment  controllers.v1.FeedsController.mentions(categoryId: String, entityName: String, entityType: String, sentiment: String)
 
-GET /v1/newsletter/signup  controllers.v1.CommsController.newsletterSignupGet()
+GET /v1/newsletter/signup  controllers.v1.CommsController.newsletterSignupGet(email: Option[String])
 POST /v1/newsletter/signup  controllers.v1.CommsController.newsletterSignupPost()
 GET /v1/newsletter/verify  controllers.v1.CommsController.newsletterVerifyGet(token: String)
 

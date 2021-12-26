@@ -18,9 +18,12 @@ libraryDependencies ++= Seq(
 "com.typesafe" % "config" % "1.4.1",
 // https://stackoverflow.com/questions/49760733/caused-by-java-lang-classnotfoundexception-com-sun-tools-javac-code-typetags-w
 "org.projectlombok" % "lombok" % "1.18.2",
-"com.redislabs" %% "spark-redis" % "3.0.0",
 "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test,
 "redis.clients" % "jedis" % "3.7.0"
+)
+// https://mvnrepository.com/artifact/com.sendgrid/sendgrid-java
+libraryDependencies += "com.sendgrid" % "sendgrid-java" % "4.8.0" excludeAll(
+    ExclusionRule(organization = "com.fasterxml.jackson.core")
 )
 
 // avoid: SLF4J: Class path contains multiple SLF4J bindings
@@ -48,7 +51,7 @@ lazy val root = (project in file(".")).enablePlugins(
 // swaggerDomainNameSpaces := Seq("models")
 
 scalafmtOnCompile := true
-// scalafixOnCompile := true
+scalafixOnCompile := true
 scalacOptions += "-Ywarn-unused"
 
 // https://sbt-native-packager.readthedocs.io/en/latest/formats/docker.html#requirements

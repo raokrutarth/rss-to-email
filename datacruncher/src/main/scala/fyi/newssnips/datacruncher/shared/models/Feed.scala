@@ -4,7 +4,6 @@ import java.security.MessageDigest
 import java.math.BigInteger
 import java.time.OffsetDateTime
 
-//
 case class FeedURL(value: String) {
 
   def digest(): String = {

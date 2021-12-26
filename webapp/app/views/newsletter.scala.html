@@ -1,4 +1,5 @@
-@import controllers.v1.{SignupData, Frequency}
+@import fyi.newssnips.webapp.models.{SignupData}
+@import fyi.newssnips.webapp.models._
 @import play.api.mvc._
 @import play.api.data.Forms._
 @import play.api.data.Form
@@ -8,10 +9,14 @@
 
 @siteTemplate("Newsletter") {
 
-    <div class="container-sm">
+    <div class="container-sm" style="min-width: 500px; width: 500px; border-width: 0px; border-radius: 4px; padding: 20px;">
+        <h1>Subscribe to newsletter</h1>
         <p>
-            Get the top topics directly to you inbox.
+            Get the top topics delivered to your inbox.
         </p>
+        <div class="alert alert-dark" role="alert">
+            The first 100 subscribers signup for FREE.
+        </div>
 
         @helper.form(action = postUrl) {
             @CSRF.formField                   
@@ -20,6 +25,7 @@
                     class="form-control" 
                     id='@{form("email").id}' 
                     name='@{form("email").label}'
+                    value='@{form("email").value}'
                     aria-describedby="emailHelp" 
                     placeholder="Enter email"
                 >
@@ -28,29 +34,33 @@
                 https://www.playframework.com/documentation/2.8.x/ScalaSessionFlash#Flash-scope
                 sent during redrect to specify failure/success
                 *@
-                @flash.get("message") match {
-                    case Some(message) => {
-                        <small id="emailHelp" class="text-success form-text">
-                        @message
-                        </small>
-                    }
-                    case _ => {
-                        <small id="emailHelp" class="form-text text-muted">
-                            A verification email will be sent to this address.
-                        </small>
-                    }
+                @if(flash.get("error").nonEmpty) {
+                    <small id="emailHelp" class="text-danger form-text">
+                        @flash.get("error")
+                    </small>
+                } else if(flash.get("success").nonEmpty) {
+                    <small id="emailHelp" class="text-success form-text">
+                        @flash.get("success")
+                    </small>
+                } else {
+                    <small id="emailHelp" class="form-text text-muted">
+                        A verification email will be sent to this address.
+                    </small>
                 }
             </div>
             
             <div class="form-group">
-                <label for='@{form("frequency").id}'>Frequency</label>
+                <label for='@{form("frequency").id}'>How often would you like to receive it?</label>
                 <select id='@{form("frequency").id}' name='@{form("frequency").label}' class="form-control">
                     @for(f <- Frequency.values.toSeq){
                         <option>@f.toString</option>
                     }   
                 </select>
+                <small class="form-text text-muted">
+                    If you'd like to unsubscribe, please select "Never".
+                </small>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-dark">Save</button>
     
             @if(form.hasErrors) {
                 @for(error <- form.errors){

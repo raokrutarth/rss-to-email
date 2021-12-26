@@ -7,7 +7,6 @@ import java.time.ZoneId
 import configuration.AppConfig
 import com.typesafe.scalalogging.Logger
 import java.lang.Runtime
-// }
 
 object PerformanceUtils {
   private val log: Logger = Logger("app." + this.getClass().toString())

@@ -6,25 +6,16 @@ import scala.util.{Failure, Success}
 import javax.inject.Inject
 import javax.inject._
 import com.typesafe.scalalogging.Logger
-import play.api.inject.ApplicationLifecycle
-import scala.concurrent.Future
 import fyi.newssnips.shared.DbConstants
 import fyi.newssnips.core.PageDataFetcher
 import play.api.cache.Cached
 import play.twirl.api.Html
 import fyi.newssnips.datastore.Cache
 import configuration.AppConfig
-import play.api.libs.json._
-import fyi.newssnips.core.CategoryAnalysisPageData
-import scala.util.Try
-import fyi.newssnips.models._
-import play.api.libs.json._
-import fyi.newssnips.webapp.core.Postgres
 
 @Singleton
 class FeedsController @Inject() (
     val controllerComponents: ControllerComponents,
-    lifecycle: ApplicationLifecycle,
     cached: Cached,
     cache: Cache
 ) extends BaseController {
@@ -139,12 +130,4 @@ class FeedsController @Inject() (
         }
       }
     }
-
-  lifecycle.addStopHook { () =>
-    Future.successful {
-      log.warn("Running feeds controller EOL hook.")
-      cache.cleanup()
-      Postgres.cleanup()
-    }
-  }
 }

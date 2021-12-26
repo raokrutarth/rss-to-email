@@ -1,4 +1,5 @@
 package fyi.newssnips.shared
+
 import configuration.AppConfig
 
 case class CategoryDbMetadata(

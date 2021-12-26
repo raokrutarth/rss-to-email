@@ -21,10 +21,17 @@ case class AppConfig(
     // timezone of app from
     // https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/ZoneId.html
     timezone: String,
-    pg: PostgresConfig
+    pg: PostgresConfig,
+    comms: CommsConfig,
+    hostName: String, // localhost/website address,
+    adminAuth: AdminAuth
 )
 case class PostgresConfig(
     connStr: String
+)
+
+case class CommsConfig(
+    sendgridApiKey: String
 )
 
 case class DatastaxConfig(
@@ -41,6 +48,11 @@ case class RedisConfig(
     port: Int,
     password: String,
     useTls: Boolean
+)
+
+case class AdminAuth(
+    username: String,
+    password: String
 )
 
 object AppConfig {
@@ -151,7 +163,15 @@ object AppConfig {
       redis = extractRedisConfig(config),
       sampleDfs = if (Properties.envOrNone("SAMPLE_DFS").isEmpty) false else true,
       timezone = Properties.envOrElse("TZ", "America/Los_Angeles"),
-      pg = getPostgresConfig(config)
+      pg = getPostgresConfig(config),
+      comms = CommsConfig(
+        config.getString("secrets.email.sendgrid.apiKey")
+      ),
+      hostName = if (runtime.equals("docker")) "https://newssnips.fyi" else "http://localhost:9000",
+      adminAuth = AdminAuth(
+        config.getString("secrets.http_auth.admin.user"),
+        config.getString("secrets.http_auth.admin.password")
+      )
     )
   }
 }

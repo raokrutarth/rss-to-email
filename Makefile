@@ -45,6 +45,9 @@ heroku-redis:
 	heroku redis:info $(HRK_APP)
 	heroku redis:cli $(HRK_APP)
 
+redis-config-show:
+	heroku config:get $(HRK_APP) REDIS_URL
+
 # start:
 # 	$(KCTL) apply -f deploy/rte-ns.yaml
 # 	$(KCTL) apply -f deploy/app.yaml

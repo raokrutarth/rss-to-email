@@ -150,15 +150,8 @@ scala + play tutorials: https://www.youtube.com/watch?v=FqMDHsFNlxQ&list=PLLMXbk
 - explore importing huggingface models to spark.
 - async rest client within play <https://www.playframework.com/documentation/2.8.x/ScalaWS>
 - 2gb ram <https://www.koyeb.com/pricing>
-- sentiment analysis models:
-  - `https://nlp.johnsnowlabs.com/2021/11/01/bert_base_sequence_classifier_dbpedia_14_en.html`
-  - `https://nlp.johnsnowlabs.com/2021/11/02/bert_base_sequence_classifier_ag_news_en.html`
-  - `https://nlp.johnsnowlabs.com/2021/11/01/bert_base_sequence_classifier_imdb_en.html`
-  - `https://nlp.johnsnowlabs.com/2021/11/03/bert_sequence_classifier_finbert_en.html`
-  - `https://nlp.johnsnowlabs.com/2021/09/28/classifierdl_bertwiki_finance_sentiment_en.html`
 - percentile filter
   - `https://spark.apache.org/docs/3.1.1/api/python/reference/api/pyspark.sql.functions.percentile_approx.html`
-- caching: `https://github.com/search?q=RedisStandalone&type=code`
 - serverless container hosting:
   - `https://developers.cloudflare.com/load-balancing/additional-options/deploy-containerized-applications`
   - `https://docs.cloudfoundry.org/devguide/deploy-apps/push-docker.html`
@@ -167,3 +160,26 @@ scala + play tutorials: https://www.youtube.com/watch?v=FqMDHsFNlxQ&list=PLLMXbk
   - `https://www.redhat.com/en/technologies/cloud-computing/openshift/container-platform`
   - `https://news.ycombinator.com/item?id=28841292`
   - `https://direktiv.io/`
+- newsletter platforms:
+  - sendgrid
+    - `https://github.com/sendgrid/sendgrid-java/blob/main/USAGE.md#campaigns`
+    - `https://docs.sendgrid.com/ui/sending-email/how-to-send-email-with-marketing-campaigns`
+  - `https://zapier.com/blog/automate-email-newsletter-maintenance/`
+  - `https://zapier.com/apps/categories/email-newsletters`
+  - `https://mailchimp.com/pricing/free-details/`
+  - `https://zapier.com/apps/mailchimp/integrations/webhook`
+  - `https://www.mailerlite.com/pricing`
+  - `https://substack.com/switch-to-substack` for features. Not API friendly.
+  - `https://www.getrevue.co/` has API and twitter integration.
+  - `https://www.zerobounce.net/email-validation-pricing` email validation.
+  - `https://convertkit.com/pricing` good free tier. API support unknown.
+  - `https://www.aweber.com/pricing.htm` same as above.
+  - `https://www.sendinblue.com/pricing/`
+  - `https://www.constantcontact.com/mainpage` has social ads built in.
+  - `https://www.beehiiv.com/pricing` has email verification.
+- basic user authentication:
+  - `https://github.com/nulab/scala-oauth2-provider/`
+  - `https://github.com/nulab/play2-oauth2-provider`
+  - `https://www.playframework.com/documentation/2.8.x/ScalaActionsComposition#Authentication`
+  - `https://github.com/AlexITC/crypto-coin-alerts/blob/develop/alerts-server/app/com/alexitc/coinalerts/services/JWTAuthenticatorService.scala`
+  
