@@ -11,5 +11,5 @@ FEED_FILE="./app/resources/feeds-news.json"
 
 curl -X POST \
   -H 'Content-Type: application/json' \
-  -d '{"urls":["http://thehill.com/taxonomy/term/1778/feed"]}' \
+  -d '{"urls":["http://feeds.marketwatch.com/marketwatch/topstories/"]}' \
   ${ADDR}/v1/rss/report

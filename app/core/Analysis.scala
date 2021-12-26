@@ -10,11 +10,12 @@ import org.apache.spark.sql._
 import org.apache.spark.sql.expressions.scalalang.typed
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
+import org.apache.spark.ml.feature.{RegexTokenizer}
 
 import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
 import com.johnsnowlabs.nlp.SparkNLP
 import com.johnsnowlabs.nlp.{DocumentAssembler, Finisher}
-import com.johnsnowlabs.nlp.annotators.{StopWordsCleaner, Tokenizer}
+import com.johnsnowlabs.nlp.annotators.{StopWordsCleaner, Tokenizer, Normalizer}
 
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.sql.SparkSession
@@ -54,31 +55,17 @@ class Analysis @Inject() (lifecycle: ApplicationLifecycle) {
   private val sentimetPipeline =
     new PretrainedPipeline("analyze_sentiment", lang = "en")
 
-  private val marketSentimentPipeline = new LightPipeline(
-    new Pipeline()
-      .setStages(
-        Array(
-          new DocumentAssembler()
-            .setInputCol("text")
-            .setOutputCol("document"),
-          BertSentenceEmbeddings
-            .pretrained("sent_bert_wiki_books_sst2", "en")
-            .setInputCols(Array("document"))
-            .setOutputCol("sentence_embeddings"),
-          ClassifierDLModel
-            .pretrained("classifierdl_bertwiki_finance_sentiment", "en")
-            .setInputCols(Array("document", "sentence_embeddings"))
-            .setOutputCol("class")
-        )
-      )
-      .fit(spark.createDataFrame(Seq()).toDF("text"))
-  )
+  private val cleaningPipeline =
+    new RegexTokenizer() // removes tags from string and split into words
+      .setInputCol("rawText")
+      .setOutputCol("normalized")
+      .setPattern("<[^>]+>|\\s+")
+      .setToLowercase(false)
 
   private def getEntities(contentsDf: DataFrame): DataFrame = {
-
     val transformed = entityRecognitionPipeline.transform(contentsDf)
+    // transformed.printSchema()
     log.info(s"Extracted entities from ${transformed.count()} blocks of text.")
-    transformed.select("id", "entities").limit(3).show(false)
     // Every ROW contains the text with an array of entities and
     // corresponding array of maps that contain the tags for each entity.
     // to get all entities and their tags, need to explode each array column.
@@ -86,12 +73,12 @@ class Analysis @Inject() (lifecycle: ApplicationLifecycle) {
     val entitiesDf = transformed
       .select(
         // expand entities array to individual rows
-        col("id").as("textID"),
+        col("id").as("textId"),
         explode(col("entities")).as("entity")
       )
       .select(
         // extract values from each entity struct
-        col("textID"),
+        col("textId"),
         col("entity.result").as("entityName"),
         col("entity.metadata.entity").as("entityType")
       )
@@ -100,20 +87,38 @@ class Analysis @Inject() (lifecycle: ApplicationLifecycle) {
     entitiesDf
   }
 
-  private def getSentiment(contentsDf: DataFrame): Unit = {
+  private def getSentiment(contentsDf: DataFrame): DataFrame = {
     val transformed =
-      marketSentimentPipeline.transform(contentsDf)
+      sentimetPipeline.transform(contentsDf)
     log.info(s"Extracted sentiment from ${transformed.count()} blocks of text.")
-    transformed.printSchema()
-    transformed.select("id", "text", "sentiment").limit(3).show(false)
+
+    // transformed.printSchema()
+
+    val sentimentDf = transformed
+      .select(
+        col("id").as("textId"),
+        explode(col("sentiment")).as("sentiment")
+      )
+      .select(
+        col("textId"),
+        col("sentiment.result").as("sentiment"),
+        col("sentiment.metadata.confidence").as("confidence"),
+        (col("sentiment.end") - col("sentiment.begin"))
+          .as("sentimentBlockLength")
+      )
+
+    log.info(s"Extracted ${sentimentDf.count()} sentiment blocks.")
+    sentimentDf
+      .limit(10)
+      .show(false)
+
+    sentimentDf
   }
 
-  def generateReport(contents: Seq[FeedContent]): Option[Report] = {
-    import spark.implicits._
-
-    log.info(s"Performing analysis for ${contents.size} articles.")
-    log.info(s"Connected to spark version ${spark.version}")
-
+  private def constructContentsDf(
+      contents: Seq[FeedContent],
+      shouldClean: Boolean = false
+  ): DataFrame = {
     val allTitles = contents.zipWithIndex.map {
       case (c: FeedContent, idx: Int) =>
         (idx, c.title)
@@ -122,14 +127,52 @@ class Analysis @Inject() (lifecycle: ApplicationLifecycle) {
       case (c: FeedContent, idx: Int) =>
         (idx + contents.size + 1, c.body)
     }
-    val contentsDf = spark
+    val rawContentsDf = spark
       .createDataFrame(
         allTitles ++ allDescriptions
       )
-      .toDF("id", "text")
+      .toDF("id", "rawText")
+    if (shouldClean) {
+      val cleanedContentsDf = cleaningPipeline.transform(rawContentsDf)
+      // cleaningPipeline.fit(rawContentsDf).transform(rawContentsDf)
 
+      log.info(s"Cleaned ${cleanedContentsDf.count()} blocks of text.")
+      // cleanedContentsDf
+      //   .sample(0.25)
+      //   .select("id", "rawText", "normalized")
+      //   .show(false)
+
+      val contentsDf =
+        cleanedContentsDf.select(
+          col("id"),
+          concat_ws(" ", col("normalized")).as("text")
+        )
+
+      contentsDf.sample(0.25).show(false)
+      contentsDf
+    } else {
+      rawContentsDf.select(col("id"), col("rawText").as("text"))
+    }
+  }
+
+  def generateReport(contents: Seq[FeedContent]): Option[Report] = {
+    import spark.implicits._
+
+    log.info(s"Performing analysis for ${contents.size} articles.")
+    log.info(s"Connected to spark version ${spark.version}")
+
+    val contentsDf = constructContentsDf(contents, true)
     // val entitiesDf = getEntities(contentsDf)
-    val sentimentDf = getSentiment(contentsDf)
+    // val sentimentDf = getSentiment(contentsDf)
+    // entitiesDf
+    //   .join(
+    //     sentimentDf,
+    //     sentimentDf("textId") === entitiesDf("textId"),
+    //     "inner"
+    //   )
+    //   .join(contentsDf, contentsDf("id") === sentimentDf("textId"))
+    //   .sample(0.5)
+    //   .show(false)
     None
   }
 
