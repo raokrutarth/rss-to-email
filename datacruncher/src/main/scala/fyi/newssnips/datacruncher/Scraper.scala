@@ -10,6 +10,7 @@ import scala.util.{Failure, Success, Try}
 import com.typesafe.scalalogging.Logger
 import fyi.newssnips.shared.DateTimeUtils
 import play.api.libs.json._
+import com.github.ghostdogpr.readability4s.Readability
 
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.dsl.DSL._
@@ -53,6 +54,40 @@ object Scraper {
         throw new IllegalArgumentException(
           s"Invalid response status code $status_code"
         )
+    }
+  }
+
+  /** Scrape a page that contains at most one article.
+    */
+  def scrapeDirectArticle(url: String): Option[FeedContent] = {
+    val request = new HttpGet(
+      "https://www.schwab.com/resource-center/insights/content/schwab-market-update"
+    )
+    request.setHeader(
+      "user-agent",
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1.2 Safari/605.1.15"
+    )
+    val response = httpClient.execute(request)
+
+    val payload = EntityUtils.toString(response.getEntity())
+    val aOpt = Readability(
+      "https://www.schwab.com/resource-center/insights/content/schwab-market-update",
+      payload
+    ).parse()
+    aOpt match {
+      case Some(a) => {
+        Some(
+          // use .exerpt if full article content is too long
+          FeedContent(url, a.title, a.textContent)
+        )
+      }
+      case _ => {
+        val statusCode = response.getStatusLine().getStatusCode()
+        log.error(
+          s"Unable to get raw article with statuc code $statusCode from $url"
+        )
+        None
+      }
     }
   }
 
@@ -133,11 +168,11 @@ object Scraper {
   ): Seq[FeedContent] = {
     for {
       xmlItem <- (xml \\ "entry")
-      title = (xmlItem \\ "title").text
+      title = (xmlItem \ "title").text
       // TODO fix by parsing the html content
       // with https://github.com/ruippeixotog/scala-scraper
       description = if (disableContent) "" else (xmlItem \\ "content").text
-      link        = (xmlItem \\ "link" \ "@href").text
+      link        = (xmlItem \ "link" \ "@href").text
     } yield FeedContent(
       link,
       title,
@@ -152,9 +187,9 @@ object Scraper {
   ): Seq[FeedContent] = {
     for {
       xmlItem <- (xml \\ "item")
-      title       = (xmlItem \\ "title").text
+      title       = (xmlItem \ "title").text
       description = if (disableContent) "" else (xmlItem \ "description").text
-      link        = (xmlItem \\ "link").text
+      link        = (xmlItem \ "link").text
     } yield FeedContent(
       link,
       title,

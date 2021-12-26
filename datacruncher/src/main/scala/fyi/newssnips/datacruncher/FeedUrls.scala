@@ -84,6 +84,10 @@ object FeedUrls {
       "https://www.reddit.com/r/SPACs/.rss",
       "https://www.reddit.com/r/options/.rss",
       "https://www.express.co.uk/posts/rss/21/finance",
+      "https://www.barchart.com/news/rss/financials/crypto",
+      "https://www.barchart.com/news/authors/rss",
+      "https://www.barchart.com/news/rss/financials",
+      "https://www.barchart.com/news/rss/commodities",
 
       // https://tradingeconomics.com/rss/ (see other useful)
       // "https://tradingeconomics.com/rss/news.aspx", (generic headline for every country. e.g. GDP)

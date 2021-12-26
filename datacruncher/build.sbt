@@ -28,6 +28,8 @@ libraryDependencies += "org.postgresql" % "postgresql" % "42.3.1"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.1" % "test"
 libraryDependencies +=  "redis.clients" % "jedis" % "3.7.0" 
 libraryDependencies += "net.ruippeixotog" %% "scala-scraper" % "2.2.1"
+libraryDependencies += "com.github.ghostdogpr" % "readability4s" % "1.0.9"
+
 
 scalacOptions += "-Ywarn-unused"
 scalafmtOnCompile := true
