@@ -3,23 +3,24 @@
 # Script to start the development container which has all
 # the development utilities installed.
 
-# run from repo root directory
+# NOTE run from repo root directory
 
-docker stop scala-dev && docker rm scala-dev || true
+docker rm -f rss-dev || true
 
-docker build --file dev-env/Dockerfile -t scala-dev-img ./dev-env
+docker build --file dev-env/Dockerfile -t rss-dev-img ./dev-env
 
 docker run \
     -d \
-    -p 34000:3000 \
-    -p 34022:22 \
-    -e JUPYTER_ENABLE_LAB=no \
-    -e GRANT_SUDO=yes \
     --restart "unless-stopped" \
-    -v "${PWD}":/home/jovyan/dev \
-    --name scala-dev \
-    scala-dev-img
+    -v "${PWD}":/home/dev/work \
+    --name rss-dev \
+    rss-dev-img
+
+docker update \
+    --memory=2.5G \
+    --cpus=1.75 \
+    rss-dev
 
 if [[ -v RUN ]]; then
-    docker exec -it scala-dev bash
+    docker exec -it rss-dev bash
 fi

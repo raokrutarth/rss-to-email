@@ -1,4 +1,4 @@
-# Course files
+# Effective Programming in Scala & Functional Programming in Scala Specialization Course files
 
 ## Resources
 

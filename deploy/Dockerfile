@@ -4,7 +4,7 @@ ARG ROOT_CONTAINER=ubuntu:focal
 
 FROM $ROOT_CONTAINER
 
-ARG NB_USER="dev"
+ARG NB_USER="prod"
 ARG NB_UID="1000"
 ARG NB_GID="100"
 
@@ -20,20 +20,16 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update --yes && \
     apt-get install --yes --no-install-recommends \
     tini \
-    wget \
     ca-certificates \
-    sudo \
     locales \
     default-jdk \
     scala \
     vim \
     curl \
-    git \
-    nodejs \
-    npm \
-    fonts-liberation \
-    run-one && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    wget
+
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen
 
@@ -45,31 +41,10 @@ ENV SHELL=/bin/bash \
     LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US.UTF-8
+
+RUN useradd -l -m -s /bin/bash -N -u "${NB_UID}" "${NB_USER}"
+
 ENV HOME="/home/${NB_USER}"
-
-# Copy a script that we will use to correct permissions after running certain commands
-COPY fix-permissions /usr/local/bin/fix-permissions
-RUN chmod a+rx /usr/local/bin/fix-permissions
-
-# Enable prompt color in the skeleton .bashrc before creating the default NB_USER
-# hadolint ignore=SC2016
-RUN sed -i 's/^#force_color_prompt=yes/force_color_prompt=yes/' /etc/skel/.bashrc
-
-# Create NB_USER with given username user with UID=1000 and in the 'users' group
-# and make sure these dirs are writable by the `users` group.
-RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
-    sed -i.bak -e 's/^%admin/#%admin/' /etc/sudoers && \
-    sed -i.bak -e 's/^%sudo/#%sudo/' /etc/sudoers && \
-    useradd -l -m -s /bin/bash -N -u "${NB_UID}" "${NB_USER}" && \
-    chmod g+w /etc/passwd && \
-    fix-permissions "${HOME}"
-
-RUN echo "${NB_USER}":"${NB_USER}" | chpasswd
-# Add new user to sudo group
-RUN adduser "${NB_USER}" sudo
-# Ensure sudo group users are not asked for 
-# a password when using  sudo command by ammending sudoers file
-RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # Spark dependencies
 # Default values can be overridden at build time
@@ -110,24 +85,31 @@ RUN cp -p "${SPARK_HOME}/conf/spark-defaults.conf.template" "${SPARK_HOME}/conf/
     echo 'spark.driver.extraJavaOptions -Dio.netty.tryReflectionSetAccessible=true' >> "${SPARK_HOME}/conf/spark-defaults.conf" && \
     echo 'spark.executor.extraJavaOptions -Dio.netty.tryReflectionSetAccessible=true' >> "${SPARK_HOME}/conf/spark-defaults.conf"
 
-USER ${NB_UID}
-
 # scala-coursier
-RUN set -x && curl -fLo /tmp/cs https://git.io/coursier-cli-"$(uname | tr LD ld)" && \
+ENV COURSIER_INSTALL_DIR /home/${NB_USER}/coursier
+RUN mkdir -p "${COURSIER_INSTALL_DIR}"
+RUN set -x && \
+    curl -fLo /tmp/cs https://git.io/coursier-cli-"$(uname | tr LD ld)" && \
     chmod +x /tmp/cs && \
+    ls ${COURSIER_INSTALL_DIR} && \
     /tmp/cs install cs && \
     rm /tmp/cs && \
-    echo "export PATH=\"$PATH:/home/${NB_USER}/.local/share/coursier/bin\"" >> /home/${NB_USER}/.bashrc && \
-    /home/${NB_USER}/.local/share/coursier/bin/cs setup -y --jvm adopt:11
+    echo "export PATH=\"$PATH:${COURSIER_INSTALL_DIR}\"" >> /home/${NB_USER}/.bashrc && \
+    ${COURSIER_INSTALL_DIR}/cs setup -y --jvm adopt:11
 
-# Setup work directory for backward-compatibility
-RUN mkdir "/home/${NB_USER}/work" && \
-    fix-permissions "/home/${NB_USER}"
+WORKDIR /opt/rss-to-email
+RUN chown ${NB_USER} /opt/rss-to-email
+EXPOSE 9000
 
-RUN set -x && \
-    fix-permissions "/home/${NB_USER}"
+COPY ./app ./app
+COPY ./conf ./conf
+COPY ./project ./project
+COPY ./public ./public
+COPY ./test ./test
+# COPY ./target .
+COPY ./build.sbt .
 
+# USER ${NB_UID}
 # Configure container startup
 ENTRYPOINT ["/bin/bash"]
-CMD [ "-c", "while true; do sleep 365d; done" ]
-WORKDIR "${HOME}"
+# CMD [ "compile", "run" ]

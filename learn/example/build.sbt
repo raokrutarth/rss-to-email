@@ -1,5 +1,7 @@
 course := "progfun1"
 assignment := "example"
-scalaVersion := "3.0.0"
+scalaVersion := "2.13.1"
 scalacOptions ++= Seq("-language:implicitConversions", "-deprecation")
-libraryDependencies += "org.scalameta" %% "munit" % "0.7.26" % Test
+libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
+
+testOptions in Test += Tests.Argument(TestFrameworks.JUnit, "-a", "-v", "-s")
