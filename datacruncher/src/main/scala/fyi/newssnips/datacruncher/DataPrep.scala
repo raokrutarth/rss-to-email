@@ -18,7 +18,7 @@ import fyi.newssnips.shared.DfUtils
 @Singleton
 class DataPrep(spark: SparkSession) {
   import spark.implicits._
-  private val log: Logger = Logger(this.getClass())
+  private val log: Logger = Logger("app." + this.getClass().toString())
 
   private val cleaningPipeline = new Pipeline().setStages(
     Array(
@@ -50,11 +50,12 @@ class DataPrep(spark: SparkSession) {
     val descriptionsDf = spark.sparkContext
       .parallelize(contents.map { c => (c.url, c.body) })
       .toDF("url", "rawText")
-    log.info(s"Identified ${descriptionsDf.count()} blocks of description.")
+    log.info(s"Identified blocks of description.")
 
     val cleanedDescriptionsDf = cleaningPipeline
       .fit(descriptionsDf)
       .transform(descriptionsDf)
+      .dropDuplicates("url")
       .select(
         concat_ws(" ", col("normalized")).as("textBlock"),
         col("url")
@@ -70,7 +71,7 @@ class DataPrep(spark: SparkSession) {
         col("url")
       )
     log.info(
-      s"Cleaned and extracted ${descriptionSentencesDf.count()} sentences from descriptions."
+      s"Cleaned and extracted sentences from descriptions."
     )
 
     // prepare titles
@@ -81,12 +82,13 @@ class DataPrep(spark: SparkSession) {
     val cleanTitlesDf = cleaningPipeline
       .fit(titlesDf)
       .transform(titlesDf)
+      .dropDuplicates("url")
       .select(
         concat_ws(" ", col("normalized")).as("text"),
         col("url")
       )
     log.info(
-      s"Cleaned and extracted ${cleanTitlesDf.count()} titles."
+      s"Cleaned and extracted titles."
     )
 
     val contentsDf =
@@ -94,15 +96,19 @@ class DataPrep(spark: SparkSession) {
         .union(descriptionSentencesDf)
         .select(
           monotonically_increasing_id().as("id"),
-          trim(col("text")).as("text"),
+
+          // replace html escape tags and trim whitespace.
+          // TODO escape URLs
+          trim(regexp_replace(col("text"), "&#\\S*", "")).as("text"),
           col("url")
         )
         .filter("text != ''")
+        .dropDuplicates("text")
 
     log.info(
-      s"Extracted a total of ${contentsDf.count()} sentences from titles and descriptions."
+      s"Extracted sentences from titles and descriptions."
     )
-    DfUtils.showSample(contentsDf, 5f)
+    DfUtils.showSample(contentsDf)
     contentsDf
   }
 
@@ -111,7 +117,7 @@ class DataPrep(spark: SparkSession) {
   def seperateLinksFromContents(
       contentsDf: DataFrame
   ): (DataFrame, DataFrame) = {
-    log.info(s"Seperating URLs from ${contentsDf.count()} sentences.")
+    log.info(s"Seperating URLs from thick contents dataframe.")
 
     val urlDf = contentsDf
       .select($"url")
@@ -121,8 +127,8 @@ class DataPrep(spark: SparkSession) {
         col("url")
       )
 
-    log.info(s"Found ${urlDf.count()} unique URLs.")
-    DfUtils.showSample(urlDf, 5f, false)
+    log.info(s"Extracted unique URLs.")
+    DfUtils.showSample(df = urlDf, truncate = false)
 
     val slimContentsDf = contentsDf
       .alias("cnt_df")
@@ -135,7 +141,7 @@ class DataPrep(spark: SparkSession) {
         col("url_df.link_id"),
         col("cnt_df.text")
       )
-    log.info("Slimmed contents dataframe:")
+    log.info("Constructed slim contents dataframe.")
     DfUtils.showSample(slimContentsDf)
 
     (urlDf, slimContentsDf)

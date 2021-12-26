@@ -3,14 +3,13 @@ package fyi.newssnips.core
 import play.api._
 import scala.util.{Failure, Success, Try}
 import javax.inject._
-import fyi.newssnips.models.AnalysisRow
+import fyi.newssnips.models.{AnalysisRow, FeedRow}
 import play.api.Logger
 import fyi.newssnips.datastore.DatastaxCassandra
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 
 import DatastaxCassandra.spark.implicits._
-import fyi.newssnips.webapp.datastore.Cache
 import fyi.newssnips.shared.CategoryDbMetadata
 import scala.concurrent.{Future, blocking}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -18,10 +17,12 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import configuration.AppConfig
 import org.apache.spark.storage.StorageLevel
+import fyi.newssnips.datastore.Cache
+import play.api.libs.json._
 
 case class CategoryAnalysisPageData(
     analysisRows: Array[AnalysisRow],
-    sourceFeeds: Array[String],
+    sourceFeeds: Array[FeedRow],
     lastUpdated: String
 )
 
@@ -34,10 +35,7 @@ case class EntityTextsPageData(
 )
 
 @Singleton
-class PageDataFetcher(
-    // spark: SparkSession,
-    cache: Cache
-) {
+class PageDataFetcher() {
   private val log: Logger = Logger("app." + this.getClass().toString())
   val db                  = DatastaxCassandra
 
@@ -45,64 +43,42 @@ class PageDataFetcher(
   private val dataStoreWaitTime = if (AppConfig.settings.inProd) { 5.second }
   else 15.seconds
 
-  /* fetch tables with caching */
-  private def getCachedDf(tableName: String): Try[DataFrame] = Try {
-    cache.getDf(tableName) match {
-      case Success(df) =>
-        df.show()
-        df // cache hit
+  implicit val feedRowFormat     = Json.format[FeedRow]
+  implicit val analysisRowFormat = Json.format[AnalysisRow]
+  implicit val pdRowFormat       = Json.format[CategoryAnalysisPageData]
 
-      // cache miss. go to db and set cache.
-      case Failure(exc) =>
-        log.error(s"Unable to load table $tableName from cache with exception $exc")
-
-        db.getDataframe(tableName) match {
-          case Success(df) =>
-            // df.persist() // need for the write to work.
-
-            Future {
-              blocking {
-                cache.putDf(tableName, df) match {
-                  case Failure(exc) =>
-                    log.error(
-                      s"Failed to save table $tableName in cache after db fetch with exception $exc"
-                    )
-                  case _ => log.info(s"Saved table $tableName in cache after db fetch.")
-                }
-
-              }
-            }
-
-            df
-          case _ => throw new RuntimeException(s"Unable to get table $tableName from db.")
-        }
-    }
-  }
-
-  def getCategoryAnalysisPage(categoryMetadata: CategoryDbMetadata): Try[CategoryAnalysisPageData] =
+  /** Gets the category's page data from the DB by colelcting the necessary DFs
+    */
+  private def getCategoryPageDataDb(
+      categoryMetadata: CategoryDbMetadata
+  ): Try[CategoryAnalysisPageData] =
     Try {
       log.info(s"Getting analysis page data for category ${categoryMetadata.toString}")
-
       val combined =
         for {
-          apr <- Future { blocking { getCachedDf(categoryMetadata.analysisTableName) } }
-          fdf <- Future { blocking { getCachedDf(categoryMetadata.sourceFeedsTableName) } }
+          apr <- Future { blocking { db.getDataframe(categoryMetadata.analysisTableName) } }
+          fdf <- Future { blocking { db.getDataframe(categoryMetadata.sourceFeedsTableName) } }
           upd <- Future { blocking { db.getKV(categoryMetadata.lastUpdateKey) } }
         } yield (apr, fdf, upd)
 
       val (analysisDf: Try[DataFrame], feedsDf: Try[DataFrame], lastUpdated: Try[String]) =
         Await.result(combined, dataStoreWaitTime)
 
+      log.info(s"Fetched all tables for page ${categoryMetadata.name}.")
+
       (analysisDf, feedsDf, lastUpdated) match {
         case (Success(analysisDf), Success(feedsDf), Success(lastUpdated)) =>
-          analysisDf.persist(StorageLevel.MEMORY_ONLY)
+          analysisDf.persist(StorageLevel.MEMORY_ONLY) // FIXME: needed for null array bug.
           feedsDf.persist(StorageLevel.MEMORY_ONLY)
+
+          log.info(s"Persisted all tables for page ${categoryMetadata.name}.")
 
           val pd = CategoryAnalysisPageData(
             analysisRows = analysisDf.as[AnalysisRow].sort($"totalNumTexts".desc).collect(),
-            sourceFeeds = feedsDf.select($"url").map(f => f.getString(0)).collect.toArray,
+            sourceFeeds = feedsDf.as[FeedRow].collect(),
             lastUpdated = lastUpdated
           )
+          log.info(s"Collected all tables for page ${categoryMetadata.name}.")
           Future {
             blocking {
               analysisDf.unpersist()
@@ -122,6 +98,29 @@ class PageDataFetcher(
       }
     }
 
+  def getCategoryAnalysisPage(
+      cache: Cache,
+      categoryMetadata: CategoryDbMetadata
+  ): Try[CategoryAnalysisPageData] =
+    Try {
+      val cacheKey = categoryMetadata.name + ".page.data"
+      cache.get(cacheKey) match {
+        case Success(cachedRaw) =>
+          log.info(s"Cache hit for ${categoryMetadata.name} page data.")
+          Json.parse(cachedRaw).as[CategoryAnalysisPageData]
+        case _ =>
+          log.info(s"Page data cache miss for ${categoryMetadata.name}.")
+
+          getCategoryPageDataDb(categoryMetadata) match {
+            case Success(pd) =>
+              Future { blocking { cache.set(cacheKey, Json.toJson(pd).toString()) } }
+              pd
+            case Failure(e) =>
+              throw new RuntimeException(s"Failed to get category page data with error $e")
+          }
+      }
+    }
+
   def getTextsPage(
       categoryMetadata: CategoryDbMetadata,
       entityName: String,
@@ -129,16 +128,19 @@ class PageDataFetcher(
       sentiment: String
   ): Try[EntityTextsPageData] =
     Try {
+      val logIdentifier =
+        Seq(entityType, entityName, sentiment).mkString(
+          " - "
+        ) + categoryMetadata.toString()
       log.info(
-        s"Getting texts page data for entity ${entityName} and " +
-          s"type ${entityType} and sentiment ${sentiment} with ${categoryMetadata.toString()}."
+        s"Getting texts page data for ${logIdentifier}."
       )
 
       val combined =
         for {
-          apr   <- Future { blocking { getCachedDf(categoryMetadata.analysisTableName) } }
-          urldf <- Future { blocking { getCachedDf(categoryMetadata.articleUrlsTableName) } }
-          tdf   <- Future { blocking { getCachedDf(categoryMetadata.textsTableName) } }
+          apr   <- Future { blocking { db.getDataframe(categoryMetadata.analysisTableName) } }
+          urldf <- Future { blocking { db.getDataframe(categoryMetadata.articleUrlsTableName) } }
+          tdf   <- Future { blocking { db.getDataframe(categoryMetadata.textsTableName) } }
         } yield (apr, urldf, tdf)
 
       val (analysisDf: Try[DataFrame], urlsDf: Try[DataFrame], textsDf: Try[DataFrame]) =
@@ -146,12 +148,16 @@ class PageDataFetcher(
 
       (analysisDf, urlsDf, textsDf) match {
         case (Success(analysisDf), Success(urlsDf), Success(textsDf)) =>
+          log.info(
+            s"Combining tables for texts page data extraction for ${logIdentifier}"
+          )
+
           val filterDf = analysisDf
+            .select("entityName", "entityType", "negativeTextIds", "positiveTextIds")
             .filter($"entityName" === entityName && $"entityType" === entityType)
           if (filterDf.isEmpty) {
             log.info(
-              s"No analysis rows found for entity ${entityName} and " +
-                s"type ${entityType} and sentiment ${sentiment}"
+              s"No analysis rows found for entity ${logIdentifier}."
             )
             EntityTextsPageData(rows = Array.empty)
           } else {
@@ -172,10 +178,9 @@ class PageDataFetcher(
               .select($"text", $"url")
 
             log.info(
-              s"Extracted text and URLs for entity ${entityName} and " +
-                s"type ${entityType} and sentiment ${sentiment}"
+              s"Collecting text and URLs for ${logIdentifier}."
             )
-            extractedDf.show()
+            // extractedDf.show()
             val r = EntityTextsPageData(
               rows = extractedDf
                 .as[TextsPageRow]
@@ -185,6 +190,9 @@ class PageDataFetcher(
                     TextsPageRow(text = r.text, url = s"https://www.google.com/search?q=${r.text}")
                   else r
                 )
+            )
+            log.info(
+              s"Collected text and URLs for ${logIdentifier}."
             )
             Future {
               blocking {

@@ -14,12 +14,13 @@ import fyi.newssnips.shared.DfUtils
 
 @Singleton
 class Analysis(spark: SparkSession) {
-  private val log: Logger = Logger(this.getClass())
+  private val log: Logger = Logger("app." + this.getClass().toString())
   import spark.implicits._
 
   // https://nlp.johnsnowlabs.com/docs/en/pipelines#recognizeentitiesdl
   // https://nlp.johnsnowlabs.com/demo
 
+  log.info("Initalizing analysis pipelines.")
   log.info("Initalizing sentiment pipeline.")
   private val sentimetPipeline =
     new LightPipeline(
@@ -38,11 +39,17 @@ class Analysis(spark: SparkSession) {
       ).model
     )
 
+  // TODO use it to remove stop words from entity names
+  // private val stopWordsPipeline = new StopWordsRemover()
+  // .setInputCol("raw")
+  // .setOutputCol("filtered")
+
   log.info("Analysis pipelines initalized.")
 
   private def getEntities(contentsDf: DataFrame): DataFrame = {
     val transformed = entityRecognitionPipeline.transform(contentsDf)
-    log.info(s"Extracted entities from ${transformed.count()} blocks of text.")
+    log.info(s"Extracted entities from blocks of text.")
+
     // Every ROW contains the text with an array of entities and
     // corresponding array of maps that contain the tags for each entity.
     // to get all entities and their tags, need to explode each array column.
@@ -56,20 +63,21 @@ class Analysis(spark: SparkSession) {
       .select(
         // extract values from each entity struct
         col("text_id"),
-        col("entity.result").as("entityName"),
+        // remove starting and trailing punctuation from entity name
+        // TODO use [^\x20-\x7E]+ to remove non-printable chars.
+        regexp_replace(col("entity.result"), "(\\W+$|^\\W+)", "")
+          .as("entityName"),
         col("entity.metadata.entity").as("entityType")
       )
-    log.info(s"Extracted ${entitiesDf.count()} entities and their types.")
-    DfUtils.showSample(entitiesDf, 5f)
+    log.info(s"Extracted entities and their types.")
+    DfUtils.showSample(entitiesDf)
     entitiesDf
   }
 
   private def getSentiment(contentsDf: DataFrame): DataFrame = {
     val transformed =
       sentimetPipeline.transform(contentsDf)
-    log.info(s"Extracted sentiment from ${transformed.count()} blocks of text.")
-
-    // transformed.printSchema()
+    log.info(s"Extracted sentiment from blocks of text.")
 
     val sentimentDf = transformed
       .select(
@@ -84,7 +92,7 @@ class Analysis(spark: SparkSession) {
           .as("sentimentBlockLength")
       )
 
-    log.info(s"Extracted ${sentimentDf.count()} sentiment blocks.")
+    log.info(s"Extracted sentiment blocks.")
     DfUtils.showSample(sentimentDf, 5f)
 
     sentimentDf
@@ -118,13 +126,14 @@ class Analysis(spark: SparkSession) {
       )
 
     log.info(
-      s"Constructed expanded result of ${expandedDf.count()} entities, sentiments " +
+      s"Constructed expanded result of entities, sentiments " +
         "and their accompnying texts."
     )
-    DfUtils.showSample(expandedDf, 5f)
+    DfUtils.showSample(expandedDf)
 
     val negCondition = col("sentiment") === "negative"
     val posCondition = col("sentiment") === "positive"
+    val typesToSkip  = Seq("CARDINAL", "ORDINAL", "PERCENT", "WORK_OF_ART")
 
     val resultDf = expandedDf
       .groupBy("entityName", "entityType")
@@ -141,18 +150,16 @@ class Analysis(spark: SparkSession) {
         (sum("confidence") * sum("sentimentBlockLength"))
           .as("aggregateConfidence")
       )
+      .filter(!col("entityType").isInCollection(typesToSkip))
       .where("""
-        entityType != 'CARDINAL' 
-        and entityType != 'ORDINAL' 
-        and entityType != 'PERCENT'
-        and aggregateConfidence > 0
+        aggregateConfidence > 0
       """)
       .orderBy(col("totalNumTexts").desc)
       .na
       .drop("any")
 
-    log.info(s"Analysis resulted in ${resultDf.count()} entities of interest.")
-    DfUtils.showSample(resultDf, 5f)
+    log.info(s"Analysis report constructed.")
+    DfUtils.showSample(resultDf)
     Some(resultDf)
   }
 

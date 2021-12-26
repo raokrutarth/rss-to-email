@@ -1,8 +1,8 @@
 package fyi.newssnips.models
 
-import java.time.LocalDate
 import java.security.MessageDigest
 import java.math.BigInteger
+import java.time.OffsetDateTime
 
 //
 case class FeedURL(value: String) {
@@ -28,8 +28,18 @@ case class FeedContent(
 )
 
 case class Feed(
+    title: String,
     url: FeedURL,
-    content: Option[Seq[FeedContent]],
+    content: Seq[FeedContent],
     // https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html
-    lastScraped: Option[LocalDate]
+    lastScraped: OffsetDateTime
+)
+
+/** As present in the df
+  */
+case class FeedRow(
+    feed_id: Long,
+    url: String,
+    title: String,
+    last_scraped: String
 )

@@ -12,7 +12,7 @@ import scala.util.{Failure, Success, Try}
 
 // TODO https://www.baeldung.com/scala/scalatest
 class DatastaxCassandraSpec extends FlatSpec {
-  val log = Logger(this.getClass())
+  val log = Logger("app." + this.getClass().toString())
 
   import DatastaxCassandra.spark.implicits._
 

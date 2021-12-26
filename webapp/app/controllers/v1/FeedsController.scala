@@ -8,37 +8,51 @@ import javax.inject._
 import play.api.Logger
 import fyi.newssnips.datastore.DatastaxCassandra
 import play.api.inject.ApplicationLifecycle
-import fyi.newssnips.webapp.datastore.Cache
 import scala.concurrent.Future
 import fyi.newssnips.shared.DbConstants
 import fyi.newssnips.core.PageDataFetcher
 import play.api.cache.Cached
+import play.twirl.api.Html
+import fyi.newssnips.datastore.Cache
 import configuration.AppConfig
+import play.api.libs.json._
+import fyi.newssnips.core.CategoryAnalysisPageData
+import scala.util.Try
+import fyi.newssnips.models._
+import play.api.libs.json._
+// import fyi.newssnips.models.AnalysisRow
 
 @Singleton
 class FeedsController @Inject() (
     val controllerComponents: ControllerComponents,
     lifecycle: ApplicationLifecycle,
-    cached: Cached
+    cached: Cached,
+    cache: Cache
 ) extends BaseController {
 
   private val log: Logger = Logger("app." + this.getClass().toString())
-  private val cache       = new Cache(DatastaxCassandra.spark)
-  private val dataFetcher = new PageDataFetcher(cache)
+  private val dataFetcher = new PageDataFetcher()
   private val errResp = InternalServerError(
-    "<h1>A server error occurred: Please try again later.</h1>"
+    views.html.siteTemplate("Error")(
+      Html(
+        """
+          <div class='alert alert-danger col-md-6 offset-md-3'>
+          <h3>An unknown server error occurred. Please try again later.</h3></div>
+        """
+      )
+    )
   ).as("text/html")
 
-  val pageCacheTimeSec: Int = if (AppConfig.settings.inProd) 1800 else 300
+  val pageCacheTimeSec: Int = if (AppConfig.settings.inProd) 30 else 5
 
-  def home() = cached.status(_ => "homeAnalysisPage", 200, pageCacheTimeSec) {
+  def home() = cached.status(_ => "homeAnalysisPage", status = 200, pageCacheTimeSec) {
     Action { implicit request: Request[AnyContent] =>
       val dbMetadata = DbConstants.categoryToDbMetadata("home")
       log.info(
         s"Received home page request from client ${request.remoteAddress}. " +
           s"Using db metadata ${dbMetadata.toString()}"
       )
-      dataFetcher.getCategoryAnalysisPage(dbMetadata) match {
+      dataFetcher.getCategoryAnalysisPage(cache, dbMetadata) match {
         case Success(data) =>
           log.info(
             s"Parsing ${data.analysisRows.size} analysis row(s) and " +
@@ -64,7 +78,7 @@ class FeedsController @Inject() (
   }
 
   def category(categoryId: String) =
-    cached.status(_ => "category" + categoryId, 200, pageCacheTimeSec) {
+    cached.status(_ => "category" + categoryId, status = 200, pageCacheTimeSec) {
       Action { implicit request: Request[AnyContent] =>
         log.info(
           s"Received category ${categoryId} page request from client ${request.remoteAddress}"
@@ -74,7 +88,7 @@ class FeedsController @Inject() (
             log.info(
               s"Using db metadata ${dbMetadata.toString()} for category $categoryId."
             )
-            dataFetcher.getCategoryAnalysisPage(dbMetadata) match {
+            dataFetcher.getCategoryAnalysisPage(cache, dbMetadata) match {
               case Success(data) =>
                 log.info(
                   s"Parsing ${data.analysisRows.size} analysis row(s) and ${data.sourceFeeds.size} feed(s) into HTML template."
@@ -101,7 +115,7 @@ class FeedsController @Inject() (
   def mentions(categoryId: String, entityName: String, entityType: String, sentiment: String) =
     cached.status(
       _ => "mentions" + categoryId + entityName + entityType + sentiment,
-      200,
+      status = 200,
       pageCacheTimeSec
     ) {
       Action { implicit request: Request[AnyContent] =>
@@ -131,6 +145,7 @@ class FeedsController @Inject() (
     Future.successful {
       log.warn("Running feeds controller EOL hook.")
       DatastaxCassandra.cleanup()
+      cache.cleanup()
     }
   }
 }

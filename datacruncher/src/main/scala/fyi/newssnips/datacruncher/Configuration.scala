@@ -17,7 +17,15 @@ case class AppConfig(
     sendgrid: SendgridConfig,
     runtimeEnv: String,
     inProd: Boolean,
-    httpClientConfig: RequestConfig
+    httpClientConfig: RequestConfig,
+
+    // timezone of app from
+    /* https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/ZoneId.html */
+    timezone: String,
+
+    // when set via env var, intermediate dataframes
+    // are sampled during cycle for debugging.
+    sampleDfs: Boolean
 )
 
 case class DatastaxConfig(
@@ -34,7 +42,7 @@ case class SendgridConfig(
 
 /* https://stackoverflow.com/questions/20879639/write-base64-encoded-image-to-file */
 object AppConfig {
-  val log: Logger = Logger(this.getClass())
+  val log: Logger = Logger("app." + this.getClass().toString())
 
   val settings: AppConfig = load(
     ConfigFactory.parseFile(
@@ -94,8 +102,14 @@ object AppConfig {
         apiKey = config.getString("secrets.sendgrid.apiKey")
       ),
       runtimeEnv = runtime,
-      inProd = if (runtime.equals("docker")) true else false,
-      httpClientConfig = requestConfig
+      inProd = if (runtime.equals("docker")) {
+        log.warn("Running in production mode.")
+        true
+      } else false,
+      httpClientConfig = requestConfig,
+      timezone = Properties.envOrElse("TZ", "America/Los_Angeles"),
+      sampleDfs =
+        if (Properties.envOrNone("SAMPLE_DFS").isEmpty) false else true
     )
   }
 }

@@ -12,6 +12,8 @@ package fyi.newssnips.datastore
 // https://blog.knoldus.com/getting-started-phantom/
 // https://outworkers.github.io/phantom/basics/database.html
 // https://outworkers.github.io/phantom/basics/connectors.html
+// https://medium.com/rahasak/cassandra-scala-client-d50ebd5a9723
+// https://github.com/magro/play2-scala-cassandra-sample
 
 import configuration.AppConfig
 

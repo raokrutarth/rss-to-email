@@ -1,13 +1,14 @@
 package fyi.newssnips.datacruncher.core
 
-import fyi.newssnips.models.{FeedContent, FeedURL}
-import scala.xml.XML
+import fyi.newssnips.models.{Feed, FeedContent, FeedURL}
+import scala.xml.{Elem, XML}
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.util.EntityUtils
 import configuration.AppConfig
 import scala.util.{Failure, Success, Try}
 import com.typesafe.scalalogging.Logger
+import fyi.newssnips.shared.DateTimeUtils
 
 object Scraper {
   private val httpClient =
@@ -16,16 +17,16 @@ object Scraper {
       .setDefaultRequestConfig(AppConfig.settings.httpClientConfig)
       .build()
 
-  private val log: Logger = Logger(this.getClass())
+  private val log: Logger = Logger("app." + this.getClass().toString())
 
-  private def getXML(url: String): Try[scala.xml.Elem] = Try {
+  private def getXML(url: String): Try[Elem] = Try {
     log.info(s"Fetching XML from feed $url")
     val request = new HttpGet(
       url.strip()
     )
     request.setHeader(
       "user-agent",
-      "Mozilla/5.0"
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1.2 Safari/605.1.15"
     )
     request.setHeader("Accept", "application/rss+xml")
     val response    = httpClient.execute(request)
@@ -44,34 +45,53 @@ object Scraper {
     }
   }
 
-  def getContent(feedUrl: FeedURL): Option[Seq[FeedContent]] = {
-    getXML(feedUrl.value) match {
+  def getAndParseFeed(url: FeedURL): Option[Feed] = {
+    val isReddit: Boolean = url.value.contains("reddit.com")
+
+    Scraper.getXML(url.value) match {
       case Success(xml) =>
         val feedTitle = (xml \\ "title")(0).text // .as[Option[String]]
-        log.info(f"Found feed with title: $feedTitle")
+        log.info(
+          f"Extracting contents from feed ${url.value} with title $feedTitle."
+        )
 
         val itemTag =
-          if (feedUrl.value.contains("reddit.com")) "entry" else "item"
+          if (isReddit) "entry" else "item"
         val contentTag =
-          if (feedUrl.value.contains("reddit.com")) "content" else "description"
+          if (isReddit) "content" else "description"
 
         val contents = for {
           xmlItems <- (xml \\ itemTag)
           title       = (xmlItems \\ "title").text
           description = (xmlItems \\ contentTag).text
-          link        = (xmlItems \\ "link").text
+          link =
+            if (!isReddit) (xmlItems \\ "link").text
+            else (xmlItems \\ "link" \ "@href").text
         } yield FeedContent(
           link,
           title,
           description,
           false
         )
-        log.info(s"Extracted ${contents.size} items from $feedUrl")
+        log.info(s"Extracted ${contents.size} items form ${url.value}.")
         // TODO when lenght is 0, return failure
-        Some(contents)
+        if (contents.isEmpty) {
+          None
+        } else {
+          Some(
+            Feed(
+              url = url,
+              content = contents,
+              title = feedTitle,
+              lastScraped = DateTimeUtils.now()
+            )
+          )
+        }
 
-      case Failure(s) =>
-        log.error(s"Failed to get XML content. Reason: $s")
+      case Failure(exc) =>
+        log.error(
+          s"Failed to get feed contents from ${url.value} because: $exc"
+        )
         None
     }
   }

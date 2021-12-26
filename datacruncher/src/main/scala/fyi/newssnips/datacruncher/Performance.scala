@@ -3,7 +3,7 @@ package fyi.newssnips.datacruncher
 import com.typesafe.scalalogging.Logger
 
 object PerformanceStats {
-  val log = Logger(this.getClass())
+  val log = Logger("app." + this.getClass().toString())
 
   def logMemory() = {
     // memory info

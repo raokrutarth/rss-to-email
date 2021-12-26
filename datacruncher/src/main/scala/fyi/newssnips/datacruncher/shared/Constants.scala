@@ -1,6 +1,7 @@
 package fyi.newssnips.shared
 
 case class CategoryDbMetadata(
+    name: String,
     analysisTableName: String,    // table name of sentiment and count of mentions
     textsTableName: String,       // table name of raw texts for the category
     sourceFeedsTableName: String, // table name of rss feed URLs
@@ -15,6 +16,7 @@ object DbConstants {
         (
           category,
           CategoryDbMetadata(
+            name = category,
             analysisTableName = s"${category}_page_analysis_results",
             textsTableName = s"${category}_page_texts",
             sourceFeedsTableName = s"${category}_page_feeds",

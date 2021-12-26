@@ -29,15 +29,12 @@ scalafmtOnCompile := true
 scalafixOnCompile := true
 scalacOptions += "-Ywarn-unused"
 
-// export JAVA_OPTS="-Xms512M -Xmx4048M -XX:+UseG1GC -XX:+CMSClassUnloadingEnabled -XX:ParallelGCThreads=4 -XX:GCTimeRatio=5"
+// export JAVA_OPTS="-XX:+AggressiveHeap -Xms512M -Xmx6048M"
 lazy val root = (project in file(".")).settings(
   javaOptions ++= Seq(
     "-Xms512M",
     "-Xmx4048M",
-    "-XX:+UseG1GC",
-    "-XX:+CMSClassUnloadingEnabled",
-    "-XX:ParallelGCThreads=4",
-    "-XX:GCTimeRatio=5" // app gets 5x the time on the CPU vs. GC
+    "-XX:+AggressiveHeap"
   )
 )
 // fork := true

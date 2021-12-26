@@ -41,4 +41,23 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting
       contentAsString(home) must include("Welcome to Play")
     }
   }
+
+  "feeds test data" should {
+    val d: CategoryAnalysisPageData = CategoryAnalysisPageData(
+      analysisRows = Array(
+        AnalysisRow(
+          Some("US"),
+          Some("GPE"),
+          Some(0),
+          Some(0),
+          Some(List()),
+          Some(List()),
+          Some(0),
+          Some(0)
+        )
+      ),
+      sourceFeeds = Array(),
+      lastUpdated = "today"
+    )
+  }
 }

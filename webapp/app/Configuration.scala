@@ -17,7 +17,12 @@ case class AppConfig(
     redis: RedisConfig,
     runtimeEnv: String,
     inProd: Boolean,
-    httpClientConfig: RequestConfig
+    httpClientConfig: RequestConfig,
+    sampleDfs: Boolean, // when enabled, prints the intermediate DFs (slow)
+
+    // timezone of app from
+    // https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/ZoneId.html
+    timezone: String
 )
 
 case class DatastaxConfig(
@@ -79,6 +84,7 @@ object AppConfig {
         zipPath
       case _ =>
         // in dev/test. use existing secrets file.
+        log.info("Using local DB connection bundle.")
         "/home/dev/work/datastax-db-secrets.zip"
     }
   }
@@ -124,7 +130,9 @@ object AppConfig {
       runtimeEnv = runtime,
       inProd = if (runtime.equals("docker")) true else false,
       httpClientConfig = requestConfig,
-      redis = extractRedisConfig(config)
+      redis = extractRedisConfig(config),
+      sampleDfs = if (Properties.envOrNone("SAMPLE_DFS").isEmpty) false else true,
+      timezone = Properties.envOrElse("TZ", "America/Los_Angeles")
     )
   }
 }

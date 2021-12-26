@@ -1,34 +1,50 @@
 package fyi.newssnips.shared
 
 import org.apache.spark.sql._
-import java.text.SimpleDateFormat
-import java.util.{Calendar, Date}
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.time.ZoneId
+import configuration.AppConfig
+import com.typesafe.scalalogging.Logger
 
 object DfUtils {
+  private val log: Logger = Logger("app." + this.getClass().toString())
 
-  /* Log n random values from the dataframe */
+  /** Log n random values from the dataframe if the envorinment variable for df sampeling is
+    * enabled. Can reduce performance.
+    */
   def showSample(
       df: DataFrame,
       n: Float = 5f,
       truncate: Boolean = true
   ): Unit = {
-    df.sample(n / math.max(n, df.count())).show(truncate)
+    if (AppConfig.settings.sampleDfs) {
+      log.info(s"Sampling dataframe with ${df.count()} rows.")
+      df.sample(n / math.max(n, df.count())).show(truncate)
+    }
+
   }
 }
 
+// wrapper around date time utils so
+// library used can be changed as needed.
 object DateTimeUtils {
-  private val displayDateFormatter = new SimpleDateFormat(
-    "EEE, MMM dd, yyyy h:mm a z"
-  )
+  private val tz = ZoneId.of(AppConfig.settings.timezone)
+  private val displayDateFormatter =
+    DateTimeFormatter
+      .ofLocalizedDateTime(FormatStyle.MEDIUM)
+      .withZone(tz)
 
-  def now(): Date = Calendar.getInstance.getTime
+  def now(): OffsetDateTime =
+    OffsetDateTime.now(tz)
 
-  def getDateAsString(d: Date): String = {
+  def getDateAsString(d: OffsetDateTime): String = {
     displayDateFormatter.format(d)
   }
 
-  def convertStringToDate(s: String): Date = {
-    displayDateFormatter.parse(s)
+  def convertStringToDate(s: String): OffsetDateTime = {
+    OffsetDateTime.parse(s, displayDateFormatter)
   }
 
   /* https://hussachai.medium.com/normalizing-a-date-string-in-the-scala-way-f37a2bdcc4b9 */

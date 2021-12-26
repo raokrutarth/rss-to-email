@@ -9,41 +9,90 @@ import fyi.newssnips.datastore.DatastaxCassandra
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 import fyi.newssnips.shared.DbConstants
-import fyi.newssnips.shared.{DateTimeUtils, DfUtils}
+import fyi.newssnips.shared.DateTimeUtils
 
 import scala.util.Failure
 import fyi.newssnips.datacruncher.core.Analysis
 
+import fyi.newssnips.models.Feed
+
 object AnalysisCycle {
-  private val log = Logger(this.getClass())
+  private val log = Logger("app." + this.getClass().toString())
 
   private val db = DatastaxCassandra
   import db.spark.implicits._
 
-  log.info("Initalizing analysis")
   private val analysis = new Analysis(db.spark)
-  log.info("Initalized analysis")
+  log.info("Initalized analysis module.")
+
   private val dataPrep = new DataPrep(db.spark)
-  log.info("Initalized dataprep")
+  log.info("Initalized dataprep module.")
 
   private val booksFinderUdf = udf(ContextFinder.findBooks)
-  private val talksFinderUdf = udf(ContextFinder.findTalks)
 
   val categoryToUrls: Map[String, Seq[String]] = Map(
     "home" -> Seq(
-      "https://feeds.a.dj.com/rss/RSSWorldNews.xml"
+      "https://feeds.a.dj.com/rss/RSSWorldNews.xml",
+      "https://www.reddit.com/r/UpliftingNews/.rss",
+      "https://www.reddit.com/r/worldnews/.rss",
+      "http://rss.cnn.com/rss/cnn_world.rss",
+      "http://rss.cnn.com/rss/cnn_us.rss",
+      "http://rss.cnn.com/rss/cnn_latest.rss",
+      "https://nypost.com/feed",
+      "http://feeds.feedburner.com/zerohedge/feed",
+      "https://www.huffpost.com/section/front-page/feed?x=1",
+      "http://feeds.foxnews.com/foxnews/latest",
+      "http://feeds.foxnews.com/foxnews/world",
+      "https://cdn.feedcontrol.net/8/1114-wioSIX3uu8MEj.xml",
+      "https://www.yahoo.com/news/rss",
+      "https://www.rt.com/rss/news/"
     ),
     "markets" -> Seq(
-      "https://www.reddit.com/r/StockMarket/rising/.rss",
-      "http://feeds.marketwatch.com/marketwatch/realtimeheadlines/"
+      "http://feeds.marketwatch.com/marketwatch/realtimeheadlines/",
+      "https://finance.yahoo.com/news/rss",
+      "https://www.nasdaq.com/feed/rssoutbound",
+      "https://seekingalpha.com/market_currents.xml",
+      "https://seekingalpha.com/feed.xml",
+      "http://feeds.feedburner.com/TradingVolatility",
+      "http://rss.politico.com/economy.xml",
+      "https://feeds.a.dj.com/rss/RSSMarketsMain.xml",
+      "http://thehill.com/taxonomy/term/30/feed",
+      "http://thehill.com/taxonomy/term/20/feed",
+      "https://nypost.com/business/feed/",
+      "http://feeds.marketwatch.com/marketwatch/topstories/",
+      "https://fool.libsyn.com/rss",
+      "https://www.cnbc.com/id/20409666/device/rss/rss.html?x=1",
+      "https://www.wallstreetsurvivor.com/feed/",
+      "https://www.investing.com/rss/news_25.rss",
+      "https://www.reddit.com/r/StockMarket/.rss",
+      "https://www.reddit.com/r/wallstreetbets/.rss",
+      "https://www.reddit.com/r/stocks/.rss"
     ),
+    // "technology" -> Seq("https://www.techmeme.com/feed.xml"),
     "politics" -> Seq(
       "https://rss.politico.com/congress.xml",
-      "http://thehill.com/rss/syndicator/19110"
+      "http://thehill.com/rss/syndicator/19110",
+      "https://www.memeorandum.com/feed.xml",
+      "https://www.reddit.com/r/politics/.rss",
+      "https://www.reddit.com/r/NeutralPolitics/.rss",
+      "https://news.yahoo.com/rss/politics"
     ),
     "entertainment" -> Seq(
       "https://www.buzzfeed.com/celebrity.xml",
-      "https://www.buzzfeed.com/tvandmovies.xml"
+      "https://www.buzzfeed.com/tvandmovies.xml",
+      "http://syndication.eonline.com/syndication/feeds/rssfeeds/topstories.xml",
+      "https://meredith.mediaroom.com/news-releases?pagetemplate=rss&category=816",
+      "http://feeds.bet.com/AllBetcom",
+      "https://www.hollywoodintoto.com/feed/",
+      "https://hollywoodlife.com/feed/",
+      "https://mtonews.com/.rss/full/",
+      "http://feeds.feedburner.com/variety/headlines",
+      "https://www.reddit.com/r/entertainment/.rss",
+      "https://www.reddit.com/r/celebrities/.rss",
+      "https://www.reddit.com/r/entertainment/.rss",
+      "https://www.wesmirch.com/feed.xml",
+      "https://mediagazer.com/feed.xml",
+      "https://www.yahoo.com/entertainment/rss"
     )
   )
 
@@ -53,15 +102,23 @@ object AnalysisCycle {
     )
     val categoryMetadata = DbConstants.categoryToDbMetadata(categoryId)
 
-    val feedsDf: DataFrame = db.spark.sparkContext
-      .parallelize(urls.zipWithIndex)
-      .toDF("url", "feed_id")
-    DfUtils.showSample(feedsDf, 5f)
+    val categoryFeeds: Seq[Feed] = urls.flatMap { u =>
+      // TODO group urls by host/first8-chars and reduce sleep time.
+      Thread.sleep(726) // sleep to avoid rate limiting
+      Scraper.getAndParseFeed(FeedURL(u))
+    }
 
-    val categoryContents = urls.flatMap { u =>
-      Thread.sleep(500)
-      Scraper.getContent(FeedURL(u))
-    }.flatten
+    // create feeds df
+    val feedsDf: DataFrame = categoryFeeds.zipWithIndex
+      .map { case (f, i) =>
+        (i, f.title, f.url.value, DateTimeUtils.getDateAsString(f.lastScraped))
+      }
+      .toDF("feed_id", "title", "url", "last_scraped")
+
+    log.info(s"Feeds for category ${categoryId}:")
+    feedsDf.show(false) // small table. ok to print.
+
+    val categoryContents = categoryFeeds.map { f => f.content }.flatten
 
     val fatContentsDf       = dataPrep.constructContentsDf(categoryContents)
     val (urlDf, contentsDf) = dataPrep.seperateLinksFromContents(fatContentsDf)
@@ -83,13 +140,9 @@ object AnalysisCycle {
             "contextBooks",
             booksFinderUdf(col("entityName"), col("entityType"))
           )
-          .withColumn(
-            "contextTalks",
-            talksFinderUdf(col("entityName"), col("entityType"))
-          )
 
-        log.info("Fetched context items for all entities in report.")
-        resDf.show()
+        log.info(s"Final analysis report for $categoryId:")
+        resDf.show() // critical dataframe to see before saving
 
         db.putDataframe(
           categoryMetadata.analysisTableName,
@@ -101,7 +154,7 @@ object AnalysisCycle {
             log.error(s"Failed to store analysis. Reason: $s")
           case _ =>
             log.info(
-              s"Home page analysis rows saved successfully. Saving analysis metadata."
+              s"${categoryMetadata.analysisTableName} rows saved successfully. Saving analysis metadata."
             )
             toSave.foreach { case (df, tableName, idCol) =>
               db.putDataframe(
@@ -133,13 +186,14 @@ object AnalysisCycle {
         }
       case _ => log.error("Unable to generate home page results report.")
     }
+    contentsDf.unpersist()
   }
 
   db.cleanup()
 }
 
 object Main extends App {
-  val log = Logger(this.getClass())
+  val log = Logger("app." + this.getClass().toString())
   log.info("Running analysis cycle.")
   AnalysisCycle
   log.info("Analysis cycle finished.")

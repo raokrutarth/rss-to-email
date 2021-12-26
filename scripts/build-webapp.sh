@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-BUILD_TAG=${1:-"newssnips-webapp-test:$(date +%m-%d-%Y)"}
+BUILD_TAG=${1:-"newssnips-webapp-dev:$(date +%m-%d-%Y)"}
 
 # run the build command to create the
 # executable in the dev-env container
@@ -22,9 +22,3 @@ if [[ -v RUN ]]; then
     --rm -it \
     "${BUILD_TAG}"
 fi
-
-echo "${BUILD_TAG}"
-
-# if [[ ! -v RUN ]]; then
-#     eval $(minikube -p minikube docker-env -u)
-# fi

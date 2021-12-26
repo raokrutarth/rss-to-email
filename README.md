@@ -149,7 +149,16 @@ scala + play tutorials: https://www.youtube.com/watch?v=FqMDHsFNlxQ&list=PLLMXbk
 - explore importing huggingface models to spark.
 - async rest client within play <https://www.playframework.com/documentation/2.8.x/ScalaWS>
 - 2gb ram <https://www.koyeb.com/pricing>
+- sentiment analysis models:
+  - https://nlp.johnsnowlabs.com/2021/11/01/bert_base_sequence_classifier_dbpedia_14_en.html
+  - https://nlp.johnsnowlabs.com/2021/11/02/bert_base_sequence_classifier_ag_news_en.html
+  - https://nlp.johnsnowlabs.com/2021/11/01/bert_base_sequence_classifier_imdb_en.html
+  - https://nlp.johnsnowlabs.com/2021/11/03/bert_sequence_classifier_finbert_en.html
+  - https://nlp.johnsnowlabs.com/2021/09/28/classifierdl_bertwiki_finance_sentiment_en.html
+- percentile filter
+  - https://spark.apache.org/docs/3.1.1/api/python/reference/api/pyspark.sql.functions.percentile_approx.html
 
+- caching: https://github.com/search?q=RedisStandalone&type=code
 names:
 - sentimetrics
 - news snack

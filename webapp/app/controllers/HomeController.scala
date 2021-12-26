@@ -7,20 +7,24 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql._
 
 import play.api.mvc._
-import fyi.newssnips.datastore.ConnectDatabase
+import play.api.cache.Cached
 
 @Singleton
-class HomeController @Inject() (val controllerComponents: ControllerComponents)
-    extends BaseController {
+class HomeController @Inject() (
+    val controllerComponents: ControllerComponents,
+    cached: Cached
+) extends BaseController {
 
   def index() = Action {
-    Redirect("/v1/home")
+    Redirect("/about")
   }
 
-  def about() = Action {
-    Ok(
-      views.html.about()
-    ).as("text/html")
+  def about() = cached.status(_ => "aboutPage", status = 200) {
+    Action {
+      Ok(
+        views.html.about()
+      ).as("text/html")
+    }
   }
 
   def testSpark() = Action {
