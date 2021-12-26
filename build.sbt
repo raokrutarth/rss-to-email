@@ -3,6 +3,8 @@ organization := "com.kr"
 
 version := "1.0"
 
+scalacOptions += "-Wunused:imports"
+
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.12.10"
@@ -20,6 +22,7 @@ import com.typesafe.sbt.packager.docker.DockerChmodType
 import com.typesafe.sbt.packager.docker.DockerPermissionStrategy
 dockerChmodType := DockerChmodType.UserGroupWriteExecute
 dockerPermissionStrategy := DockerPermissionStrategy.CopyChown
+import com.typesafe.sbt.packager.docker.DockerVersion
 
 Docker / packageName := "rss-to-email"
 Docker / version := sys.env.getOrElse("BUILD_NUMBER", "0")
@@ -28,6 +31,7 @@ Docker / daemonUser := "daemon"
 dockerExposedPorts := Seq(9000)
 dockerBaseImage := "openjdk:11-slim"
 dockerUpdateLatest := true
+dockerVersion := Some(DockerVersion(20, 10, 7, Some("ce")))
 
 // Adds additional packages into Twirl
 //TwirlKeys.templateImports += "com.kr.controllers._"

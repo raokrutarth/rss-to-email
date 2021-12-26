@@ -1,7 +1,11 @@
 #!/bin/bash -ex
 
-echo "Run build with command in dev-env: sbt docker:stage"
+# run the build command to create the
+# executable in the dev-env container
+docker exec rss-dev \
+    bash -c "pushd /home/dev/work && /home/dev/.local/share/coursier/bin/sbt docker:stage"
 
+# point docker to minikube for registry-free image transfer
 eval $(minikube -p minikube docker-env)
 
 docker build \
@@ -10,8 +14,7 @@ docker build \
     target/docker/stage
 
 if [[ -v RUN ]]; then
-    dummy_token="SL0kKTecNCH3Q_hT2r79bzkc3i7myMkxcnmoNuJAAB8"
-
+    # test the image locally if needed.
     docker run \
     --rm \
     -it \

@@ -86,6 +86,8 @@ WORKDIR /opt/rss-to-email
 RUN chown ${NB_USER} /opt/rss-to-email
 EXPOSE 9000
 
+# requires the binaries built from before with sbt
+# and the build context set to target/docker/stage
 COPY --chown=${NB_USER}:root opt /opt
 
 USER ${NB_UID}

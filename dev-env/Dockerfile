@@ -27,6 +27,7 @@ RUN apt-get update --yes && \
     default-jdk \
     scala \
     vim \
+    unzip \
     curl \
     git \
     nodejs \
@@ -117,8 +118,9 @@ RUN set -x && curl -fLo /tmp/cs https://git.io/coursier-cli-"$(uname | tr LD ld)
     chmod +x /tmp/cs && \
     /tmp/cs install cs && \
     rm /tmp/cs && \
-    echo "export PATH=\"$PATH:/home/${NB_USER}/.local/share/coursier/bin\"" >> /home/${NB_USER}/.bashrc && \
     /home/${NB_USER}/.local/share/coursier/bin/cs setup -y --jvm adopt:11
+
+ENV PATH="/home/${NB_USER}/.local/share/coursier/bin:$PATH"
 
 # Setup work directory for backward-compatibility
 RUN mkdir "/home/${NB_USER}/work" && \

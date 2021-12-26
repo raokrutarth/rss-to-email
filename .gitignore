@@ -2,6 +2,7 @@
 .secrets.yml
 settings.yaml
 settings.yml
+logs/
 
 # bloop and metals
 .bloop
