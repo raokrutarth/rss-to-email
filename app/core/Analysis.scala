@@ -40,7 +40,6 @@ class Analysis @Inject() (lifecycle: ApplicationLifecycle) {
         "org.apache.spark.serializer.KryoSerializer"
       )
       .config("spark.kryoserializer.buffer.max", "100M")
-      .config("spark.executor.memory", "500M")
       .master("local[*]")
       .config("spark.driver.memory", "100M")
       .getOrCreate()
@@ -124,14 +123,14 @@ class Analysis @Inject() (lifecycle: ApplicationLifecycle) {
       case (c: FeedContent, idx: Int) =>
         (idx, c.title)
     }
-    val allDescriptions = contents.zipWithIndex.map {
-      case (c: FeedContent, idx: Int) =>
-        (idx + contents.size + 1, c.body)
-    }
+    // val allDescriptions = contents.zipWithIndex.map {
+    //   case (c: FeedContent, idx: Int) =>
+    //     (idx + contents.size + 1, c.body)
+    // }
 
     val rawContentsDf = spark
       .createDataFrame(
-        spark.sparkContext.parallelize(allTitles ++ allDescriptions)
+        spark.sparkContext.parallelize(allTitles) // ++ allDescriptions
       )
       .toDF("id", "rawText")
     if (shouldClean) {

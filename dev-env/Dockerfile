@@ -93,6 +93,7 @@ RUN wget "https://archive.apache.org/dist/spark/spark-${APACHE_SPARK_VERSION}/sp
     tar xzf "spark-${APACHE_SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz" -C /usr/local --owner root --group root --no-same-owner && \
     rm "spark-${APACHE_SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz"
 
+RUN curl https://cli-assets.heroku.com/install.sh | sh
 WORKDIR /usr/local
 
 # Configure Spark

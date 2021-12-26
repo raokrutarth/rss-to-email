@@ -3,6 +3,17 @@
 Simple server that keeps checking the configured RSS feeds and
 sends periodic emails to the configured destination email address.
 
+## TODO
+
+- seperate into prez & worker layer.
+- setup k8s worker cron job.
+- pick name.
+- create static pages.
+- provision redis.
+- setup heroku secrets and local dynamic secrets.
+- makefile for deployments and management.
+- minikube at crontab reboot.
+
 ## Usage
 
 TODO
@@ -124,3 +135,75 @@ scala + play tutorials: https://www.youtube.com/watch?v=FqMDHsFNlxQ&list=PLLMXbk
 - example bootstrap page from scratch <https://www.w3schools.com/bootstrap/bootstrap_theme_company.asp>
 - bootstrap dark theme css <https://bootstrap.themes.guide/darkster/>
 - popover for links from buttons<https://getbootstrap.com/docs/4.0/components/popovers/>
+- custom hybrid hosting solution: 
+  - <https://inlets.dev/> $20/m
+  - <https://ngrok.com/pricing> $5/m
+  - <https://alternativeto.net/software/inlets/>
+- cheapest hosting solutions (2 core 4 GB ram ~$20/m):
+  - <https://www.vultr.com/products/cloud-compute/>
+  - <https://www.digitalocean.com/pricing/>
+  - B2 plan <https://azure.microsoft.com/en-us/pricing/details/app-service/linux/#pricing>
+  - e2 medium <https://cloud.google.com/run/pricing#cloud-run-pricing>
+  - AWS ec2 t4g.medium HDD ~$15
+
+names:
+- sentimetrics
+- news snack
+- metricsfeed
+- smetrics
+- timelymetrics
+- metrics-of-now
+- buzzatory
+- hype snack
+- newsnips
+- uptickmetrics
+- news pulse
+- report pulse
+- feed pulse
+- news net
+- metrics buzz
+- nautnews
+- think news
+- reporteer metrics
+- daily metrics
+- BUZZLYTICS.COM
+- dalylitics
+- METRICSLY
+- news-keep
+- news-report
+- newsscreen
+- feedscreen
+- mainstream metrics
+- informed.me
+- mnmts
+- feedish
+- feed-slice
+- feed-xray
+- scoop-metrics
+- newsmetry
+- news-decrypt
+- news-untangle
+- decrypt-metrics
+- sentiment-decrypt
+- sentiment-inspect
+- news inspect
+- news elucidate
+- news assort
+- sentimen assort
+- news guage
+- news nick
+- news appraise
+- sentiment assay
+- feed reckon
+- sentiguage
+- sentitally
+- news docket
+- senti-brief
+- sentipeg
+- news condense
+- sentiment netshell
+- news confab
+- news chews
+- news dissect
+- scrutinize.news
+- news intervene

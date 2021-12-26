@@ -10,7 +10,8 @@ case class AnalysisRow(
     numTexts: Option[Long],
     aggregateConfidence: Option[Double]
 )
+
 // companion objects needed for json parsing to object
-// object Report {
-//   implicit val reportFormat = Json.format[Report]
+// object AnalysisRow {
+//   implicit val analysisRowFormat = Json.format[AnalysisRow]
 // }

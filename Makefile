@@ -1,6 +1,10 @@
 KCTL ?= minikube kubectl --
 NS ?= rte-ns
 
+HRK_APP ?= --app sentipeg
+
+BUILD_TAG ?= "rss-to-email:$$(date +%H-%m-%d-%Y)"
+
 init-minikube:
 	minikube config set cpus 4
 	minikube config set driver docker
@@ -12,24 +16,28 @@ init-minikube:
 		--kubernetes-version=latest
 	minikube addons enable metrics-server
 
-start:
-	$(KCTL) apply -f deploy/rte-ns.yaml
-	$(KCTL) apply -f deploy/app.yaml
+# start:
+# 	$(KCTL) apply -f deploy/rte-ns.yaml
+# 	$(KCTL) apply -f deploy/app.yaml
 
-stop:
-	$(KCTL) delete namespace $(NS)
+# stop:
+# 	$(KCTL) delete namespace $(NS)
 
-status:
-	$(KCTL) -n $(NS) get deployments
-	$(KCTL) -n $(NS) get pods
+# status:
+# 	$(KCTL) -n $(NS) get deployments
+# 	$(KCTL) -n $(NS) get pods
 
-redeploy-app:
-	./scripts/build.sh
-	$(KCTL) -n $(NS) rollout restart deployment rss-to-email-dep
+# $(KCTL) -n $(NS) rollout restart deployment rss-to-email-dep
 
-test-app:
-	set -x && curl "$$(minikube service --url -n $(NS) rss-to-email-svc)"
+# test-app:
+# 	set -x && curl "$$(minikube service --url -n $(NS) rss-to-email-svc)"
 
 app-logs:
-	$(KCTL) -n $(NS) logs deployment/rss-to-email-dep
+	heroku logs $(HRK_APP) --num=500 --tail
 
+redeploy-app:
+	./scripts/build.sh $(BUILD_TAG)
+	docker tag $(BUILD_TAG) registry.heroku.com/sentipeg/web
+	docker push registry.heroku.com/sentipeg/web
+	heroku container:release web $(HRK_APP)
+	make -s app-logs

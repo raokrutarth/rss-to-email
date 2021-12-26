@@ -9,8 +9,7 @@
   </div> -->
 
   <div class="container">
-    <div class="jumbotron text-white jumbotron-image shadow"
-      style="background-image: url(https://images.unsplash.com/photo-1552152974-19b9caf99137?fit=crop&w=1350&q=80);">
+    <div class="jumbotron">
       <h1>News Entity Metrics</h1>
       <p>Get sentiment, No. of mentions and other relevant metrics
         for entities mentioned in the news.
@@ -22,9 +21,9 @@
   <div class="row" id="show-feeds">
     <div class="col-md-12">
       <p>
-        <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false"
-          aria-controls="collapseExample">
-          Link with href
+        <a class="btn btn-dark dropdown-toggle" data-toggle="collapse" href="#collapseExample" role="button"
+          aria-expanded="false" aria-controls="collapseExample">
+          Source Feeds
         </a>
       </p>
       <div class="collapse" id="collapseExample">
@@ -69,8 +68,9 @@
                 <td>@t.aggregateConfidence</td>
 
                 @t.sentiment match {
-                case Some("negative") => {<td><button type="button" class="btn btn-danger">Negative</button></td>}
-                case Some("positive") => {<td><a href="#" class="btn btn-success">Positive</a></td>}
+                case Some("negative") => {<td><button type="button" class="btn btn-outline-danger">Negative</button>
+                </td>}
+                case Some("positive") => {<td><a href="#" class="btn btn-outline-success">Positive</a></td>}
                 }
                 </tr>
                 }

@@ -21,13 +21,15 @@ import java.time.LocalDate
 import akka.actor
 import play.api.Logger
 
+import datastore.DocumentStore
 import core.{Scraper, Analysis}
 import models.AnalysisRow
 
 @Singleton
 class FeedsController @Inject() (
     val controllerComponents: ControllerComponents,
-    val analysis: Analysis
+    val analysis: Analysis,
+    val db: DocumentStore
 ) extends BaseController {
 
   val log: Logger = Logger(this.getClass())
@@ -35,17 +37,17 @@ class FeedsController @Inject() (
   def hp() = Action { implicit request: Request[AnyContent] =>
     // val allContents: Seq[Seq[FeedContent]] =
     //   Seq(
-    //     "http://rss.cnn.com/rss/cnn_topstories.rss"
-    //     // "http://rss.cnn.com/rss/cnn_world.rss",
-    //     // "http://rss.cnn.com/rss/cnn_us.rss",
-    //     // "http://rss.cnn.com/rss/cnn_latest.rss",
+    //     "http://rss.cnn.com/rss/cnn_topstories.rss",
+    //     "http://rss.cnn.com/rss/cnn_world.rss",
+    //     "http://rss.cnn.com/rss/cnn_us.rss",
+    //     "http://rss.cnn.com/rss/cnn_latest.rss"
     //     // "https://rss.politico.com/congress.xml",
     //     // "http://rss.politico.com/politics.xml",
     //     // "https://feeds.a.dj.com/rss/RSSWorldNews.xml",
     //     // "http://feeds.feedburner.com/zerohedge/feed",
     //     // "http://thehill.com/rss/syndicator/19110",
     //     // "http://thehill.com/taxonomy/term/1778/feed",
-    //     // "https://nypost.com/feed",
+    //     // "https://nypost.com/feed"
     //     // "https://snewsi.com/rss"
     //     // "https://www.reddit.com/r/StockMarket/.rss"
     //   )
@@ -58,23 +60,23 @@ class FeedsController @Inject() (
 
     // TODO progress bar for sentiment scale
     // https://www.w3schools.com/bootstrap/bootstrap_progressbars.asp
+
     Ok(
       views.html.index(
-        // analysisRows
         Array(
           AnalysisRow(
-            Some("et"),
-            Some("ORD"),
-            Some("negative"),
-            Some(0),
-            Some(0)
+            Some("Google"),
+            Some("ORG"),
+            Some("positive"),
+            Some(43),
+            Some(95.0)
           ),
           AnalysisRow(
-            Some("et3333333"),
-            Some("ORD"),
-            Some("positive"),
-            Some(100000),
-            Some(0.999)
+            Some("Google"),
+            Some("ORG"),
+            Some("negative"),
+            Some(23),
+            Some(33.0)
           )
         )
       )
@@ -96,14 +98,42 @@ class FeedsController @Inject() (
         - send report to email and return OK
         - report contains new articles with links.
          */
-        val allContents: Seq[Seq[FeedContent]] = urls
+        val allContents: Seq[Seq[FeedContent]] = Seq(
+          // "http://rss.cnn.com/rss/cnn_topstories.rss"
+          // "http://rss.cnn.com/rss/cnn_world.rss",
+          // "http://rss.cnn.com/rss/cnn_us.rss",
+          // "http://rss.cnn.com/rss/cnn_latest.rss"
+          // "https://rss.politico.com/congress.xml",
+          // "http://rss.politico.com/politics.xml"
+          // "https://feeds.a.dj.com/rss/RSSWorldNews.xml",
+          // "http://feeds.feedburner.com/zerohedge/feed",
+          // "http://thehill.com/rss/syndicator/19110",
+          // "http://thehill.com/taxonomy/term/1778/feed",
+          "https://nypost.com/feed"
+          // "https://snewsi.com/rss"
+          // "https://www.reddit.com/r/StockMarket/.rss"
+        )
           .flatMap(u => Scraper.getContent(FeedURL(u)))
 
-        val report = {
-          analysis.generateReport(allContents.flatten)
-          Ok("Urls found")
-        }
-        report
+        // val reportRows =
+        //   analysis.generateReport(allContents.flatten)
+
+        // db.upsertAnalysis("home.page.analysis.rows", reportRows) match {
+        //   case Failure(s) =>
+        //     log.error(s"Failed to store analysis. Reason: $s")
+        //   case Success(_) =>
+        //     log.info(s"Home page analysis rows svaed successfully.")
+        // }
+
+        // memory info
+        val mb = 1024 * 1024
+        val runtime = Runtime.getRuntime
+        println(
+          "** Used Memory:  " + (runtime.totalMemory - runtime.freeMemory) / mb + " MB"
+        )
+        println("** Max Memory:   " + runtime.maxMemory / mb)
+
+        Ok("Report generated")
       case _ =>
         BadRequest("No URLs for RSS feeds found in request")
     }

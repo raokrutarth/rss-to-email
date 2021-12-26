@@ -15,6 +15,10 @@ import org.apache.http.client.methods.{
   HttpGet,
   HttpRequestBase
 }
+
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.DataFrame
+
 import org.apache.http.impl.client.DefaultHttpClient
 import scala.concurrent.Future
 import javax.inject._
@@ -30,6 +34,7 @@ import org.apache.http.util.EntityUtils
 import org.apache.http.entity.StringEntity
 import models.FeedContent
 import play.api.Logger
+import models.AnalysisRow
 
 // https://stargate.io/docs/stargate/1.0/developers-guide/document-using.html#_retrieving_a_document_using_a_where_clause
 
@@ -53,6 +58,8 @@ class DocumentStore @Inject() (lifecycle: ApplicationLifecycle) {
 
   // TODO use to keep track of user to feed mappings
   private val userToFeedsCollections = "user-to-feeds"
+
+  implicit val analysisRowFormat = Json.format[AnalysisRow]
 
   private def addAuth(request: HttpRequestBase): Unit = {
     request.setHeader("X-Cassandra-Token", AppConfig.settings.database.appToken)
@@ -86,6 +93,33 @@ class DocumentStore @Inject() (lifecycle: ApplicationLifecycle) {
         val docIdToFeed = content("data").as[Map[String, Feed]]
         logger.info(s"Fetched ${docIdToFeed.size} feeds for user $userID")
         Success(docIdToFeed.values.toSeq)
+    }
+  }
+
+  def upsertAnalysis(key: String, rows: Array[AnalysisRow]): Try[String] = {
+    val url =
+      AppConfig.settings.database.url + apiPath + s"/analysisStore/$key"
+    logger.info(
+      s"Storing dataframe with key $key using DB API $url"
+    )
+    val request = new HttpPut(url)
+    addAuth(request)
+    val feedJson =
+      request.setEntity(new StringEntity(Json.toJson(rows).toString()))
+
+    val response = httpClient.execute(request)
+    val status_code = response.getStatusLine().getStatusCode()
+    val message = EntityUtils.toString(response.getEntity())
+    status_code match {
+      case 200 =>
+        logger.info(s"Saved dataframe with message $message")
+        val docId = Json.parse(message)("documentId")
+        Success(docId.as[String])
+      case _ =>
+        logger.error(s"Failed to save dataframe with key $key")
+        throw new HttpException(
+          s"Invalid status code $status_code and message $message during dataframe upsert."
+        )
     }
   }
 
