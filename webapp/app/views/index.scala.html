@@ -1,0 +1,88 @@
+@(analysisRows: Array[AnalysisRow])
+
+@main("RSS Analysis") {
+<div class="container">
+  <!-- <div class="row justify-content-center">
+    <div class="col-md-6 text-center mb-5">
+      <h2 class="heading-section">News Analysis for Today</h2>
+    </div>
+  </div> -->
+
+  <div class="container">
+    <div class="jumbotron">
+      <h1>News Entity Metrics</h1>
+      <p>Get sentiment, No. of mentions and other relevant metrics
+        for entities mentioned in the news.
+      </p>
+    </div>
+  </div>
+
+  <div class="row" id="pre-table">
+
+    <div class="col-md-12">
+      <div class="float-right">
+        Last updated: Jan 12, 1995
+      </div>
+
+      <p>
+        <a class="btn btn-dark dropdown-toggle" data-toggle="collapse" href="#collapseExample" role="button"
+          aria-expanded="false" aria-controls="collapseExample">
+          Source Feeds
+        </a>
+      </p>
+      <div class="collapse" id="collapseExample">
+        <div class="card card-body">
+
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">Cras justo odio</li>
+            <li class="list-group-item">Dapibus ac facilisis in</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+          </ul>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table table-bordered table-dark table-striped">
+            <thead>
+              <tr>
+                <th>Entity</th>
+                <th>Entity Type</th>
+                <th>No. Samples</th>
+                <th>Sentiment Strength</th>
+                <th>Sentiment</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for(t <- analysisRows) {<tr>
+                <th scope="row">@t.entityName</th>
+                <td>@t.entityType</td>
+                <td>@t.numTexts</td>
+                <td>@t.aggregateConfidence</td>
+
+                @t.sentiment match {
+                case Some("negative") => {<td><button type="button" class="btn btn-outline-danger">Negative</button>
+                </td>}
+                case Some("positive") => {<td><a href="#" class="btn btn-outline-success">Positive</a></td>}
+                }
+                </tr>
+                }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  }

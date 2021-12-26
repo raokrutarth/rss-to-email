@@ -30,6 +30,7 @@ RUN apt-get update --yes && \
     unzip \
     curl \
     git \
+    time \
     nodejs \
     npm \
     fonts-liberation \

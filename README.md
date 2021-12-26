@@ -144,7 +144,12 @@ scala + play tutorials: https://www.youtube.com/watch?v=FqMDHsFNlxQ&list=PLLMXbk
   - <https://www.digitalocean.com/pricing/>
   - B2 plan <https://azure.microsoft.com/en-us/pricing/details/app-service/linux/#pricing>
   - e2 medium <https://cloud.google.com/run/pricing#cloud-run-pricing>
-  - AWS ec2 t4g.medium HDD ~$15
+  - AWS ec2 t4g.medium HDD ~$15 <https://mtyurt.net/post/2021/why-we-chose-aws-ecs.html>
+- spark project templates <https://github.com/foundweekends/giter8/wiki/giter8-templates>
+- spark streaming code <https://medium.com/expedia-group-tech/apache-spark-structured-streaming-output-sinks-3-of-6-ed3247545fbc>
+- datastax + spark integration.
+- redis <https://faun.pub/how-to-share-spark-dataset-across-applications-using-redis-9f64e6e79352>
+  - set eviction policy <https://flaviocopes.com/heroku-redis-maxmemory-policy/>
 
 names:
 - sentimetrics
