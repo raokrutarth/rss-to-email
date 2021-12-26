@@ -1,8 +1,8 @@
-@import fyi.newssnips.models.{AnalysisRow, FeedRow}
+@import fyi.newssnips.models._
 @import fyi.newssnips.shared.EntityTypeDescriptions
 
 
-@(analysisRows: Array[AnalysisRow], sourceFeeds: Array[FeedRow], lastUpdated: String, categroyId: String)
+@(analysisRows: Array[AnalysisRowUi], sourceFeeds: Array[FeedRow], lastUpdated: String, categroyId: String)
 
 @siteTemplate("NewsSnips") {
 <div class="container">
@@ -14,10 +14,10 @@
       <p>
         <!-- Take control &#9994 of the topics that get your attention &#128064. -->
         Press the
-          <button type="button" class="btn bth-sm btn-outline-success">Green Numbers</button> 
+          <span class="badge badge-pill badge-success">Green Numbers</span> 
           for positivity and 
-          <button type="button" class="btn bth-sm btn-outline-danger">Red Numbers</button>
-          for the other side next to each topic.
+          <span class="badge badge-pill badge-danger">Red Numbers</span>
+          for the other side on each topic.
       </p>
       <p style="font-style: italic;">You may need to swipe sideways on smaller screens.</p>
       <a class="btn btn-info" href="/about" role="button">Learn More</a>
@@ -64,8 +64,7 @@
                 <th data-toggle="tooltip" data-placement="top" data-trigger="click hover focus"
                   title="Click/hover on topic to see topic type">Topic &#9432;</th>
                 <th>Total Mentions</th>
-                <th>&#128512 Mentions</th>
-                <th>&#128545 Mentions</th>
+                <th>Mood</th>
               </tr>
             </thead>
             <tbody>
@@ -74,15 +73,44 @@
                   data-placement="top auto"
                   title='@t.entityType (@{EntityTypeDescriptions.descriptions getOrElse(t.entityType, "")})'>
                   @t.entityName
+                  
+                  @if(t.negativeMentions > 0) {
+                    &nbsp;
+                    <a 
+                      data-bs-placement="top" 
+                      title='See negative sentiment mentions of @t.entityName.'
+                      href="/v1/@categroyId/mentions/@t.entityName/@t.entityType/negative"
+                      class="badge badge-pill badge-danger">@t.negativeMentions
+                    </a>
+                  }
+
+                  @if(t.positiveMentions > 0) {
+                    &nbsp;
+                    <a data-bs-placement="top" title='See positive sentiment mentions of @t.entityName.'
+                      href="/v1/@categroyId/mentions/@t.entityName/@t.entityType/positive"
+                      class="badge badge-pill badge-success">@t.positiveMentions
+                    </a>
+                  }
+                  
                 </th>
                 <td>@t.totalNumTexts</td>
-                <td><a data-bs-placement="top" title='See positive sentiment mentions of @t.entityName.'
-                    href="/v1/@categroyId/mentions/@t.entityName/@t.entityType/positive"
-                    class="btn btn-outline-success">@t.positiveMentions</a>
-                </td>
-                <td><a data-bs-placement="top" title='See negative sentiment mentions of @t.entityName.'
-                    href="/v1/@categroyId/mentions/@t.entityName/@t.entityType/negative"
-                    class="btn btn-outline-danger">@t.negativeMentions</a>
+                <td> 
+                  @if(t.positivityScore > 65) {
+                    <!-- smiling face with open mouth and smiling eyes -->
+                    &#128516;
+                  } else if(t.positivityScore > 50){
+                    <!-- slightly smiling face -->
+                    &#128578;
+                  } else if(t.positivityScore >= 40){
+                    <!-- neutral face -->
+                    &#128528;
+                  } else if(t.positivityScore > 30){
+                    <!-- angry face -->
+                    &#128544;
+                  } else {
+                    <!-- angry face red -->
+                    &#128545;
+                  }
                 </td>
                 </tr>
                 }

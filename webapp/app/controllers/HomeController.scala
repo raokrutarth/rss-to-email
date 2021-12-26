@@ -32,6 +32,19 @@ class HomeController @Inject() (
 User-agent: *
 Allow: /
 Disallow: */mentions/*
+
+Sitemap: https://newssnips.fyi/sitemap.txt
+    """).as("text/plain")
+  }
+
+  def sitemapTxt() = Action { _ =>
+    // TODO add sitemap.
+    Ok("""
+https://newssnips.fyi/about
+https://newssnips.fyi/v1/home
+https://newssnips.fyi/v1/category/markets
+https://newssnips.fyi/v1/category/entertainment
+https://newssnips.fyi/v1/category/politics
     """).as("text/plain")
   }
 

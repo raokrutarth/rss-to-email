@@ -4,13 +4,19 @@
 ## both
 
 - switch toggled home page.
-- music background video.
+  - more visuals and images.
+- music background tutorial video/gif.
 - launch checklist.
+  - reddit & blog post.
+  print flyers in gym & downtown streets.
+- Create Instagram, reddit and facebook account.
 
 ## wa
 
-- reddit & blog post.
+- positivity columns.
+- newsletter welcome and update email.
 - entity search functionality.
+- `https://www.buymeacoffee.com/`
 
 ## dc
 
@@ -20,9 +26,11 @@
 - manual exceptions:
   - remove zeroedge. invalid text description.
     - feed url class's descriptionClean flag.
-  - set category of feed URL in class.
   - remove mfool descriptions due to reporter name. 
+  - remove axios content. too long.
+  - remove slate content. unrelated image descriptions.
 - call cache warm after update.
+- rss feed URL finder using nav bar links.
 
 ## non-urgent
 
@@ -33,7 +41,6 @@
 - add context column.
 - table column names to shared.
 - dynamic entity book url scraper.
-- YouTube tutorial video.
 - add roadmap section. e.g. filtering feeds.
 - move to bootstrap 5.1
 - enable pagination for text and entity pages.

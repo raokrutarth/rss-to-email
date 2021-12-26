@@ -9,3 +9,13 @@ case class AnalysisRow(
     negativeTextIds: Option[List[Long]],
     totalNumTexts: Long
 )
+
+// FIXME use traits and proper inheretence
+case class AnalysisRowUi(
+    entityName: String,
+    entityType: String,
+    negativeMentions: Long,
+    positiveMentions: Long,
+    totalNumTexts: Long,
+    positivityScore: Int // calculated at query time
+)

@@ -195,3 +195,4 @@ scala + play tutorials: https://www.youtube.com/watch?v=FqMDHsFNlxQ&list=PLLMXbk
 - redis SSL via stunnel:
   - `https://morethantech.info/blogs/2020/04/26/redis-via-stunnel/`
 - sendgrid bulk send: `https://www.twilio.com/blog/sending-bulk-emails-3-ways-sendgrid-nodejs`
+- admin dashboard: `https://twitter.com/Cruip_com`

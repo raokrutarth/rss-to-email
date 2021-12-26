@@ -1,11 +1,5 @@
-import java.time.OffsetDateTime
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import java.time.ZoneId
-import fyi.newssnips.shared.config.SharedConfig
-import com.typesafe.scalalogging.Logger
-import java.lang.Runtime
+import java.net.URI
 
- DateTimeFormatter.ofPattern("E, d LLL YYYY").format(
-     OffsetDateTime.now(ZoneId.of("UTC"))
- )
+val h = new URI("https://www.politico.com/news/2021/12/01/democrats-paid-leave-push-523574").getHost()
+h
+println(h)

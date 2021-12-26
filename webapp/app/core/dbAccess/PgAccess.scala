@@ -17,32 +17,33 @@ class PgAccess @Inject() (db: Postgres) {
       categoryMetadata: CategoryDbMetadata,
       limit: Int = 100,
       offset: Int = 0
-  ): Try[Array[AnalysisRow]] = {
+  ): Try[Array[AnalysisRowUi]] = {
     val q = s"""
       SELECT 
         "entityName", "entityType", 
         "negativeMentions", "positiveMentions", 
-        "totalNumTexts"
+        "totalNumTexts",
+        ROUND(("positiveMentions"::float / "totalNumTexts"::float) * 100) AS positivity_score
+
       FROM ${categoryMetadata.analysisTableName}
       ORDER BY "totalNumTexts" DESC 
       LIMIT ? OFFSET ?;
     """
     val parser = (r: ResultSet) => {
-      AnalysisRow(
+      AnalysisRowUi(
         entityName = r.getString("entityName"),
         entityType = r.getString("entityType"),
         negativeMentions = r.getLong("negativeMentions"),
         positiveMentions = r.getLong("positiveMentions"),
         totalNumTexts = r.getLong("totalNumTexts"),
-        positiveTextIds = None,
-        negativeTextIds = None
+        positivityScore = r.getInt("positivity_score")
       )
     }
     val queryArgs = (p: PreparedStatement) => {
       p.setInt(1, limit)
       p.setInt(2, offset)
     }
-    db.getRows[AnalysisRow](q, queryArgs, parser)
+    db.getRows[AnalysisRowUi](q, queryArgs, parser)
   }
 
   def getFeedsRows(categoryMetadata: CategoryDbMetadata): Try[Array[FeedRow]] = {
@@ -112,6 +113,7 @@ class PgAccess @Inject() (db: Postgres) {
       TextsPageRow(
         text = r.getString("text"),
         url = r.getString("url")
+        // host = import java.net.URI | new URI(r.getString("url")).getHost()
       )
     }
     db.getRows[TextsPageRow](query = q, parser = parser, queryArgs = queryArgs)

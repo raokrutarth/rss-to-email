@@ -70,7 +70,7 @@ object SharedConfig {
       config: Config,
       inProd: Boolean
   ): PostgresConfig = {
-    val dbProvider = if (inProd) "cockroachdb" else "yugabyte"
+    val dbProvider = "cockroachdb" //if (inProd) "cockroachdb" else "yugabyte"
 
     log.info(s"Using postgres provider : ${dbProvider}")
 

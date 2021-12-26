@@ -17,7 +17,7 @@ import fyi.newssnips.webapp.core.dal._
 import fyi.newssnips.webapp.core.db._
 
 case class CategoryAnalysisPageData(
-    analysisRows: Array[AnalysisRow],
+    analysisRows: Array[AnalysisRowUi],
     sourceFeeds: Array[FeedRow],
     lastUpdated: String
 )
@@ -33,7 +33,7 @@ class PageDataFetcher @Inject() (dal: PgAccess, db: Postgres)() {
   else 15.seconds
 
   implicit val feedRowFormat     = Json.format[FeedRow]
-  implicit val analysisRowFormat = Json.format[AnalysisRow]
+  implicit val analysisRowFormat = Json.format[AnalysisRowUi]
   implicit val pdRowFormat       = Json.format[CategoryAnalysisPageData]
 
   /** Gets the category's page data from the DB by colelcting the necessary DFs
