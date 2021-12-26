@@ -9,6 +9,8 @@ libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0
 val sparkVersion = "3.1.2"
 libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion
 
+// libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.3"
+
 libraryDependencies += "com.typesafe" % "config" % "1.4.1"
 // libraryDependencies += "org.webjars" % "swagger-ui" % "3.43.0"
 lazy val root = (project in file(".")).enablePlugins(

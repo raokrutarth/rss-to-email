@@ -117,11 +117,11 @@ class DocumentStore @Inject() (lifecycle: ApplicationLifecycle) {
     }
   }
 
-  def deleteFeed(feed: Feed): Try[Boolean] = {
-    val docId = feed.url.digest()
+  def deleteFeed(feedUrl: FeedURL): Try[Boolean] = {
+    val docId = feedUrl.digest()
     val url =
       AppConfig.settings.database.url + apiPath + s"/$feedsCollection/$docId"
-    logger.info(s"Deleting feed $feed with URL $url")
+    logger.info(s"Deleting feed $feedUrl with DB API $url")
     val request = new HttpDelete(url)
     addAuth(request)
 
@@ -129,8 +129,14 @@ class DocumentStore @Inject() (lifecycle: ApplicationLifecycle) {
     val status_code = response.getStatusLine().getStatusCode()
     status_code match {
       case 204 =>
-        logger.info(s"Deleted feed ${feed.url}")
+        // FIXME same status code even if the document does not exist
+        logger.info(s"Deleted feed ${feedUrl}")
         Success(true)
+      case _ =>
+        logger.error(
+          s"Unable to delete feed $feedUrl with status code $status_code."
+        )
+        Success(false)
     }
   }
 

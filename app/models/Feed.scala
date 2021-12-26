@@ -30,6 +30,7 @@ case class FeedContent(
 case class Feed(
     url: FeedURL,
     content: Option[Seq[FeedContent]],
+    // https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html
     lastScraped: Option[LocalDate]
 )
 

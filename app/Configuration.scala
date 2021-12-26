@@ -4,6 +4,8 @@ import com.typesafe.config.ConfigFactory
 import com.typesafe.config.Config
 import scala.util.Properties
 import java.io.File
+import org.apache.http.impl.client.HttpClientBuilder
+import org.apache.http.client.config.RequestConfig
 
 // https://github.com/alexandru/scala-best-practices/blob/master/sections/
 // 3-architecture.md#35-must-not-use-parameterless-configfactoryload-or-access-a-config-object-directly
@@ -12,7 +14,8 @@ case class AppConfig(
     database: DatastaxConfig,
     sendgrid: SendgridConfig,
     runtimeEnv: String,
-    inProd: Boolean
+    inProd: Boolean,
+    httpClientConfig: RequestConfig
 )
 
 case class DatastaxConfig(
@@ -39,6 +42,15 @@ object AppConfig {
   /** Load from a given Typesafe Config object */
   def load(config: Config): AppConfig = {
     val runtime: String = Properties.envOrElse("RUNTIME_ENV", "development")
+
+    val timeout = 10
+    val requestConfig = RequestConfig
+      .custom()
+      .setConnectTimeout(timeout * 1000)
+      .setConnectionRequestTimeout(timeout * 1000)
+      .setSocketTimeout(timeout * 1000)
+      .build()
+
     AppConfig(
       database = DatastaxConfig(
         url = config.getString("secrets.database.datastaxAstra.url"),
@@ -48,7 +60,8 @@ object AppConfig {
         apiKey = config.getString("secrets.sendgrid.apiKey")
       ),
       runtimeEnv = runtime,
-      inProd = if (runtime.equals("docker")) true else false
+      inProd = if (runtime.equals("docker")) true else false,
+      httpClientConfig = requestConfig
     )
   }
 }

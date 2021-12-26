@@ -47,3 +47,7 @@ annual fees.
   - <https://github.com/Tusharrajbhardwaj/HR_RestApi_CRUD_Scala_ReactiveMongo_PlayFramework>
 - DB connection performance: <https://www.playframework.com/documentation/2.1.0/ThreadPools>
 - cassandra datastax ORM <https://github.com/DataStax-Examples/object-mapper-jvm>
+- <https://github.com/lauris/awesome-scala>
+- Feeds to explore: <https://rss.com/blog/popular-rss-feeds/>
+- Scala/Java NLP librarier: <https://www.predictiveanalyticstoday.com/top-free-software-for-text-analysis-text-mining-text-analytics/>
+- monitoring <https://medium.com/i-love-my-local-farmer-engineering-blog/monitoring-serverless-java-applications-b0f15c487364>
