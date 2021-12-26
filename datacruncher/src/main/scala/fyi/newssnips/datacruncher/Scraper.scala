@@ -31,7 +31,7 @@ object Scraper {
     )
     request.setHeader(
       "Accept",
-      "application/rss+xml, text/xml, application/xml, application/rdf+xml, application/atom+xml"
+      "application/rss+xml, application/xml, application/atom+xml, text/xml" // application/rdf+xml
     )
     val response    = httpClient.execute(request)
     val status_code = response.getStatusLine().getStatusCode()
@@ -75,8 +75,64 @@ object Scraper {
     }
   }
 
-  def getAndParseFeed(url: FeedURL): Option[Feed] = {
-    val isReddit: Boolean = url.value.contains("reddit.com")
+  private def extractGNewsContent(
+      xml: Elem,
+      disableContent: Boolean
+  ): Seq[FeedContent] = {
+    for {
+      xmlItems <- (xml \\ "item")
+      title       = (xmlItems \\ "title").text
+      description = if (disableContent) "" else (xmlItems \ "description").text
+      link        = (xmlItems \\ "link").text
+    } yield FeedContent(
+      link,
+      title,
+      description,
+      false
+    )
+  }
+
+  private def extractRedditContent(
+      xml: Elem,
+      disableContent: Boolean
+  ): Seq[FeedContent] = {
+    for {
+      xmlItem <- (xml \\ "entry")
+      title = (xmlItem \\ "title").text
+      // TODO fix by parsing the html content
+      // with https://github.com/ruippeixotog/scala-scraper
+      description = ""
+      link        = (xmlItem \\ "link" \ "@href").text
+    } yield FeedContent(
+      link,
+      title,
+      description,
+      false
+    )
+  }
+
+  private def extractBasicContent(
+      xml: Elem,
+      disableContent: Boolean
+  ): Seq[FeedContent] = {
+    for {
+      xmlItem <- (xml \\ "item")
+      title       = (xmlItem \\ "title").text
+      description = if (disableContent) "" else (xmlItem \ "description").text
+      link        = (xmlItem \\ "link").text
+    } yield FeedContent(
+      link,
+      title,
+      description,
+      false
+    )
+  }
+
+  def getAndParseFeed(
+      url: FeedURL,
+      disableContent: Boolean =
+        true // don't read the description of each entry in xml
+  ): Option[Feed] = {
 
     Scraper.getXML(url.value) match {
       case Success(xml) =>
@@ -85,24 +141,13 @@ object Scraper {
           f"Extracting contents from feed ${url.value} with title $feedTitle."
         )
 
-        val itemTag =
-          if (isReddit) "entry" else "item"
-        val contentTag =
-          if (isReddit) "content" else "description"
-
-        val contents = for {
-          xmlItems <- (xml \\ itemTag)
-          title       = (xmlItems \\ "title").text
-          description = (xmlItems \\ contentTag).text
-          link =
-            if (!isReddit) (xmlItems \\ "link").text
-            else (xmlItems \\ "link" \ "@href").text
-        } yield FeedContent(
-          link,
-          title,
-          description,
-          false
-        )
+        val contents = if (url.value.contains("reddit.com")) {
+          extractRedditContent(xml, disableContent)
+        } else if (url.value.contains("news.google.com")) {
+          extractGNewsContent(xml, disableContent)
+        } else {
+          extractBasicContent(xml, disableContent)
+        }
         log.info(s"Extracted ${contents.size} items form ${url.value}.")
         // TODO when lenght is 0, return failure
         if (contents.isEmpty) {

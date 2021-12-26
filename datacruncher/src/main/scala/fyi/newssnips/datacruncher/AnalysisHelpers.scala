@@ -11,8 +11,11 @@ object NerHelper {
         normalizeEntityName(
           en.replaceFirst("(The\\s*|the\\s*)", "")
         )
-      case en if (en.endsWith("'s")) => en.slice(0, en.lastIndexOfSlice("'s"))
-      case _                         => en
+      case en if (en.endsWith("'s")) =>
+        normalizeEntityName(
+          en.slice(0, en.lastIndexOf("'s"))
+        )
+      case _ => en
     }
   }
 

@@ -66,7 +66,15 @@ class Analysis(spark: SparkSession) {
     "tom gardner",
     "benzinga",
     "axios",
-    "mto news"
+    "mto news",
+    "yahoo entertainment",
+    "google news",
+    "cnbc", // need a better filter
+    "cnn",
+    "fox news",
+    "yahoo finance",
+    "usa today",
+    "the wall street journal"
     // remove https://fool.libsyn.com/michael-lewis-returns
   )
   private val typesToSkip =

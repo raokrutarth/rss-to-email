@@ -14,11 +14,36 @@ import fyi.newssnips.datacruncher.utils.DfUtils
 import fyi.newssnips.datacruncher.scripts.ModelStore
 import org.apache.spark.ml.PipelineModel
 
+object DataPrepHelpers {
+  private val log: Logger = Logger("app." + this.getClass().toString())
+
+  def normalizeTitle(url: String, title: String): String = {
+    if (url.contains("news.google.com")) {
+      // google news titles contain the publisher at the end seperated by -
+      val sepIdx = title.lastIndexOf("-")
+      if (sepIdx > -1) {
+        title.slice(0, sepIdx)
+      } else {
+        log.warn(
+          s"Unable to see google news publisher seperator for $title from $url"
+        )
+        title
+      }
+
+    } else {
+      title
+    }
+  }
+
+  val titleNormalizeUdf = udf((u: String, t: String) => normalizeTitle(u, t))
+}
+
 @Singleton
 class DataPrep(spark: SparkSession) {
   import spark.implicits._
   private val log: Logger = Logger("app." + this.getClass().toString())
 
+  // TODO use https://rdrr.io/github/r-spark/sparknlp/man/nlp_sentence_detector.html
   private val cleaningPipeline = new Pipeline()
     .setStages(
       Array(
@@ -26,7 +51,7 @@ class DataPrep(spark: SparkSession) {
         new RegexTokenizer()
           .setInputCol("rawText")
           .setOutputCol("normalized")
-          .setPattern("<[^>]+>|\\s+") // split by html tag or space
+          .setPattern("<[^>]+>|\\s+") // split words by html tag or space
           .setToLowercase(false)
       )
     )
@@ -47,8 +72,11 @@ class DataPrep(spark: SparkSession) {
     val cleanedDescriptionsDf = cleaningPipeline
       .transform(descriptionsDf)
       .dropDuplicates("url")
+      .withColumn("norm_merged", concat_ws(" ", col("normalized")))
+      // limit description to 300 clean characters. FIXME contains urls
+      .withColumn("merged_truncate", substring(col("norm_merged"), 0, 300))
       .select(
-        concat_ws(" ", col("normalized")).as("textBlock"),
+        col("merged_truncate").as("textBlock"),
         col("url")
       )
 
@@ -62,6 +90,7 @@ class DataPrep(spark: SparkSession) {
     log.info(
       s"Cleaned and extracted sentences from descriptions."
     )
+    DfUtils.showSample(descriptionSentencesDf)
 
     // prepare titles
     val titlesDf = spark.sparkContext
@@ -75,6 +104,11 @@ class DataPrep(spark: SparkSession) {
         concat_ws(" ", col("normalized")).as("text"),
         col("url")
       )
+      .withColumn(
+        "text",
+        DataPrepHelpers.titleNormalizeUdf(col("url"), col("text"))
+      )
+
     log.info(
       s"Cleaned and extracted titles."
     )
@@ -105,7 +139,7 @@ class DataPrep(spark: SparkSession) {
     log.info(
       s"Extracted sentences from titles and descriptions."
     )
-    DfUtils.showSample(contentsDf)
+    DfUtils.showSample(contentsDf, truncate = 200, overrideEnv = true)
     contentsDf
   }
 
