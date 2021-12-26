@@ -13,6 +13,8 @@ import org.apache.spark.sql.types._
 
 import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
 import com.johnsnowlabs.nlp.SparkNLP
+import com.johnsnowlabs.nlp.{DocumentAssembler, Finisher}
+import com.johnsnowlabs.nlp.annotators.{StopWordsCleaner, Tokenizer}
 
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.sql.SparkSession
@@ -20,6 +22,9 @@ import org.apache.spark.sql.SparkSession
 import scala.concurrent.Future
 import scala.collection.mutable.WrappedArray
 import scala.collection.JavaConverters._
+import com.johnsnowlabs.nlp.embeddings.BertSentenceEmbeddings
+import com.johnsnowlabs.nlp.annotators.classifier.dl.ClassifierDLModel
+import com.johnsnowlabs.nlp.LightPipeline
 
 @Singleton
 class Analysis @Inject() (lifecycle: ApplicationLifecycle) {
@@ -49,68 +54,58 @@ class Analysis @Inject() (lifecycle: ApplicationLifecycle) {
   private val sentimetPipeline =
     new PretrainedPipeline("analyze_sentiment", lang = "en")
 
-  private def getEntities(contentsDf: DataFrame): Map[String, String] = {
+  private val marketSentimentPipeline = new LightPipeline(
+    new Pipeline()
+      .setStages(
+        Array(
+          new DocumentAssembler()
+            .setInputCol("text")
+            .setOutputCol("document"),
+          BertSentenceEmbeddings
+            .pretrained("sent_bert_wiki_books_sst2", "en")
+            .setInputCols(Array("document"))
+            .setOutputCol("sentence_embeddings"),
+          ClassifierDLModel
+            .pretrained("classifierdl_bertwiki_finance_sentiment", "en")
+            .setInputCols(Array("document", "sentence_embeddings"))
+            .setOutputCol("class")
+        )
+      )
+      .fit(spark.createDataFrame(Seq()).toDF("text"))
+  )
+
+  private def getEntities(contentsDf: DataFrame): DataFrame = {
 
     val transformed = entityRecognitionPipeline.transform(contentsDf)
     log.info(s"Extracted entities from ${transformed.count()} blocks of text.")
-    transformed.select("id", "text", "entities").limit(3).show(false)
+    transformed.select("id", "entities").limit(3).show(false)
     // Every ROW contains the text with an array of entities and
     // corresponding array of maps that contain the tags for each entity.
     // to get all entities and their tags, need to explode each array column.
     // Which creates duplicate rows. Select col("text") when debugging.
-    val selected = transformed
+    val entitiesDf = transformed
       .select(
-        // expand entities to individual rows
+        // expand entities array to individual rows
         col("id").as("textID"),
-        col("entities.metadata").as("metadata"),
-        explode(col("entities.result")).as("extractedEntity")
+        explode(col("entities")).as("entity")
       )
       .select(
-        // expand tags to individual rows
+        // extract values from each entity struct
         col("textID"),
-        col("extractedEntity"),
-        explode(col("metadata")).as("extractedTags")
+        col("entity.result").as("entityName"),
+        col("entity.metadata.entity").as("entityType")
       )
-      // extract tags
-      .select(
-        col("textID"),
-        col("extractedEntity"),
-        col("extractedTags.entity").as("entityType")
-      )
-    log.info(s"Extracted ${selected.count()} entities and their tags.")
-    selected.limit(7).show(false)
+    log.info(s"Extracted ${entitiesDf.count()} entities and their types.")
+    entitiesDf.limit(7).show(false)
+    entitiesDf
+  }
 
-    val entitiesToMetadatas = selected
-      .collectAsList()
-      .asScala
-      .toList
-    // .collect
-    // .map(_.toSeq)
-    // .flatten
-    // .toList
-
-    log.info(
-      s"first: ${entitiesToMetadatas.head}, second: ${entitiesToMetadatas(1)}"
-    )
-
-    // entitiesToMetadatas.map {
-    //   (
-    //       entities: WrappedArray[String],
-    //       metadatas: WrappedArray[Map[String, String]]
-    //   ) =>
-    //     (entities, metadatas).zipped.foreach { (e, m) => (e, m("entity")) }
-    // }
-    // log.info(s"entities to metadata tuple $entitiesToMetadatas")
-
-    // val result = entitiesToMetadatas.flatMap { case (entities, metadatas) =>
-    //   for (
-    //     e <- entities;
-    //     m <- metadatas
-    //   ) yield (e, m("entity"))
-    // }.toMap
-    // log.info(s"results: ${result}")
-    // result
-    Map()
+  private def getSentiment(contentsDf: DataFrame): Unit = {
+    val transformed =
+      marketSentimentPipeline.transform(contentsDf)
+    log.info(s"Extracted sentiment from ${transformed.count()} blocks of text.")
+    transformed.printSchema()
+    transformed.select("id", "text", "sentiment").limit(3).show(false)
   }
 
   def generateReport(contents: Seq[FeedContent]): Option[Report] = {
@@ -133,7 +128,8 @@ class Analysis @Inject() (lifecycle: ApplicationLifecycle) {
       )
       .toDF("id", "text")
 
-    val entities = getEntities(contentsDf)
+    // val entitiesDf = getEntities(contentsDf)
+    val sentimentDf = getSentiment(contentsDf)
     None
   }
 
