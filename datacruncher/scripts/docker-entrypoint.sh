@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 
 # container entrypoint that periodically runs the
 # dc update cycle when the server resources are 
@@ -14,11 +14,11 @@ load_avg_threshold="1"
 cpu_load_avg_low () {
   # 15 min
   F15M=`(uptime | awk -F "load average:" '{ print $2 }' | cut -d, -f3) | sed 's/ //g'`
-  echo "[+] Current 15 minute load average: ${F15M}"
+  echo "[+] Current 15 minute load average: ${F15M} (max ${load_avg_threshold})"
   # comparison in bash needs int
   l_avg_int=`printf "%.0f\n" "$F15M"`
   
-  if [[ $load_avg_threshold > $l_avg_int ]]; then
+  if [[ $load_avg_threshold -gt $l_avg_int ]]; then
     return 0 # true
   else
     return 1
@@ -29,7 +29,7 @@ cpu_is_idle () {
   # percent
   cpu_idle=`top -b -n 1 | grep Cpu | awk '{print $8}'|cut -f 1 -d "."`
   cpu_use=`expr 100 - $cpu_idle`
-  echo "[+] Current cpu utilization: $cpu_use"
+  echo "[+] Current cpu utilization: $cpu_use % (max ${cpu_threshold} %)"
   if [ $cpu_use -lt $cpu_threshold ]; then
     return 0 # true
   else
@@ -40,7 +40,7 @@ cpu_is_idle () {
 mem_is_idle () {
   # MB units
   mem_free=`free -m | grep "Mem" | awk '{print $4+$6}'`
-  echo "[+] Current free memory: $mem_free MB"
+  echo "[+] Current free memory: $mem_free MB (min ${mem_threshold})"
   if [ $mem_free -ge $mem_threshold  ]; then
     return 0 # true
   else
@@ -61,13 +61,15 @@ server_is_idle () {
 
 while true; do
   until server_is_idle; do
-    echo "[-] Waiting for server resources to free up before running dc."
+    echo "[`date`] Waiting for server resources to free up before running dc."
     sleep 3m
   done
 
-  echo "[+] Running dc."
+  echo "[`date`] Running dc."
   /opt/docker/bin/datacruncher cycle
 
-  echo "[+] dc execution finished. Sleeping until next cycle window."
-  sleep 8h
+  if [[ $? -eq 0 ]]; then 
+    echo "[`date`] dc execution finished. Sleeping until next cycle window."
+    sleep 8h
+  fi
 done

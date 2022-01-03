@@ -24,9 +24,9 @@ class Cache() {
 
   // https://www.javadoc.io/doc/redis.clients/jedis/3.7.0/redis/clients/jedis/Jedis.html
   val redisPool = {
-    log.info("Initiating cache connection pool.")
+    log.info(s"Initiating cache connection pool with keyspace ${keyspace}.")
     val c = new JedisPoolConfig()
-    c.setMaxTotal(10)
+    c.setMaxTotal(5)
     c.setMaxWaitMillis(2000)
 
     new JedisPool(

@@ -3,12 +3,14 @@
 
 ## both
 
+- remove entity type grouping and test wa
+- shared config default container file paths
 - switch toggled home page.
   - more visuals and images.
 - music background tutorial video/gif.
 - launch checklist.
   - reddit & blog post.
-  print flyers in gym & downtown streets.
+  - print flyers in gym & downtown streets.
 - Create Instagram, reddit and facebook account.
 
 ## wa

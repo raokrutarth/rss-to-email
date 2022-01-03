@@ -176,7 +176,7 @@ class Analysis(spark: SparkSession) {
     )
 
     val resultDf = expandedDf
-      .groupBy("entityName", "entityType")
+      .groupBy("entityName")
       .agg(
         // collect relevant texts
         collect_set(when(col("sentiment") === "pos", $"text_id"))
@@ -184,7 +184,8 @@ class Analysis(spark: SparkSession) {
         collect_set(when(col("sentiment") === "neg", $"text_id"))
           .as("negativeTextIds"),
         // count total mentions
-        countDistinct("text_id").as("totalNumTexts")
+        countDistinct("text_id").as("totalNumTexts"),
+        first("entityType").as("entityType")
       )
       // get sentiment counts
       .withColumn("negativeMentions", size(col("negativeTextIds")))

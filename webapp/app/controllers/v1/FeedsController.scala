@@ -12,6 +12,7 @@ import play.api.cache.Cached
 import play.twirl.api.Html
 import fyi.newssnips.datastore.Cache
 import fyi.newssnips.webapp.config.AppConfig
+import fyi.newssnips.webapp.core.books.Books
 
 @Singleton
 class FeedsController @Inject() (
@@ -117,8 +118,9 @@ class FeedsController @Inject() (
           case Some(dbMetadata) =>
             dal.getTextsPage(dbMetadata, entityName, entityType, sentiment) match {
               case Success(pageData) =>
+                val books = Books.getBooks(entityType, sentiment)
                 Ok(
-                  views.html.textsPage(pageData.rows, entityName, entityType, sentiment)
+                  views.html.textsPage(pageData.rows, entityName, entityType, sentiment, books)
                 ).as("text/html")
 
               case Failure(exc) =>

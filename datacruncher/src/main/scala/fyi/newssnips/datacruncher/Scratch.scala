@@ -10,6 +10,7 @@ import configuration.AppConfig
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.util.EntityUtils
+import fyi.newssnips.shared.DateTimeUtils
 
 object ScratchCode {
   private val log = Logger("app." + this.getClass().toString())
@@ -105,7 +106,11 @@ object ScratchCode {
     df.show(false)
     spark.stop
   }
-  checkCaseFix()
+  def dateFix() = {
+    log.info("Running scratch datefix")
+    log.info(s"${DateTimeUtils.getDateAsStringUi(DateTimeUtils.now())}")
+  }
+  dateFix()
 
   def negOverride() = {
     val spark: SparkSession =

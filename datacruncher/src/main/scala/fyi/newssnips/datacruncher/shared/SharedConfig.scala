@@ -115,7 +115,7 @@ object SharedConfig {
     val provider = if (inProd) "upstash" else "heroku"
     val useSsl   = if (inProd) true else false
 
-    log.info(s"Using cache privider $provider with SSL $useSsl.")
+    log.info(s"Using cache provider $provider with SSL $useSsl.")
     val connUrl: String = Properties.envOrNone("REDIS_URL") match {
       case Some(url) =>
         // give priority to redis provided by env var

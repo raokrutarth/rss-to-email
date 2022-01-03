@@ -48,7 +48,7 @@ heroku-redis:
 	heroku redis:info $(HRK_APP)
 	heroku redis:cli $(HRK_APP)
 
-redis-config-show:
+heroku-redis-show:
 	heroku config:get $(HRK_APP) REDIS_URL
 
 # stores the creds in host and sets project.
@@ -108,22 +108,29 @@ domain-mapping:
 
 
 stop-dc:
-	docker rm -f $(DC_CONTAINER_NAME) || true
+	docker rm -f $(DC_CONTAINER_NAME)
+
+dc-logs:
+	-docker logs --tail=50 -f $(DC_CONTAINER_NAME)
 
 redeploy-dc:
 	./scripts/build-datacruncher.sh $(DC_BUILD_TAG)
 	
-	docker rm -f $(DC_CONTAINER_NAME) || true
+	-docker rm -f $(DC_CONTAINER_NAME)
+	
 	docker run -it \
 		--detach \
-    --name $(DC_CONTAINER_NAME) \
-    -e SECRETS_FILE_PATH=/etc/secrets.conf \
+		--name $(DC_CONTAINER_NAME) \
+		-e SECRETS_FILE_PATH=/etc/secrets.conf \
 		-v "/home/zee/sharp/rss-to-email/datacruncher/secrets.conf":/etc/secrets.conf:ro \
-    -e SHARED_SECRETS_FILE_PATH=/etc/shared.secrets.conf \
-    -v "/home/zee/sharp/rss-to-email/shared.secrets.conf":/etc/shared.secrets.conf:ro \
-    -e PG_CERT_PATH=/etc/pg.crt \
-    -v "/home/zee/sharp/rss-to-email/cockroachdb_db.crt":/etc/pg.crt:ro \
-    -v "/home/zee/sharp/rss-to-email/datacruncher/models":/etc/models:ro \
-    $(DC_BUILD_TAG)
+		-e SHARED_SECRETS_FILE_PATH=/etc/shared.secrets.conf \
+		-v "/home/zee/sharp/rss-to-email/shared.secrets.conf":/etc/shared.secrets.conf:ro \
+		-e PG_CERT_PATH=/etc/pg.crt \
+		-v "/home/zee/sharp/rss-to-email/cockroachdb_db.crt":/etc/pg.crt:ro \
+		-v "/home/zee/sharp/rss-to-email/datacruncher/models":/etc/models:ro \
+		-v "/etc/timezone:/etc/timezone:ro" \
+		-v "/etc/localtime:/etc/localtime:ro" \
+		$(DC_BUILD_TAG)
 	
 	docker update --memory=8Gi --cpus=6 $(DC_CONTAINER_NAME)
+	make -s dc-logs

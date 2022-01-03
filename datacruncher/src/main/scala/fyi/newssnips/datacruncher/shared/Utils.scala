@@ -38,7 +38,7 @@ object DateTimeUtils {
   def getDateAsStringUi(d: OffsetDateTime): String = {
     // shorthand to display in UI
     // E.g. "Tue, 7 Dec 2021"
-    DateTimeFormatter.ofPattern("E, d LLL YYYY").format(d)
+    DateTimeFormatter.ofPattern("E, d LLL yyyy").format(d)
   }
 
   def convertStringToDate(s: String): OffsetDateTime = {
