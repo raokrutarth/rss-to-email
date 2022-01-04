@@ -8,18 +8,6 @@ object Books {
   private val log: Logger = Logger("app." + this.getClass().toString())
   private val books = Map(
     "GPE" -> Seq( //"Countries, cities, states.",
-      """
-        <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=0805078533&asins=0805078533&linkId=8012ef06f07a8280de736abee2ddca96&show_border=false&link_opens_in_new_window=true"></iframe>
-      """,
-      """
-        <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=1541675819&asins=1541675819&linkId=bc78a5fd91ea1e9d9c3f80f96b87c0e9&show_border=true&link_opens_in_new_window=true"></iframe>
-      """,
-      """
-        <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=059331817X&asins=059331817X&linkId=45392f493fbba4b08e0c155a1f2ed736&show_border=true&link_opens_in_new_window=true"></iframe>
-      """,
-      """
-        <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=1982168439&asins=1982168439&linkId=235bdd63047a204b45e2032322d9da7a&show_border=true&link_opens_in_new_window=true"></iframe>
-      """,
       // extreme economies
       """
         <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=1784163252&asins=1784163252&linkId=5e829cfed1beb284690cfb2f5affca00&show_border=true&link_opens_in_new_window=true"></iframe>
@@ -43,6 +31,14 @@ object Books {
       // good econ hard times
       """
       <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=B07ZWKHM8N&asins=B07ZWKHM8N&linkId=329236a7753ac1acc8019cc8e9e88c8e&show_border=true&link_opens_in_new_window=true"></iframe>
+      """,
+      // social chemistry
+      """
+      <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=1524743801&asins=1524743801&linkId=6a3e2d00e13789a8bdbeeb6c22dd93ee&show_border=true&link_opens_in_new_window=true"></iframe>
+      """,
+      // madness of the crowds
+      """
+      <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=1539849589&asins=1539849589&linkId=ba3a42ece425841cfa04bd7f5c2cb34e&show_border=true&link_opens_in_new_window=true"></iframe>
       """
     ),
     "PERSON" -> Seq(
@@ -70,7 +66,7 @@ object Books {
       <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=B07QZT49MK&asins=B07QZT49MK&linkId=4828e96cccec8d95a096e193b592d1d8&show_border=true&link_opens_in_new_window=true"></iframe>
       """
     ),
-    "NORP" -> Seq(
+    "NORP" -> Seq( //"Nationalities or religious or political groups.",
       // useful delusions
       """
       <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=0393652203&asins=0393652203&linkId=3d3205a779436882d48eae60141eab74&show_border=true&link_opens_in_new_window=true"></iframe>
@@ -114,21 +110,21 @@ object Books {
       """
       <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=B00GBE63LE&asins=B00GBE63LE&linkId=8c64f333e7e1a11eaff97871d3fb5b0b&show_border=true&link_opens_in_new_window=true"></iframe>
       """
-    ), //"Nationalities or religious or political groups.",
+    ),
     "FAC" -> Seq(), //"Buildings, airports, highways, bridges, etc.",
-    "ORG" -> Seq(
+    "ORG" -> Seq( // Companies, agencies, institutions, etc.
       // winner take all
       """
-    <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=B07FNSVK5S&asins=B07FNSVK5S&linkId=26e908e13e6655e2aea0c93acefa4883&show_border=true&link_opens_in_new_window=true"></iframe>
-    """,
+      <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=B07FNSVK5S&asins=B07FNSVK5S&linkId=26e908e13e6655e2aea0c93acefa4883&show_border=true&link_opens_in_new_window=true"></iframe>
+      """,
       // superforecasting
       """
-    <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=0804136718&asins=0804136718&linkId=3ccccd3fdf8866c6ee006756c7a880e3&show_border=true&link_opens_in_new_window=true"></iframe>
-    """,
+      <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=0804136718&asins=0804136718&linkId=3ccccd3fdf8866c6ee006756c7a880e3&show_border=true&link_opens_in_new_window=true"></iframe>
+      """,
       // architects of intellegence
       """
-    <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=B0812B9X5G&asins=B0812B9X5G&linkId=1e5e7d28b649a1868038251af7601970&show_border=true&link_opens_in_new_window=true"></iframe>
-    """,
+      <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=B0812B9X5G&asins=B0812B9X5G&linkId=1e5e7d28b649a1868038251af7601970&show_border=true&link_opens_in_new_window=true"></iframe>
+      """,
       // sand hill road
       """
       <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=059308358X&asins=059308358X&linkId=4e07b7206fc8825c9793f10ac670bd5e&show_border=true&link_opens_in_new_window=true"></iframe>
@@ -145,14 +141,14 @@ object Books {
       """
       <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=B01M19JRIO&asins=B01M19JRIO&linkId=0bf170521c753462c89ab63545f61efd&show_border=true&link_opens_in_new_window=true"></iframe>
       """
-    ), //"Companies, agencies, institutions, etc.",
-    "LOC" -> Seq(
+    ),
+    "LOC" -> Seq( // Non-GPE locations, mountain ranges, bodies of water.
       // deep survival
       """
       <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=B00G09UL22&asins=B00G09UL22&linkId=1e799250fd63f5ea6af79be2b0582826&show_border=true&link_opens_in_new_window=true"></iframe>
       """
-    ), //"Non-GPE locations, mountain ranges, bodies of water.",
-    "PRODUCT" -> Seq(
+    ),
+    "PRODUCT" -> Seq( //"Objects, vehicles, foods, etc. (Not services.)",
       // enough
       """
       <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=0470524235&asins=0470524235&linkId=d293c0966f495165b03e1393f3a21ffb&show_border=true&link_opens_in_new_window=true"></iframe>
@@ -185,8 +181,8 @@ object Books {
       """
       <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=B001H071HC&asins=B001H071HC&linkId=63ce478ca97fc81d89e7efb08c7d1557&show_border=true&link_opens_in_new_window=true"></iframe>
       """
-    ), //"Objects, vehicles, foods, etc. (Not services.)",
-    "EVENT" -> Seq(
+    ),
+    "EVENT" -> Seq( //"Named hurricanes, battles, wars, sports events, etc.",
       // art of rhetoric
       """
       <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=0140445102&asins=0140445102&linkId=594b8a081cca093ccdd6ec0db488896c&show_border=true&link_opens_in_new_window=true"></iframe>
@@ -207,23 +203,23 @@ object Books {
       """
       <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=B000MGBNM6&asins=B000MGBNM6&linkId=f166bed86b2c259fda2ed2b099d7478f&show_border=true&link_opens_in_new_window=true"></iframe>
       """
-    ), //"Named hurricanes, battles, wars, sports events, etc.",
+    ),
     "WORK_OF_ART" -> Seq(), //"Titles of books, songs, etc.",
     "LAW" -> Seq(
       // power of us
       """
-    <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=0316538418&asins=0316538418&linkId=f2de97a0c3b9393c3f0bc6f76ab27860&show_border=true&link_opens_in_new_window=true"></iframe>
-    """
+      <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=0316538418&asins=0316538418&linkId=f2de97a0c3b9393c3f0bc6f76ab27860&show_border=true&link_opens_in_new_window=true"></iframe>
+      """
     ), //"Named documents made into laws.",
     "LANGUAGE" -> Seq(
       // language instinct
       """
-    <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=0061336467&asins=0061336467&linkId=6b65cecb82be60c7f84908421131d292&show_border=true&link_opens_in_new_window=true"></iframe>
-    """,
+      <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=0061336467&asins=0061336467&linkId=6b65cecb82be60c7f84908421131d292&show_border=true&link_opens_in_new_window=true"></iframe>
+      """,
       // how the mind works
       """
-    <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=0393334775&asins=0393334775&linkId=8e64334b87f7118496f54d82baa35af1&show_border=true&link_opens_in_new_window=true"></iframe>
-    """
+      <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=0393334775&asins=0393334775&linkId=8e64334b87f7118496f54d82baa35af1&show_border=true&link_opens_in_new_window=true"></iframe>
+      """
     ), //"Any named language.",
     "MONEY" -> Seq(
       // rentier capitalism
@@ -267,7 +263,7 @@ object Books {
     """
       <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=0674840313&asins=0674840313&linkId=12939abc95e4f1d54fa49967c45abdbd&show_border=true&link_opens_in_new_window=true"></iframe>
       """,
-    // bumliminal mind
+    // subliminal mind
     """
       <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=B007WZU3E4&asins=B007WZU3E4&linkId=926d30773a8722e19a57bfa6cd285e9d&show_border=true&link_opens_in_new_window=true"></iframe>
       """,
@@ -285,8 +281,8 @@ object Books {
       """,
     // makers takers
     """
-      <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=B01CUKFLII&asins=B01CUKFLII&linkId=9b76d3f9fe06f2f85048d43700d6afca&show_border=true&link_opens_in_new_window=true"></iframe>
-      """
+    <iframe style="width:120px;height:240px;" marginwidth="0" marginheight="0" scrolling="no" frameborder="0" src="//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ss&ref=as_ss_li_til&ad_type=product_link&tracking_id=sentipeg-20&language=en_US&marketplace=amazon&region=US&placement=B01CUKFLII&asins=B01CUKFLII&linkId=9b76d3f9fe06f2f85048d43700d6afca&show_border=true&link_opens_in_new_window=true"></iframe>
+    """
   )
 
   def getBooks(entityType: String, sentiment: String): Seq[Html] = {

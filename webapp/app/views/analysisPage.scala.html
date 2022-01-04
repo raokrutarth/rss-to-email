@@ -2,7 +2,8 @@
 @import fyi.newssnips.shared.EntityTypeDescriptions
 
 
-@(analysisRows: Array[AnalysisRowUi], sourceFeeds: Array[FeedRow], lastUpdated: String, categroyId: String)
+@(analysisRows: Array[AnalysisRowUi], sourceFeeds: Array[FeedRow], lastUpdated:
+String, categroyId: String, positivity: Int)
 
 @siteTemplate("NewsSnips") {
 <div class="container">
@@ -14,41 +15,74 @@
       <p>
         <!-- Take control &#9994 of the topics that get your attention &#128064. -->
         Press the
-          <span class="badge badge-pill badge-success">Green Numbers</span> 
-          for positivity and 
-          <span class="badge badge-pill badge-danger">Red Numbers</span>
-          for the other side on each topic.
+        <span class="badge badge-pill badge-success">Green Numbers</span>
+        for positivity and
+        <span class="badge badge-pill badge-danger">Red Numbers</span>
+        for the other side on each topic.
       </p>
-      <p style="font-style: italic;">You may need to swipe sideways on smaller screens.</p>
+      <!-- <p style="font-style: italic;">You may need to swipe sideways on smaller
+        screens.</p> -->
       <a class="btn btn-info" href="/about" role="button">Learn More</a>
     </div>
   </div>
   }
 
-  <div class="row" id="pre-table">
+  <div class="row">
     <div class="col-md-12">
-      <div class="float-right">
+      <!-- <div class="float-right">
         Last updated: @lastUpdated
+      </div> -->
+
+      <div class="card mx-auto bg-transparent border-0 mb-3">
+        <!-- <div class="card-header text-center"><h6>Pick Mood</h6></div> -->
+        <div class="card-body mx-auto">
+          <!-- <h6 class="card-title">Mood</h6> -->
+          <!-- <label for="customRange1">Positivity</label> -->
+          <p class="font-italic">Filter topics by positivity</p>
+          &#128545; <input value="@positivity" type="range" min="0" max="100" step="5"
+            id="customRange1" onchange="onMoodUpdate(value)"> &#128516;
+        </div>
       </div>
-      <p>
-        <a class="btn btn-dark dropdown-toggle" data-toggle="collapse" href="#collapseExample" role="button"
-          aria-expanded="false" aria-controls="collapseExample">
-          Sources
-        </a>
-      </p>
-      <div class="collapse" id="collapseExample">
-        <div class="card card-body">
+    </div>
+  </div>
 
-          <ul class="list-group list-group-flush">
-            @for(sf <- sourceFeeds) {<tr>
-              @if(sf.title.nonEmpty) {
-              <li class="list-group-item"><a target="_blank" href="@sf.url">@sf.title</a></li>
-              } else {
-              <li class="list-group-item"><a target="_blank" href="@sf.url">@sf.url</a></li>
-              }
-              </tr>}
-          </ul>
+  <div class="d-flex flex-row-reverse">
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-sm btn-light border-dark mb-2" data-toggle="modal"
+      data-target="#feedsModal">
+      See Sources
+    </button>
 
+    <!-- Modal -->
+    <div class="modal fade" id="feedsModal" tabindex="-1"
+      aria-labelledby="feedsModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="feedsModalLabel">Content Publishers</h5>
+            <button type="button" class="close" data-dismiss="modal"
+              aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted text-left">Last updated on @lastUpdated</p>
+            <ul class="list-group list-group-flush">
+              @for(sf <- sourceFeeds) {<tr>
+                @if(sf.title.nonEmpty) {
+                <li class="list-group-item"><a target="_blank"
+                    href="@sf.url">@sf.title</a></li>
+                } else {
+                <li class="list-group-item"><a target="_blank"
+                    href="@sf.url">@sf.url</a></li>
+                }
+                </tr>}
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary"
+              data-dismiss="modal">Close</button>
+          </div>
         </div>
       </div>
     </div>
@@ -61,55 +95,58 @@
           <table class="table table-bordered table-dark table-striped">
             <thead>
               <tr>
-                <th data-toggle="tooltip" data-placement="top" data-trigger="click hover focus"
-                  title="Click/hover on topic to see topic type">Topic &#9432;</th>
+                <th data-toggle="tooltip" data-placement="top"
+                  data-trigger="click hover focus"
+                  title="Click/hover on topic to see topic type">Topic &#9432;
+                </th>
                 <th>Total Mentions</th>
                 <th>Mood</th>
               </tr>
             </thead>
             <tbody>
               @for(t <- analysisRows) {<tr>
-                <th scope="row" style="font-style: italic;" data-toggle="popover" data-trigger="focus click hover"
+                <th scope="row" style="font-style: italic;"
+                  data-toggle="popover" data-trigger="focus click hover"
                   data-placement="top auto"
                   title='@t.entityType (@{EntityTypeDescriptions.descriptions getOrElse(t.entityType, "")})'>
                   @t.entityName
-                  
+
                   @if(t.negativeMentions > 0) {
-                    &nbsp;
-                    <a 
-                      data-bs-placement="top" 
-                      title='See negative sentiment mentions of @t.entityName.'
-                      href="/v1/@categroyId/mentions/@t.entityName/@t.entityType/negative"
-                      class="badge badge-pill badge-danger">@t.negativeMentions
-                    </a>
+                  &nbsp;
+                  <a data-bs-placement="top"
+                    title='See negative sentiment mentions of @t.entityName.'
+                    href="/v1/@categroyId/mentions/@t.entityName/@t.entityType/negative"
+                    class="badge badge-pill badge-danger">@t.negativeMentions
+                  </a>
                   }
 
                   @if(t.positiveMentions > 0) {
-                    &nbsp;
-                    <a data-bs-placement="top" title='See positive sentiment mentions of @t.entityName.'
-                      href="/v1/@categroyId/mentions/@t.entityName/@t.entityType/positive"
-                      class="badge badge-pill badge-success">@t.positiveMentions
-                    </a>
+                  &nbsp;
+                  <a data-bs-placement="top"
+                    title='See positive sentiment mentions of @t.entityName.'
+                    href="/v1/@categroyId/mentions/@t.entityName/@t.entityType/positive"
+                    class="badge badge-pill badge-success">@t.positiveMentions
+                  </a>
                   }
-                  
+
                 </th>
                 <td>@t.totalNumTexts</td>
-                <td> 
+                <td>
                   @if(t.positivityScore > 65) {
-                    <!-- smiling face with open mouth and smiling eyes -->
-                    &#128516;
+                  <!-- smiling face with open mouth and smiling eyes -->
+                  &#128516;
                   } else if(t.positivityScore > 50){
-                    <!-- slightly smiling face -->
-                    &#128578;
+                  <!-- slightly smiling face -->
+                  &#128578;
                   } else if(t.positivityScore >= 40){
-                    <!-- neutral face -->
-                    &#128528;
+                  <!-- neutral face -->
+                  &#128528;
                   } else if(t.positivityScore > 30){
-                    <!-- angry face -->
-                    &#128544;
+                  <!-- angry face -->
+                  &#128544;
                   } else {
-                    <!-- angry face red -->
-                    &#128545;
+                  <!-- angry face red -->
+                  &#128545;
                   }
                 </td>
                 </tr>
@@ -117,6 +154,7 @@
             </tbody>
           </table>
         </div>
+        <div class="card-footer text-muted">Last updated on @lastUpdated</div>
       </div>
     </div>
   </div>

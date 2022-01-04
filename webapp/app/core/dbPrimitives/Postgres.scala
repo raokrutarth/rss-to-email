@@ -34,7 +34,7 @@ class Postgres @Inject() (
     c.setKeepaliveTime(30 * 1000) // 30s
     c.setLeakDetectionThreshold(2000)
     c.setMaxLifetime(45 * 1000)
-    c.setIdleTimeout(10 * 1000)
+    // c.setIdleTimeout(10 * 1000)
     new HikariDataSource(c)
   }
   lifecycle.addStopHook(() =>

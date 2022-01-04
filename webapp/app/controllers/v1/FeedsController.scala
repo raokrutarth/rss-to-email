@@ -6,7 +6,7 @@ import scala.util.{Failure, Success}
 import javax.inject.Inject
 import javax.inject._
 import com.typesafe.scalalogging.Logger
-import fyi.newssnips.shared.DbConstants
+import fyi.newssnips.shared._
 import fyi.newssnips.core.PageDataFetcher
 import play.api.cache.Cached
 import play.twirl.api.Html
@@ -43,7 +43,7 @@ class FeedsController @Inject() (
         s"Received home page request from client ${request.remoteAddress}. " +
           s"Using db metadata ${dbMetadata.toString()}"
       )
-      dal.getCategoryAnalysisPage(cache, dbMetadata) match {
+      dal.getCategoryAnalysisPage(cache, dbMetadata, 0) match {
         case Success(data) =>
           log.info(
             s"Parsing ${data.analysisRows.size} analysis row(s) and " +
@@ -57,7 +57,8 @@ class FeedsController @Inject() (
               data.analysisRows,
               data.sourceFeeds,
               data.lastUpdated,
-              "home"
+              "home",
+              0
             )
           ).as("text/html")
 
@@ -68,18 +69,18 @@ class FeedsController @Inject() (
     }
   }
 
-  def category(categoryId: String) =
-    cached.status(_ => "category" + categoryId, status = 200, pageCacheTimeSec) {
+  def category(categoryId: String, positivity: Int) =
+    cached.status(_ => "category" + categoryId + s"$positivity", status = 200, pageCacheTimeSec) {
       Action { implicit request: Request[AnyContent] =>
         log.info(
-          s"Received category ${categoryId} page request from client ${request.remoteAddress}"
+          s"Received category ${categoryId} (mp $positivity) page request from client ${request.remoteAddress}"
         )
         DbConstants.categoryToDbMetadata get categoryId match {
           case Some(dbMetadata) => {
             log.info(
               s"Using db metadata ${dbMetadata.toString()} for category $categoryId."
             )
-            dal.getCategoryAnalysisPage(cache, dbMetadata) match {
+            dal.getCategoryAnalysisPage(cache, dbMetadata, positivity) match {
               case Success(data) =>
                 log.info(
                   s"Parsing ${data.analysisRows.size} analysis row(s) and ${data.sourceFeeds.size} feed(s) into HTML template."
@@ -89,7 +90,8 @@ class FeedsController @Inject() (
                     data.analysisRows,
                     data.sourceFeeds,
                     data.lastUpdated,
-                    categoryId
+                    categoryId,
+                    positivity
                   )
                 ).as("text/html")
 
@@ -119,8 +121,17 @@ class FeedsController @Inject() (
             dal.getTextsPage(dbMetadata, entityName, entityType, sentiment) match {
               case Success(pageData) =>
                 val books = Books.getBooks(entityType, sentiment)
+                val entityTypeDescription =
+                  EntityTypeDescriptions.descriptions getOrElse (entityType, entityType)
                 Ok(
-                  views.html.textsPage(pageData.rows, entityName, entityType, sentiment, books)
+                  views.html.textsPage(
+                    pageData.rows,
+                    entityName,
+                    entityType,
+                    sentiment,
+                    books,
+                    entityTypeDescription
+                  )
                 ).as("text/html")
 
               case Failure(exc) =>

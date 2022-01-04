@@ -216,3 +216,17 @@ scala + play tutorials: https://www.youtube.com/watch?v=FqMDHsFNlxQ&list=PLLMXbk
   - `https://www.crazyegg.com/` site scan
   - `https://matomo.org/` click tracking
   - `https://analytics.google.com/analytics/web/provision/#/provision`
+- site & business status page
+  - `https://instatus.com/blog`
+- mobile app
+  - `https://docs.flutter.dev/deployment/ios`
+- marketing checklist start point"
+  - `https://www.pinterest.com/business/hub`
+  - `https://twitter.com/alexgarcia_atx/status/1463188550430699522`
+  - `https://www.indiehackers.com/post/acquisition-channel-trends-opportunities-google-linkedin-pinterest-d621da3047`
+  - `https://twitter.com/IndieHackers/status/1453320053999480832`
+  - `https://blog.hubspot.com/blog/tabid/6307/bid/31147/the-ultimate-guide-to-mastering-pinterest-for-marketing.aspx`
+  - `https://twitter.com/mynameis_davis/status/1473299500290695175?s=20`
+  - `https://www.sendowl.com/where_to_sell`
+  - `https://blog.howitzer.co/`
+- slider `https://mdbootstrap.com/docs/b4/jquery/getting-started/installation/`

@@ -40,14 +40,14 @@ lazy val root = (project in file(".")).enablePlugins(
   PlayScala
 // SwaggerPlugin
 )
-.settings(
-  // export JAVA_OPTS="-Xms100M -Xmx512M -Xss520k -XX:+UseG1GC"
-  javaOptions ++= Seq(
-    "-Xms100M",
-    "-Xmx512M",
-    "-XX:+UseG1GC",
-  )
-)
+// .settings(
+//   // export JAVA_OPTS="-Xms100M -Xmx512M -Xss520k -XX:+UseG1GC"
+//   javaOptions ++= Seq(
+//     "-Xms100M",
+//     "-Xmx512M",
+//     "-XX:+UseG1GC",
+//   )
+// )
 // swaggerDomainNameSpaces := Seq("models")
 
 scalafmtOnCompile := true

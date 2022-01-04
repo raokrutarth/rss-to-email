@@ -3,10 +3,7 @@
 
 ## both
 
-- remove entity type grouping and test wa
 - shared config default container file paths
-- switch toggled home page.
-  - more visuals and images.
 - music background tutorial video/gif.
 - launch checklist.
   - reddit & blog post.
@@ -15,9 +12,9 @@
 
 ## wa
 
+- wrap up positivity glider.
 - newsletter welcome and update email.
 - entity search functionality.
-- buymeacoffee
 - cache clear on deploy.
 
 ## dc

@@ -15,6 +15,7 @@ class PgAccess @Inject() (db: Postgres) {
 
   def getAnalysisRows(
       categoryMetadata: CategoryDbMetadata,
+      minPositivity: Int,
       limit: Int = 100,
       offset: Int = 0
   ): Try[Array[AnalysisRowUi]] = {
@@ -26,6 +27,7 @@ class PgAccess @Inject() (db: Postgres) {
         ROUND(("positiveMentions"::float / "totalNumTexts"::float) * 100) AS positivity_score
 
       FROM ${categoryMetadata.analysisTableName}
+      WHERE ROUND(("positiveMentions"::float / "totalNumTexts"::float) * 100) >= ?
       ORDER BY "totalNumTexts" DESC 
       LIMIT ? OFFSET ?;
     """
@@ -40,8 +42,9 @@ class PgAccess @Inject() (db: Postgres) {
       )
     }
     val queryArgs = (p: PreparedStatement) => {
-      p.setInt(1, limit)
-      p.setInt(2, offset)
+      p.setInt(1, minPositivity)
+      p.setInt(2, limit)
+      p.setInt(3, offset)
     }
     db.getRows[AnalysisRowUi](q, queryArgs, parser)
   }

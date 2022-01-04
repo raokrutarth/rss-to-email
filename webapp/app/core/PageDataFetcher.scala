@@ -39,12 +39,13 @@ class PageDataFetcher @Inject() (dal: PgAccess, db: Postgres)() {
   /** Gets the category's page data from the DB by colelcting the necessary DFs
     */
   private def getCategoryPageDataDb(
-      categoryMetadata: CategoryDbMetadata
+      categoryMetadata: CategoryDbMetadata,
+      minPositivity: Int
   ): Try[CategoryAnalysisPageData] =
     Try {
       log.info(s"Getting analysis page data for category ${categoryMetadata.toString}")
 
-      val analysisTry    = dal.getAnalysisRows(categoryMetadata)
+      val analysisTry    = dal.getAnalysisRows(categoryMetadata, minPositivity)
       val feedsTry       = dal.getFeedsRows(categoryMetadata)
       val lastUpdatedTry = db.getKv(categoryMetadata.lastUpdateKey)
 
@@ -70,20 +71,23 @@ class PageDataFetcher @Inject() (dal: PgAccess, db: Postgres)() {
 
   def getCategoryAnalysisPage(
       cache: Cache,
-      categoryMetadata: CategoryDbMetadata
+      categoryMetadata: CategoryDbMetadata,
+      minPositivity: Int
   ): Try[CategoryAnalysisPageData] =
     Try {
-      val cacheKey = categoryMetadata.name + ".page.data"
+      val cacheKey = categoryMetadata.name + ".page.data" + s".min.pos.$minPositivity"
       cache.get(cacheKey) match {
         case Some(cachedRaw) =>
-          log.info(s"Cache hit for ${categoryMetadata.name} page data.")
+          log.info(
+            s"Cache hit for ${categoryMetadata.name} page data with minimum positivity $minPositivity."
+          )
           Json.parse(cachedRaw).as[CategoryAnalysisPageData]
         case _ =>
           log.info(s"Page data cache miss for ${categoryMetadata.name}.")
 
           val dbFetch = Future {
             blocking {
-              getCategoryPageDataDb(categoryMetadata)
+              getCategoryPageDataDb(categoryMetadata, minPositivity)
             }
           }
 

@@ -26,7 +26,10 @@ class Cache() {
   val redisPool = {
     log.info(s"Initiating cache connection pool with keyspace ${keyspace}.")
     val c = new JedisPoolConfig()
-    c.setMaxTotal(5)
+    c.setMaxTotal(3)
+    c.setMaxIdle(1)
+    c.setTestWhileIdle(true)
+    c.setTestOnCreate(true)
     c.setMaxWaitMillis(2000)
 
     new JedisPool(
@@ -41,30 +44,40 @@ class Cache() {
 
   // https://github.com/redis/jedis/issues/2708
   def set(key: String, value: String, exSec: java.lang.Integer = 0): Boolean = {
+    var j: Jedis = null
     try {
-      val r: Jedis = redisPool.getResource()
+      j = redisPool.getResource()
       if (exSec > 0) {
-        r.setex(keyspace + key, exSec, value)
+        j.setex(keyspace + key, exSec, value)
         true
       } else {
-        r.set(keyspace + key, value)
+        j.set(keyspace + key, value)
         true
       }
     } catch {
       case e: Exception =>
         log.error(s"Cache write failed with exception $e")
         false
+    } finally {
+      if (j != null) j.close()
     }
   }
 
   def delete(key: String) = Try {
-    redisPool.getResource().del(keyspace + key)
+    var j: Jedis = null
+    try {
+      j = redisPool.getResource()
+      j.del(keyspace + key)
+    } finally {
+      if (j != null) j.close()
+    }
   }
 
   def get(key: String): Option[String] = {
-
+    var j: Jedis = null
     try {
-      val v = redisPool.getResource().get(keyspace + key)
+      j = redisPool.getResource()
+      val v = j.get(keyspace + key)
       if (v == null || v.isEmpty) {
         log.info(s"No value for $key in cache.")
         None
@@ -75,13 +88,24 @@ class Cache() {
       case e: Exception =>
         log.error(s"Cache read failed with exception $e")
         None
+    } finally {
+      if (j != null) j.close()
     }
   }
 
   def flushCache() = Try {
-    val r = redisPool.getResource()
-    log.info(s"Removing all keys in cache for keyspace ${keyspace}")
-    r.keys(keyspace + "*").asScala.map(k => r.del(k))
+    var j: Jedis = null
+    try {
+      j = redisPool.getResource()
+      log.info(s"Removing all keys in cache for keyspace ${keyspace}")
+      j.keys(keyspace + "*").asScala.map(k => j.del(k))
+    } catch {
+      case e: Exception =>
+        log.error(s"Cache flush failed with exception $e")
+        None
+    } finally {
+      if (j != null) j.close()
+    }
   }
 
   def cleanup() = {

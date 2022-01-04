@@ -12,7 +12,7 @@ GET     /about     controllers.HomeController.about()
 
 GET /v1/home     controllers.v1.FeedsController.home()
 
-GET /v1/category/:categoryId                                  controllers.v1.FeedsController.category(categoryId: String)
+GET /v1/category/:categoryId                                  controllers.v1.FeedsController.category(categoryId: String, positivity: Int ?= 0)
 
 GET /v1/:categoryId/mentions/:entityName/:entityType/:sentiment  controllers.v1.FeedsController.mentions(categoryId: String, entityName: String, entityType: String, sentiment: String)
 
