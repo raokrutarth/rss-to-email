@@ -9,6 +9,11 @@ USER daemon
 ENV LOG4J_FORMAT_MSG_NO_LOOKUPS true
 ENV RUNTIME_ENV "docker"
 ENV JAVA_OPTS="-Xms100M -Xmx758M -XX:+UseG1GC -XX:+UseStringDeduplication"
-ENTRYPOINT ["/opt/docker/bin/newssnips-webapp"]
-CMD []
+
+# for heroku
+ENTRYPOINT /opt/docker/bin/newssnips-webapp
+
+# for gcp
+# ENTRYPOINT ["/opt/docker/bin/newssnips-webapp"]
+# CMD []
 

@@ -6,6 +6,7 @@ TIME_NOW := $(shell date +%Hh-%b-%d-%Y)
 
 DC_BUILD_TAG ?= "newssnips-datacruncher:$(TIME_NOW)"
 WA_BUILD_TAG ?= "newssnips-webapp:$(TIME_NOW)"
+HEROKU_BUILD_TAG ?= "registry.heroku.com/newssnips/web"
 
 GCLD = docker run --rm -ti \
 	-v /home/zee/.gcp:/root/.config/gcloud \
@@ -26,6 +27,23 @@ init-minikube:
 		--kubernetes-version=latest
 	minikube addons enable metrics-server
 
+wa-build:
+	./scripts/build-webapp.sh $(WA_BUILD_TAG)
+	# docker tag $(WA_BUILD_TAG) $(GCP_WA_IMAGE)
+	docker tag $(WA_BUILD_TAG) $(HEROKU_BUILD_TAG)
+
+heroku-push-release:
+	docker push $(HEROKU_BUILD_TAG)
+	heroku container:release web $(HRK_APP)
+
+heroku-logs:
+	-heroku logs $(HRK_APP) --num=500 --tail
+
+heroku-secrets-update:
+	./webapp/scripts/prod-deploy-config-str.sh > heroku.secrets.env
+	heroku config:set $(HRK_APP) $$(cat heroku.secrets.env)
+	rm -rf heroku.secrets.env
+
 aws-users:
 	-docker run \
 		--rm -it \
@@ -43,7 +61,7 @@ aws-s3:
 		cp ./webapp/public s3://newssnips-fyi/public \
 		--exclude "*.md" --acl public-read --recursive
 
-heroku-redis:
+heroku-redis-enter:
 	# heroku redis:maxmemory $(HRK_APP) --policy allkeys-lfu
 	heroku redis:info $(HRK_APP)
 	heroku redis:cli $(HRK_APP)
@@ -61,23 +79,19 @@ gcp-cleanup:
 	echo "delete run-app, image registry, secrets"
 	@# https://cloud.google.com/resource-manager/docs/creating-managing-projects#shutting_down_projects
 
-logs-wa:
+gcp-logs:
 	$(GCLD) "gcloud logging read --freshness=30m \
 		\"resource.type=cloud_run_revision AND resource.labels.service_name=webapp\" \
 		--limit 100" | grep textPayload
 
-wa-secrets-update:
-	./webapp/scripts/gcp-config-str.sh > gcp.secrets.env
+gcp-secrets-update:
+	gcp=1 ./webapp/scripts/prod-deploy-config-str.sh > gcp.secrets.env
 	$(GCLD) "gcloud run services update webapp --region us-west1 --update-env-vars $$(cat gcp.secrets.env)"
 	rm -rf gcp.secrets.env
 
-wa-status:
+gcp-status:
 	$(GCLD) "gcloud run services list"
 	$(GCLD) "gcloud run services describe webapp"
-
-wa-build:
-	./scripts/build-webapp.sh $(WA_BUILD_TAG)
-	docker tag $(WA_BUILD_TAG) $(GCP_WA_IMAGE)
 
 wa-push-and-launch:
 	$(GCLD) "gcloud auth configure-docker us-west1-docker.pkg.dev --quiet \
@@ -91,9 +105,9 @@ wa-push-and-launch:
 	rm -rf gcp.secrets.env
 
 # https://cloud.google.com/sdk/gcloud/reference/run/services/update
-wa-deploy: wa-build wa-push-and-launch
+gcp-deploy: gcp-build gcp-push-and-launch
 
-wa-scale-update:
+gcp-scale-update:
 	$(GCLD) "gcloud run services update webapp \
 		--cpu=2 --memory=1Gi \
 		--min-instances=1 --max-instances=1"
@@ -101,7 +115,7 @@ wa-scale-update:
 
 # https://cloud.google.com/run/docs/mapping-custom-domains
 # check on https://console.cloud.google.com/run/domains?project=newssnips
-domain-mapping:
+gcp-domain-mapping:
 	$(GCLD) "gcloud domains list-user-verified"
 	# $(GCLD) "gcloud domains verify newssnips.fyi"
 	# $(GCLD) "gcloud beta run domain-mappings create --service webapp --domain newssnips.fyi"

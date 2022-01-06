@@ -2,7 +2,7 @@
 
 export JAVA_OPTS="-Xms1024M -Xmx7048M -XX:+UseG1GC -XX:+UseStringDeduplication"
 export TF_CPP_MIN_LOG_LEVEL=2
-export RUNTIME_ENV=docker
+# export RUNTIME_ENV=docker
 
 set +x
 export DB_SECRETS_B64="$(base64 -w0 /home/dev/work/datastax-db-secrets.zip)"

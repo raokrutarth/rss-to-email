@@ -32,7 +32,8 @@ RUN apt-get update --yes && \
   git \
   time \
   fonts-liberation \
-  dnsutils
+  dnsutils \
+  lsof
 
 # Configure environment
 ENV SHELL=/bin/bash \

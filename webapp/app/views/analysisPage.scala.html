@@ -16,72 +16,65 @@ String, categroyId: String, positivity: Int)
         <!-- Take control &#9994 of the topics that get your attention &#128064. -->
         Press the
         <span class="badge badge-pill badge-success">Green Numbers</span>
-        for positivity and
+        for positive news and
         <span class="badge badge-pill badge-danger">Red Numbers</span>
         for the other side on each topic.
       </p>
-      <!-- <p style="font-style: italic;">You may need to swipe sideways on smaller
-        screens.</p> -->
       <a class="btn btn-info" href="/about" role="button">Learn More</a>
     </div>
   </div>
   }
 
   <div class="row">
-    <div class="col-md-12">
-      <!-- <div class="float-right">
-        Last updated: @lastUpdated
-      </div> -->
-
-      <div class="card mx-auto bg-transparent border-0 mb-3">
-        <!-- <div class="card-header text-center"><h6>Pick Mood</h6></div> -->
-        <div class="card-body mx-auto">
-          <!-- <h6 class="card-title">Mood</h6> -->
-          <!-- <label for="customRange1">Positivity</label> -->
-          <p class="font-italic">Filter topics by positivity</p>
-          &#128545; <input value="@positivity" type="range" min="0" max="100" step="5"
-            id="customRange1" onchange="onMoodUpdate(value)"> &#128516;
-        </div>
+    <div class="col-sm">
+      <div class="alert alert-light border-light shadow">
+        <label style="font-family: 'Bayon'; font-size: 22px; color: black;"
+          for="moodRange">Filter topics by mood</label>
+          <div class="text-nowrap">
+            &#128545;<input value="@positivity" type="range" min="0" max="100" step="5"
+          id="moodRange" onchange="onMoodUpdate(value)"> &#128516;
+          </div>
       </div>
     </div>
-  </div>
 
-  <div class="d-flex flex-row-reverse">
-    <!-- Button trigger modal -->
-    <button type="button" class="btn btn-sm btn-light border-dark mb-2" data-toggle="modal"
-      data-target="#feedsModal">
-      See Sources
-    </button>
+    <div class="col align-self-end text-right">
+      <!-- Button trigger modal -->
+      <button type="button" class="btn shadow btn-light border-dark mb-3"
+        data-toggle="modal" data-target="#feedsModal">
+        Sources
+      </button>
 
-    <!-- Modal -->
-    <div class="modal fade" id="feedsModal" tabindex="-1"
-      aria-labelledby="feedsModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="feedsModalLabel">Content Publishers</h5>
-            <button type="button" class="close" data-dismiss="modal"
-              aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <p class="text-muted text-left">Last updated on @lastUpdated</p>
-            <ul class="list-group list-group-flush">
-              @for(sf <- sourceFeeds) {<tr>
-                @if(sf.title.nonEmpty) {
-                <li class="list-group-item"><a target="_blank"
-                    href="@sf.url">@sf.title</a></li>
-                } else {
-                <li class="list-group-item"><a target="_blank"
-                    href="@sf.url">@sf.url</a></li>
-                }
-                </tr>}
-            </ul>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary"
-              data-dismiss="modal">Close</button>
+      <!-- Modal -->
+      <div class="modal fade text-center" id="feedsModal" tabindex="-1"
+        aria-labelledby="feedsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="feedsModalLabel">Content Publishers
+              </h5>
+              <button type="button" class="close" data-dismiss="modal"
+                aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p class="text-left">NewsSnips has analyzed content from the following sources to identify trending topics.</p>
+              <ul class="list-group list-group-flush">
+                @for(sf <- sourceFeeds) {<tr>
+                  @if(sf.title.nonEmpty) {
+                  <li class="list-group-item"><a target="_blank"
+                      href="@sf.url">@sf.title</a></li>
+                  } else {
+                  <li class="list-group-item"><a target="_blank"
+                      href="@sf.url">@sf.url</a></li>
+                  }
+                  </tr>}
+              </ul>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary"
+                data-dismiss="modal">Close</button>
+            </div>
           </div>
         </div>
       </div>
@@ -91,13 +84,22 @@ String, categroyId: String, positivity: Int)
   <div class="row">
     <div class="col-md-12">
       <div class="card">
-        <div class="table-responsive">
+        <!-- <div class="card-header">
+          <div class="row">
+            <div class="col text-left"><strong>Trending topics in markets news</strong></div>
+            <div class="col text-muted text-right">updated on @lastUpdated</div>
+          </div>
+        </div> -->
+        <div class="card-header text-muted text-right">
+          Updated on @lastUpdated
+        </div>
+        <div class="card-content table-responsive">
           <table class="table table-bordered table-dark table-striped">
             <thead>
               <tr>
                 <th data-toggle="tooltip" data-placement="top"
                   data-trigger="click hover focus"
-                  title="Click/hover on topic to see topic type">Topic &#9432;
+                  title="Click/hover on topic to see topic type">Topic
                 </th>
                 <th>Total Mentions</th>
                 <th>Mood</th>
@@ -154,7 +156,7 @@ String, categroyId: String, positivity: Int)
             </tbody>
           </table>
         </div>
-        <div class="card-footer text-muted">Last updated on @lastUpdated</div>
+        <!-- <div class="card-footer text-muted">Last updated on @lastUpdated</div> -->
       </div>
     </div>
   </div>

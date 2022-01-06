@@ -116,7 +116,7 @@ object SharedConfig {
     val useSsl   = if (inProd) true else false
 
     log.info(s"Using cache provider $provider with SSL $useSsl.")
-    val connUrl: String = Properties.envOrNone("REDIS_URL") match {
+    val connUrl: String = Properties.envOrNone("REDIS_URL_1") match {
       case Some(url) =>
         // give priority to redis provided by env var
         log.warn(s"Overriding cache provider with env var redis URI.")
