@@ -8,22 +8,22 @@ sentiment: String, books: Seq[Html], entityTypeDescription: String)
 <div class="container">
 
     @sentiment match {
-    case "positive" => {
-    <div class="alert alert-success">
-        <h4 class="alert-heading">@entityName
-            (@entityTypeDescription)
-        </h4>
-        <p>Positive/neutral &#128077 mentions of @entityName.</p>
-    </div>
-    }
-    case "negative" => {
-    <div class="alert alert-danger">
-        <h4 class="alert-heading">@entityName
-            (@entityTypeDescription)
-        </h4>
-        <p>Negative/neutral &#128078 mentions of @entityName.</p>
-    </div>
-    }
+        case "positive" => {
+            <div class="alert alert-success">
+                <h4 class="alert-heading">@entityName
+                    (@entityTypeDescription)
+                </h4>
+                <p>Positive/neutral &#128077 mentions of @entityName.</p>
+            </div>
+        }
+        case "negative" => {
+            <div class="alert alert-danger">
+                <h4 class="alert-heading">@entityName
+                    (@entityTypeDescription)
+                </h4>
+                <p>Negative/neutral &#128078 mentions of @entityName.</p>
+            </div>
+        }
     }
 
     <div class="row">

@@ -51,7 +51,9 @@ https://newssnips.fyi/v1/category/politics
 
   def adminDash() = auth { request =>
     log.info(s"Admin ${request.user} accessed the admin dashboard.")
-    NotImplemented("WIP")
+    Ok(
+      views.html.admin()
+    ).as("text/html")
   }
 
   def about() = cached.status(_ => "aboutPage", status = 200) {
