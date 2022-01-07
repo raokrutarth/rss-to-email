@@ -42,6 +42,7 @@ Sitemap: https://newssnips.fyi/sitemap.txt
     Ok("""
 https://newssnips.fyi/about
 https://newssnips.fyi/v1/home
+https://newssnips.fyi/v1/category/world
 https://newssnips.fyi/v1/category/markets
 https://newssnips.fyi/v1/category/entertainment
 https://newssnips.fyi/v1/category/politics

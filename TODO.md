@@ -12,8 +12,8 @@
 
 ## wa
 
-- wrap up positivity glider.
 - newsletter welcome and update email.
+- multi-table home page.
 - entity search functionality.
 - cache clear on deploy.
 

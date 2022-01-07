@@ -3,27 +3,10 @@
 
 
 @(analysisRows: Array[AnalysisRowUi], sourceFeeds: Array[FeedRow], lastUpdated:
-String, categroyId: String, positivity: Int)
+String, categoryId: String, positivity: Int)
 
 @siteTemplate("NewsSnips") {
 <div class="container">
-
-  @if(categroyId == "home") {
-  <div class="container">
-    <div class="jumbotron">
-      <h1>Welcome to a healthier way to stay informed</h1>
-      <p>
-        <!-- Take control &#9994 of the topics that get your attention &#128064. -->
-        Press the
-        <span class="badge badge-pill badge-success">Green Numbers</span>
-        for positive news and
-        <span class="badge badge-pill badge-danger">Red Numbers</span>
-        for the other side on each topic.
-      </p>
-      <a class="btn btn-info" href="/about" role="button">Learn More</a>
-    </div>
-  </div>
-  }
 
   <div class="row">
     <div class="col-sm">
@@ -81,84 +64,6 @@ String, categroyId: String, positivity: Int)
     </div>
   </div>
 
-  <div class="row">
-    <div class="col-md-12">
-      <div class="card">
-        <!-- <div class="card-header">
-          <div class="row">
-            <div class="col text-left"><strong>Trending topics in markets news</strong></div>
-            <div class="col text-muted text-right">updated on @lastUpdated</div>
-          </div>
-        </div> -->
-        <div class="card-header text-muted text-right">
-          Updated on @lastUpdated
-        </div>
-        <div class="card-content table-responsive">
-          <table class="table table-bordered table-dark table-striped">
-            <thead>
-              <tr>
-                <th data-toggle="tooltip" data-placement="top"
-                  data-trigger="click hover focus"
-                  title="Click/hover on topic to see topic type">Topic
-                </th>
-                <th>Total Mentions</th>
-                <th>Mood</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for(t <- analysisRows) {<tr>
-                <th scope="row" style="font-style: italic;"
-                  data-toggle="popover" data-trigger="focus click hover"
-                  data-placement="top auto"
-                  title='@t.entityType (@{EntityTypeDescriptions.descriptions getOrElse(t.entityType, "")})'>
-                  @t.entityName
-
-                  @if(t.negativeMentions > 0) {
-                  &nbsp;
-                  <a data-bs-placement="top"
-                    title='See negative sentiment mentions of @t.entityName.'
-                    href="/v1/@categroyId/mentions/@t.entityName/@t.entityType/negative"
-                    class="badge badge-pill badge-danger">@t.negativeMentions
-                  </a>
-                  }
-
-                  @if(t.positiveMentions > 0) {
-                  &nbsp;
-                  <a data-bs-placement="top"
-                    title='See positive sentiment mentions of @t.entityName.'
-                    href="/v1/@categroyId/mentions/@t.entityName/@t.entityType/positive"
-                    class="badge badge-pill badge-success">@t.positiveMentions
-                  </a>
-                  }
-
-                </th>
-                <td>@t.totalNumTexts</td>
-                <td>
-                  @if(t.positivityScore > 65) {
-                  <!-- smiling face with open mouth and smiling eyes -->
-                  &#128516;
-                  } else if(t.positivityScore > 50){
-                  <!-- slightly smiling face -->
-                  &#128578;
-                  } else if(t.positivityScore >= 40){
-                  <!-- neutral face -->
-                  &#128528;
-                  } else if(t.positivityScore > 30){
-                  <!-- angry face -->
-                  &#128544;
-                  } else {
-                  <!-- angry face red -->
-                  &#128545;
-                  }
-                </td>
-                </tr>
-                }
-            </tbody>
-          </table>
-        </div>
-        <!-- <div class="card-footer text-muted">Last updated on @lastUpdated</div> -->
-      </div>
-    </div>
-  </div>
+  @analysisTable(categoryId, analysisRows, lastUpdated)
 
   }

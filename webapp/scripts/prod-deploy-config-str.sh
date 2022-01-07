@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 # prints out the comma seperated env vars that 
-# need to be set in the gcp config update command.
+# need to be set in the the IaaS config update command.
 
 SECRETS_PATH="webapp/secrets.conf"
 PG_CERT_PATH="cockroachdb_db.crt"

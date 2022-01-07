@@ -13,6 +13,8 @@ import play.twirl.api.Html
 import fyi.newssnips.datastore.Cache
 import fyi.newssnips.webapp.config.AppConfig
 import fyi.newssnips.webapp.core.books.Books
+import fyi.newssnips.core.CategoryAnalysisPageData
+import scala.collection.mutable.LinkedHashMap
 
 @Singleton
 class FeedsController @Inject() (
@@ -36,44 +38,66 @@ class FeedsController @Inject() (
 
   val pageCacheTimeSec: Int = if (AppConfig.settings.shared.inProd) 30 else 5
 
-  def home() = cached.status(_ => "homeAnalysisPage", status = 200, pageCacheTimeSec) {
-    Action { implicit request: Request[AnyContent] =>
-      val dbMetadata = DbConstants.categoryToDbMetadata("home")
-      log.info(
-        s"Received home page request from client ${request.remoteAddress}. " +
-          s"Using db metadata ${dbMetadata.toString()}"
-      )
-      dal.getCategoryAnalysisPage(cache, dbMetadata, 0) match {
-        case Success(data) =>
-          log.info(
-            s"Parsing ${data.analysisRows.size} analysis row(s) and " +
-              s"${data.sourceFeeds.size} feed(s) into HTML template."
-          )
-          // TODO progress bar for sentiment scale
-          // https://www.w3schools.com/bootstrap/bootstrap_progressbars.asp
+  def home(positivity: Int) =
+    cached.status(_ => "home" + s"$positivity", status = 200, 1) {
 
-          Ok(
-            views.html.analysisPage(
-              data.analysisRows,
-              data.sourceFeeds,
-              data.lastUpdated,
-              "home",
-              0
+      // val d: CategoryAnalysisPageData = CategoryAnalysisPageData(
+      //   analysisRows = Array(
+      //     AnalysisRowUi(
+      //       "US",
+      //       "GPE",
+      //       2,
+      //       4,
+      //       6,
+      //       45
+      //     ),
+      //     AnalysisRowUi(
+      //       "US2",
+      //       "GPE",
+      //       7,
+      //       3,
+      //       10,
+      //       32
+      //     )
+      //   ),
+      //   sourceFeeds = Array(),
+      //   lastUpdated = "today"
+      // )
+      log.info(s"${DbConstants.categoryToDbMetadata.toString()}")
+
+      val categoryTables = LinkedHashMap[String, CategoryAnalysisPageData]()
+      for ((categoryId, dbMetadata) <- DbConstants.categoryToDbMetadata) {
+        log.info(
+          s"Using db metadata ${dbMetadata.toString()} for category $categoryId."
+        )
+        dal.getCategoryAnalysisPage(cache, dbMetadata, positivity, 5) match {
+          case Success(data) =>
+            log.info(
+              s"Parsing ${data.analysisRows.size} analysis row(s) and ${data.sourceFeeds.size} feed(s) into HTML template."
             )
-          ).as("text/html")
+            categoryTables(categoryId) = data
 
-        case Failure(exc) =>
-          log.error(s"Unable to get home page with exception $exc")
-          errResp
+          case Failure(exc) =>
+            log.error(s"Unable to get $categoryId page for home with exception $exc")
+        }
+      }
+
+      Action { implicit request: Request[AnyContent] =>
+        Ok(
+          views.html.home(
+            categoryTables,
+            positivity
+          )
+        ).as("text/html")
       }
     }
-  }
 
   def category(categoryId: String, positivity: Int) =
     cached.status(_ => "category" + categoryId + s"$positivity", status = 200, pageCacheTimeSec) {
       Action { implicit request: Request[AnyContent] =>
         log.info(
-          s"Received category ${categoryId} (mp $positivity) page request from client ${request.remoteAddress}"
+          s"Received request for category ${categoryId} page and minimum positivity " +
+            s"$positivity from client ${request.remoteAddress}"
         )
         DbConstants.categoryToDbMetadata get categoryId match {
           case Some(dbMetadata) => {

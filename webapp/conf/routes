@@ -10,7 +10,7 @@ GET     /sitemap.txt         controllers.HomeController.sitemapTxt()
 GET     /admin         controllers.HomeController.adminDash()
 GET     /about     controllers.HomeController.about()
 
-GET /v1/home     controllers.v1.FeedsController.home()
+GET /v1/home     controllers.v1.FeedsController.home(positivity: Int ?= 0)
 
 GET /v1/category/:categoryId                                  controllers.v1.FeedsController.category(categoryId: String, positivity: Int ?= 0)
 

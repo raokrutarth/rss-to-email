@@ -1,0 +1,91 @@
+@import fyi.newssnips.models._
+@import fyi.newssnips.core.CategoryAnalysisPageData
+@import scala.collection.mutable.LinkedHashMap
+
+@(categoryToData: LinkedHashMap[String, CategoryAnalysisPageData], positivity: Int,
+categroyId: String = "home")
+
+@siteTemplate("NewsSnips Home") {
+
+<div class="container">
+
+  <div id="carouselExampleCaptions" class="carousel slide" data-ride="carousel">
+    <ol class="carousel-indicators">
+      <li data-target="#carouselExampleCaptions" data-slide-to="0" class="active"></li>
+      <li data-target="#carouselExampleCaptions" data-slide-to="1"></li>
+    </ol>
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <!-- <div class="d-none bg-dark d-md-block">
+          <h5>First slide label</h5>
+          <p>Some representative placeholder content for the first slide.</p>
+        </div> -->
+        <div class="jumbotron bg-light text-center">
+          <h1>Welcome to a healthier way to stay informed</h1>
+          <hr class="my-4">
+          <p class="lead">
+            Press the
+            <span class="badge badge-pill badge-success">Green Numbers</span>
+            for positive news and
+            <span class="badge badge-pill badge-danger">Red Numbers</span>
+            for the other side on each topic.
+          </p>
+          <a class="btn btn-dark mt-2" href="/about" role="button">Learn More</a>
+        </div>
+      </div>
+      <div class="carousel-item">
+        <div class="jumbotron bg-light text-center">
+          <h1>Get up to speed quickly &#9889;</h1>
+          <hr class="my-4">
+          <p class="lead">
+            See the most mentioned topics in each news category with one glance.
+          </p>
+          <a class="btn btn-dark mt-2" href="/about" role="button">Learn More</a>
+        </div>
+      </div>
+      <div class="carousel-item">
+        <div class="jumbotron bg-light text-center">
+          <h1>Tone down the noise &#128227; </h1>
+          <hr class="my-4">
+          <p class="lead">
+            Filter out &#128683; topics attracting too much negativity &#129324;.
+          </p>
+          <a class="btn btn-dark mt-2" href="/about" role="button">Learn More</a>
+        </div>
+      </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-target="#carouselExampleCaptions" data-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="sr-only">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-target="#carouselExampleCaptions" data-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="sr-only">Next</span>
+    </button>
+  </div>
+
+  <div class="row">
+    <div class="col-sm">
+      <div class="alert alert-light border-light shadow text-center">
+        <label style="font-family: 'Bayon'; font-size: 22px; color: black;"
+          for="moodRange">Filter topics by mood</label>
+        <div class="text-nowrap">
+          &#128545;<input value="@positivity" type="range" min="0" max="100"
+            step="5" id="moodRange" onchange="onMoodUpdate(value)"> &#128516;
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @for((categoryId, analysis) <- categoryToData) { 
+    <h4 style="font-family: 'Helvetica';" class="pt-5">
+      Top topics in 
+      <a href="/v1/category/@categoryId" class="badge badge-pill p-2 badge-dark shadow">
+        @categoryId
+      </a> news
+      
+    </h4>
+    @analysisTable(categoryId, analysis.analysisRows, analysis.lastUpdated)
+  }
+
+}

@@ -44,14 +44,16 @@ heroku-secrets-update:
 	heroku config:set $(HRK_APP) $$(cat heroku.secrets.env)
 	rm -rf heroku.secrets.env
 
-aws-users:
+heroku-deploy: wa-build heroku-push-release heroku-logs
+
+aws-init:
 	-docker run \
 		--rm -it \
 		-v ~/.aws:/root/.aws \
 		-v ${PWD}:/aws \
 		amazon/aws-cli:2.3.0 iam list-users
 
-aws-s3:
+aws-s3-update:
 	# upload public to s3 bucket
 	-docker run \
 		--rm -it \
@@ -69,8 +71,8 @@ heroku-redis-enter:
 heroku-redis-show:
 	heroku config:get $(HRK_APP) REDIS_URL
 
-# stores the creds in host and sets project.
 gcp-init:
+	# stores the creds in host and sets project.
 	$(GCLD) "gcloud auth login && gcloud config set project newssnips"
 	$(GCLD) "gcloud config set run/region us-west1"
 
@@ -120,14 +122,13 @@ gcp-domain-mapping:
 	# $(GCLD) "gcloud domains verify newssnips.fyi"
 	# $(GCLD) "gcloud beta run domain-mappings create --service webapp --domain newssnips.fyi"
 
-
-stop-dc:
+dc-stop:
 	docker rm -f $(DC_CONTAINER_NAME)
 
 dc-logs:
 	-docker logs --tail=50 -f $(DC_CONTAINER_NAME)
 
-redeploy-dc:
+dc-redeploy:
 	./scripts/build-datacruncher.sh $(DC_BUILD_TAG)
 	
 	-docker rm -f $(DC_CONTAINER_NAME)

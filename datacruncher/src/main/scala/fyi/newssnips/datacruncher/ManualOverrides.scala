@@ -56,7 +56,9 @@ object ManualOverrides {
     "equities plunge",
     "stocks plunge",
     "equities nosedive",
-    "hospitalizations rise"
+    "hospitalizations rise",
+    "rape",
+    "accuse"
   )
 
 }

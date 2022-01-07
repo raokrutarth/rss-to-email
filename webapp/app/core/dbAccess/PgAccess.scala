@@ -16,8 +16,8 @@ class PgAccess @Inject() (db: Postgres) {
   def getAnalysisRows(
       categoryMetadata: CategoryDbMetadata,
       minPositivity: Int,
-      limit: Int = 100,
-      offset: Int = 0
+      limit: Int,
+      offset: Int
   ): Try[Array[AnalysisRowUi]] = {
     val q = s"""
       SELECT 

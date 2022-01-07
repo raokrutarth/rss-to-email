@@ -4,7 +4,7 @@ object FeedUrls {
   // TODO move to comment friendly format. e.g. yaml
   val categoryToUrls: Map[String, Seq[String]] = Map(
     // google news keyword rss: https://www.aakashweb.com/articles/google-news-rss-feed-url/
-    "home" -> Seq(
+    "world" -> Seq(
       "https://feeds.a.dj.com/rss/RSSWorldNews.xml",
       "https://www.reddit.com/r/UpliftingNews/.rss",
       "https://www.reddit.com/r/worldnews/.rss",

@@ -108,10 +108,10 @@ object AnalysisCycle {
         log.info("Fetching context products for all entities in report.")
 
         val resDf = df
-          .withColumn(
-            "contextBooks",
-            booksFinderUdf(col("entityName"), col("entityType"))
-          )
+          // .withColumn(
+          //   "contextBooks",
+          //   booksFinderUdf(col("entityName"), col("entityType"))
+          // )
 
         log.info(s"Final analysis report for $categoryId:")
         resDf.persist(StorageLevel.DISK_ONLY)
@@ -152,7 +152,8 @@ object AnalysisCycle {
                 )
             }
         }
-      case _ => log.error("Unable to generate home page results report.")
+      case _ =>
+        log.error(s"Unable to generate $categoryId category results report.")
     }
     contentsDf.unpersist()
   }

@@ -1,6 +1,7 @@
 package fyi.newssnips.shared
 
 import fyi.newssnips.shared.config.SharedConfig
+import scala.collection.mutable.LinkedHashMap
 
 case class CategoryDbMetadata(
     name: String,
@@ -15,22 +16,23 @@ object DbConstants {
   val keySpace    = if (SharedConfig.config.inProd) "prod" else "dev"
   val KVTableName = s"${keySpace}.key_value_udepqrn4g8s"
 
-  val categoryToDbMetadata: Map[String, CategoryDbMetadata] =
-    Seq("home", "markets", "politics", "entertainment")
-      .map(category =>
-        (
-          category,
-          CategoryDbMetadata(
-            name = category,
-            analysisTableName = s"${category}_page_analysis_results",
-            textsTableName = s"${category}_page_texts",
-            sourceFeedsTableName = s"${category}_page_feeds",
-            articleUrlsTableName = s"${category}_page_urls",
-            lastUpdateKey = s"${category}_page_analysis_last_updated"
+  val categoryToDbMetadata: LinkedHashMap[String, CategoryDbMetadata] =
+    LinkedHashMap(
+      Seq("world", "markets", "politics", "entertainment")
+        .map(category =>
+          (
+            category,
+            CategoryDbMetadata(
+              name = category,
+              analysisTableName = s"${category}_page_analysis_results",
+              textsTableName = s"${category}_page_texts",
+              sourceFeedsTableName = s"${category}_page_feeds",
+              articleUrlsTableName = s"${category}_page_urls",
+              lastUpdateKey = s"${category}_page_analysis_last_updated"
+            )
           )
-        )
-      )
-      .toMap
+        ): _*
+    )
 }
 
 object EntityTypeDescriptions {

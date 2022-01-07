@@ -1,0 +1,74 @@
+@import fyi.newssnips.models._
+
+@(categroyId: String, analysisRows: Array[AnalysisRowUi], lastUpdated: String)
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header p-1 text-muted text-right">
+        Updated on @lastUpdated
+      </div>
+      <div class="card-content table-responsive">
+        <table class="table table-bordered table-dark table-striped">
+          <thead>
+            <tr>
+              <th data-toggle="tooltip" data-placement="top"
+                data-trigger="click hover focus"
+                title="Click/hover on topic to see topic type">Topic
+              </th>
+              <th>Total Mentions</th>
+              <th>Mood</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for(t <- analysisRows) {<tr>
+              <th scope="row" style="font-style: italic;" data-toggle="popover"
+                data-trigger="focus click hover" data-placement="top auto">
+                @t.entityName
+
+                @if(t.negativeMentions > 0) {
+                &nbsp;
+                <a data-bs-placement="top"
+                  title='See negative sentiment mentions of @t.entityName.'
+                  href="/v1/@categroyId/mentions/@t.entityName/@t.entityType/negative"
+                  class="badge badge-pill badge-danger">@t.negativeMentions
+                </a>
+                }
+
+                @if(t.positiveMentions > 0) {
+                &nbsp;
+                <a data-bs-placement="top"
+                  title='See positive sentiment mentions of @t.entityName.'
+                  href="/v1/@categroyId/mentions/@t.entityName/@t.entityType/positive"
+                  class="badge badge-pill badge-success">@t.positiveMentions
+                </a>
+                }
+
+              </th>
+              <td>@t.totalNumTexts</td>
+              <td>
+                @if(t.positivityScore > 65) {
+                <!-- smiling face with open mouth and smiling eyes -->
+                &#128516;
+                } else if(t.positivityScore > 50){
+                <!-- slightly smiling face -->
+                &#128578;
+                } else if(t.positivityScore >= 40){
+                <!-- neutral face -->
+                &#128528;
+                } else if(t.positivityScore > 30){
+                <!-- angry face -->
+                &#128544;
+                } else {
+                <!-- angry face red -->
+                &#128545;
+                }
+              </td>
+              </tr>
+              }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
