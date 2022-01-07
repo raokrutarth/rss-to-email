@@ -49,10 +49,10 @@ https://newssnips.fyi/v1/category/politics
     """).as("text/plain")
   }
 
-  def adminDash() = auth { request =>
-    log.info(s"Admin ${request.user} accessed the admin dashboard.")
+  def adminDash(action: Option[String]) = auth { request =>
+    log.info(s"Admin ${request.user} accessed the admin dashboard with action ${action}.")
     Ok(
-      views.html.admin()
+      views.html.admin(request.user.toString)
     ).as("text/html")
   }
 
