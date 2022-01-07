@@ -44,7 +44,7 @@ class CommsController @Inject() (
     )
   ).as("text/html")
 
-  private val verificationKeyPrefix = "newsletter.email.verify."
+  private val verificationKeyPrefix = "webapp.newsletter.email.verify."
   implicit val signupDataFormat     = Json.format[SignupData]
 
   private val signupForm = Form(

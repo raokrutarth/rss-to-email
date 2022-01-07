@@ -1,4 +1,12 @@
-@(username: String)
+@import fyi.newssnips.webapp.models._
+
+@(
+  username: String, 
+  numSubscribers: Int, 
+  recentSubscribers: Array[SubscriberRow], 
+  pageVisits: Seq[String],
+  actionResponse: String,
+)
 
 <!doctype html>
 <html lang="en">
@@ -12,9 +20,9 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap@@4.6.1/dist/css/bootstrap.min.css"
-        integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn"
-        crossorigin="anonymous">
+      href="https://cdn.jsdelivr.net/npm/bootstrap@@4.6.1/dist/css/bootstrap.min.css"
+      integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn"
+      crossorigin="anonymous">
     <meta name="theme-color" content="#563d7c">
 
     <style>
@@ -40,7 +48,8 @@
 
     <nav
       class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-      <a class="navbar-brand col-md-3 col-lg-2 mr-0 px-3" href="#">NewsSnips.fyi</a>
+      <a class="navbar-brand col-md-3 col-lg-2 mr-0 px-3"
+        href="/admin">NewsSnips.fyi</a>
       <button class="navbar-toggler position-absolute d-md-none collapsed"
         type="button" data-toggle="collapse" data-target="#sidebarMenu"
         aria-controls="sidebarMenu" aria-expanded="false"
@@ -51,7 +60,7 @@
         placeholder="Search" aria-label="Search">
       <ul class="navbar-nav px-3">
         <li class="nav-item text-nowrap">
-          <a class="nav-link" href="#">Sign out (WIP)</a>
+          <a class="nav-link" href="#">@username</a>
         </li>
       </ul>
     </nav>
@@ -63,9 +72,8 @@
           <div class="sidebar-sticky pt-3">
             <ul class="nav flex-column">
               <li class="nav-item">
-                <a class="nav-link active" href="#">
-                  <span data-feather="home"></span>
-                  Dashboard <span class="sr-only">(current)</span>
+                <a class="nav-link active" href="/admin">
+                  Dashboard
                 </a>
               </li>
               <li class="nav-item">
@@ -80,57 +88,41 @@
                   Products
                 </a>
               </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="users"></span>
-                  Customers
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="bar-chart-2"></span>
-                  Reports
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="layers"></span>
-                  Integrations
-                </a>
-              </li>
             </ul>
 
             <h6
               class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-              <span>Saved reports</span>
-              <a class="d-flex align-items-center text-muted" href="#"
-                aria-label="Add a new report">
-                <span data-feather="plus-circle"></span>
-              </a>
+              <span>Summary Stats</span>
             </h6>
             <ul class="nav flex-column mb-2">
               <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="file-text"></span>
-                  Current month
-                </a>
+                24hr Page visits
+                <span class="badge badge-pill badge-success">
+                  WIP
+                </span>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="file-text"></span>
-                  Last quarter
-                </a>
+                Subscribers
+                <span class="badge badge-pill badge-success">
+                  @numSubscribers
+                </span>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="file-text"></span>
-                  Social engagement
-                </a>
+                Twitter refferals
+                <span class="badge badge-pill badge-success">
+                  WIP
+                </span>
               </li>
+            </ul>
+            <h6
+              class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+              <span>Operations</span>
+            </h6>
+            <ul class="nav flex-column mb-2">
               <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="/admin?action=flushCache">
                   <span data-feather="file-text"></span>
-                  Year-end sale
+                  Flush Cache
                 </a>
               </li>
             </ul>
@@ -138,6 +130,11 @@
         </nav>
 
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+          @if(actionResponse.nonEmpty) {
+          <div class="mt-2 alert alert-primary" role="alert">
+            @actionResponse
+          </div>
+          }
           <div
             class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 class="h2">Dashboard</h1>
@@ -156,134 +153,45 @@
             </div>
           </div>
 
-          <canvas class="my-4 w-100" id="myChart" width="900"
-            height="380"></canvas>
+          <canvas class="my-4 w-100" id="myChart" width="500"
+            height="150"></canvas>
 
-          <h2>Section title</h2>
+          <h2>Recent Page visits</h2>
           <div class="table-responsive">
             <table class="table table-striped table-sm">
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>Header</th>
-                  <th>Header</th>
-                  <th>Header</th>
-                  <th>Header</th>
+                  <th>URI</th>
+                  <th>count</th>
                 </tr>
               </thead>
               <tbody>
+                @for(uri <- pageVisits) { <tr>
+                  <td>@uri</td>
+                  <td>0</td>
+                  </tr>
+                  }
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="mt-4">Recent Newsletter Subscribers</h2>
+          <div class="table-responsive">
+            <table class="table table-striped table-sm">
+              <thead>
                 <tr>
-                  <td>1,001</td>
-                  <td>random</td>
-                  <td>data</td>
-                  <td>placeholder</td>
-                  <td>text</td>
+                  <th>email</th>
+                  <th>freq</th>
+                  <th>created_at</th>
                 </tr>
-                <tr>
-                  <td>1,002</td>
-                  <td>placeholder</td>
-                  <td>irrelevant</td>
-                  <td>visual</td>
-                  <td>layout</td>
-                </tr>
-                <tr>
-                  <td>1,003</td>
-                  <td>data</td>
-                  <td>rich</td>
-                  <td>dashboard</td>
-                  <td>tabular</td>
-                </tr>
-                <tr>
-                  <td>1,003</td>
-                  <td>information</td>
-                  <td>placeholder</td>
-                  <td>illustrative</td>
-                  <td>data</td>
-                </tr>
-                <tr>
-                  <td>1,004</td>
-                  <td>text</td>
-                  <td>random</td>
-                  <td>layout</td>
-                  <td>dashboard</td>
-                </tr>
-                <tr>
-                  <td>1,005</td>
-                  <td>dashboard</td>
-                  <td>irrelevant</td>
-                  <td>text</td>
-                  <td>placeholder</td>
-                </tr>
-                <tr>
-                  <td>1,006</td>
-                  <td>dashboard</td>
-                  <td>illustrative</td>
-                  <td>rich</td>
-                  <td>data</td>
-                </tr>
-                <tr>
-                  <td>1,007</td>
-                  <td>placeholder</td>
-                  <td>tabular</td>
-                  <td>information</td>
-                  <td>irrelevant</td>
-                </tr>
-                <tr>
-                  <td>1,008</td>
-                  <td>random</td>
-                  <td>data</td>
-                  <td>placeholder</td>
-                  <td>text</td>
-                </tr>
-                <tr>
-                  <td>1,009</td>
-                  <td>placeholder</td>
-                  <td>irrelevant</td>
-                  <td>visual</td>
-                  <td>layout</td>
-                </tr>
-                <tr>
-                  <td>1,010</td>
-                  <td>data</td>
-                  <td>rich</td>
-                  <td>dashboard</td>
-                  <td>tabular</td>
-                </tr>
-                <tr>
-                  <td>1,011</td>
-                  <td>information</td>
-                  <td>placeholder</td>
-                  <td>illustrative</td>
-                  <td>data</td>
-                </tr>
-                <tr>
-                  <td>1,012</td>
-                  <td>text</td>
-                  <td>placeholder</td>
-                  <td>layout</td>
-                  <td>dashboard</td>
-                </tr>
-                <tr>
-                  <td>1,013</td>
-                  <td>dashboard</td>
-                  <td>irrelevant</td>
-                  <td>text</td>
-                  <td>visual</td>
-                </tr>
-                <tr>
-                  <td>1,014</td>
-                  <td>dashboard</td>
-                  <td>illustrative</td>
-                  <td>rich</td>
-                  <td>data</td>
-                </tr>
-                <tr>
-                  <td>1,015</td>
-                  <td>random</td>
-                  <td>tabular</td>
-                  <td>information</td>
-                  <td>text</td>
-                </tr>
+              </thead>
+              <tbody>
+                @for(s <- recentSubscribers) { <tr>
+                  <td>@s.email</td>
+                  <td>@s.frequency</td>
+                  <td>@s.createdAt.get.toString</td>
+                  </tr>
+                  }
               </tbody>
             </table>
           </div>
@@ -294,13 +202,13 @@
 
     <!-- Jquery, popper and Bootstrap JS -->
     <script
-        src="https://cdn.jsdelivr.net/npm/jquery@@3.5.1/dist/jquery.slim.min.js"
-        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
-        crossorigin="anonymous"></script>
+      src="https://cdn.jsdelivr.net/npm/jquery@@3.5.1/dist/jquery.slim.min.js"
+      integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+      crossorigin="anonymous"></script>
     <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@@4.6.1/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF"
-        crossorigin="anonymous"></script>
+      src="https://cdn.jsdelivr.net/npm/bootstrap@@4.6.1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF"
+      crossorigin="anonymous"></script>
 
 
     <script

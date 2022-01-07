@@ -48,6 +48,36 @@ class NewsletterDal @Inject() (db: Postgres) {
 
     db.getRows[SubscriberRow](q, parser = parser)
   }
+  def getSubscribers(limit: Int = 10, offset: Int = 0): Try[Array[SubscriberRow]] = {
+
+    // TODO add pagination
+    val q = s"""
+        SELECT * FROM ${subscriberTableName} 
+        ORDER BY created_at
+        LIMIT ? OFFSET ?;
+    """
+    val parser = (r: ResultSet) => {
+      SubscriberRow(
+        email = r.getString("email"),
+        frequency = r.getString("frequency"),
+        createdAt = Some(r.getTimestamp("created_at")),
+        lastDigestAt = None,
+        metadata = {
+          val mJson = r.getString("metadata")
+          if (mJson != null && mJson.nonEmpty)
+            Some(Json.parse(mJson))
+          else
+            None
+        }
+      )
+    }
+    val queryArgs = (p: PreparedStatement) => {
+      p.setInt(1, limit)
+      p.setInt(2, offset)
+    }
+
+    db.getRows[SubscriberRow](q, queryArgs, parser = parser)
+  }
 
   def getSubscriberCount(): Try[Int] = {
     val q = s"""
@@ -73,21 +103,6 @@ class NewsletterDal @Inject() (db: Postgres) {
     log.info(s"Updating subscriber digest times.")
     db.applyUpdate(q, queryArgs)
   }
-
-//   def updateSubscriberFrequency(email: String, f: Frequency.Value) = Try {
-//     val q = s"""
-//       UPDATE ${subscriberTableName}
-//       SET frequency = ?
-//       WHERE email = ?
-//       """
-//     val queryArgs = (p: PreparedStatement) => {
-//       p.setString(1, f.toString)
-//       p.setString(2, email)
-//     }
-
-//     log.info(s"Updating subscriber ${email}'s frequency to ${f}.")
-//     db.applyUpdate(q, queryArgs)
-//   }
 
   def subscriberExists(email: String): Try[Boolean] = {
     val q = s"""

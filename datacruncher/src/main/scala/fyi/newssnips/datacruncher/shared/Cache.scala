@@ -102,7 +102,6 @@ class Cache() {
     } catch {
       case e: Exception =>
         log.error(s"Cache flush failed with exception $e")
-        None
     } finally {
       if (j != null) j.close()
     }

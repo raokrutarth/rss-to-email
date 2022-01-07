@@ -9,6 +9,7 @@ import fyi.newssnips.core._
 import play.api.inject.ApplicationLifecycle
 import scala.concurrent.Future
 import fyi.newssnips.datastore.Cache
+import fyi.newssnips.webapp.core.dal.NewsletterDal
 
 @Singleton
 class HomeController @Inject() (
@@ -16,7 +17,8 @@ class HomeController @Inject() (
     lifecycle: ApplicationLifecycle,
     cached: Cached,
     auth: AdminAuth,
-    cache: Cache
+    cache: Cache,
+    nsDal: NewsletterDal
 ) extends BaseController {
 
   val log = Logger("app." + this.getClass().toString())
@@ -51,8 +53,28 @@ https://newssnips.fyi/v1/category/politics
 
   def adminDash(action: Option[String]) = auth { request =>
     log.info(s"Admin ${request.user} accessed the admin dashboard with action ${action}.")
+    val pageVisits        = Seq("/some/a", "other/b", "rr/t")
+    val numSubscribers    = nsDal.getSubscriberCount().getOrElse(0)
+    val recentSubscribers = nsDal.getSubscribers().getOrElse(Array())
+    val actionResponse: String = action match {
+      case Some("flushCache") => {
+        cache.flushCache()
+        "cache flushed"
+      }
+      case Some(a) => {
+        log.info(s"No known admin action to take for $a")
+        s"$a is not a valid admin action"
+      }
+      case None => ""
+    }
     Ok(
-      views.html.admin(request.user.toString)
+      views.html.admin(
+        request.user.value,
+        numSubscribers,
+        recentSubscribers,
+        pageVisits,
+        actionResponse
+      )
     ).as("text/html")
   }
 
