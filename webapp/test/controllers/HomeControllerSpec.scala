@@ -43,21 +43,27 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting
   }
 
   "feeds test data" should {
-    val d: CategoryAnalysisPageData = CategoryAnalysisPageData(
-      analysisRows = Array(
-        AnalysisRow(
-          Some("US"),
-          Some("GPE"),
-          Some(0),
-          Some(0),
-          Some(List()),
-          Some(List()),
-          Some(0),
-          Some(0)
-        )
-      ),
-      sourceFeeds = Array(),
-      lastUpdated = "today"
-    )
+    // val d: CategoryAnalysisPageData = CategoryAnalysisPageData(
+    //   analysisRows = Array(
+    //     AnalysisRowUi(
+    //       "US",
+    //       "GPE",
+    //       2,
+    //       4,
+    //       6,
+    //       45
+    //     ),
+    //     AnalysisRowUi(
+    //       "US2",
+    //       "GPE",
+    //       7,
+    //       3,
+    //       10,
+    //       32
+    //     )
+    //   ),
+    //   sourceFeeds = Array(),
+    //   lastUpdated = "today"
+    // )
   }
 }

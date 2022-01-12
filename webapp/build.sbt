@@ -34,6 +34,7 @@ libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4"
 libraryDependencies ++= Seq(
   caffeine
 )
+ThisBuild / resolvers += Resolver.sonatypeRepo("snapshots")
 
 // libraryDependencies += "org.webjars" % "swagger-ui" % "3.43.0"
 lazy val root = (project in file(".")).enablePlugins(

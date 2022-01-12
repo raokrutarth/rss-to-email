@@ -36,53 +36,32 @@ class FeedsController @Inject() (
     )
   ).as("text/html")
 
-  val pageCacheTimeSec: Int = if (AppConfig.settings.shared.inProd) 30 else 5
+  val pageCacheTimeSec: Int = if (AppConfig.settings.shared.inProd) 120 else 5
 
   def home(positivity: Int) =
-    cached.status(_ => "home" + s"$positivity", status = 200, 1) {
-
-      // val d: CategoryAnalysisPageData = CategoryAnalysisPageData(
-      //   analysisRows = Array(
-      //     AnalysisRowUi(
-      //       "US",
-      //       "GPE",
-      //       2,
-      //       4,
-      //       6,
-      //       45
-      //     ),
-      //     AnalysisRowUi(
-      //       "US2",
-      //       "GPE",
-      //       7,
-      //       3,
-      //       10,
-      //       32
-      //     )
-      //   ),
-      //   sourceFeeds = Array(),
-      //   lastUpdated = "today"
-      // )
-      log.info(s"${DbConstants.categoryToDbMetadata.toString()}")
-
-      val categoryTables = LinkedHashMap[String, CategoryAnalysisPageData]()
-      for ((categoryId, dbMetadata) <- DbConstants.categoryToDbMetadata) {
-        log.info(
-          s"Using db metadata ${dbMetadata.toString()} for category $categoryId."
-        )
-        dal.getCategoryAnalysisPage(cache, dbMetadata, positivity, 5) match {
-          case Success(data) =>
-            log.info(
-              s"Parsing ${data.analysisRows.size} analysis row(s) and ${data.sourceFeeds.size} feed(s) into HTML template."
-            )
-            categoryTables(categoryId) = data
-
-          case Failure(exc) =>
-            log.error(s"Unable to get $categoryId page for home with exception $exc")
-        }
-      }
-
+    cached.status(_ => "home" + s"$positivity", status = 200, pageCacheTimeSec) {
       Action { implicit request: Request[AnyContent] =>
+        log.info(
+          s"Received home page request with minimum positivity " +
+            s"$positivity from client ${request.remoteAddress}"
+        )
+
+        val categoryTables = LinkedHashMap[String, CategoryAnalysisPageData]()
+        for ((categoryId, dbMetadata) <- DbConstants.categoryToDbMetadata) {
+          log.info(
+            s"Using db metadata ${dbMetadata.toString()} for category $categoryId."
+          )
+          dal.getCategoryAnalysisPage(cache, dbMetadata, positivity, 8) match {
+            case Success(data) =>
+              log.info(
+                s"Parsing ${data.analysisRows.size} analysis row(s) and ${data.sourceFeeds.size} feed(s) into HTML template."
+              )
+              categoryTables(categoryId) = data
+
+            case Failure(exc) =>
+              log.error(s"Unable to get $categoryId page for home with exception $exc")
+          }
+        }
         Ok(
           views.html.home(
             categoryTables,

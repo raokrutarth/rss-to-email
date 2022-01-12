@@ -177,3 +177,4 @@ dmypy.json
 .pyre/
 datacruncher/models/
 .ammonite
+cert

@@ -39,6 +39,12 @@ heroku-push-release:
 heroku-logs:
 	-heroku logs $(HRK_APP) --num=500 --tail
 
+heroku-request-logs:
+	# in the last 10k logs, count requests per endpoint
+	- heroku logs $(HRK_APP) \
+		--num=10000 | grep path | grep -v -E "(asset|well)" | \
+		grep -oP 'path=".*" h' | sort | uniq -c | sort -n
+
 heroku-secrets-update:
 	./webapp/scripts/prod-deploy-config-str.sh > heroku.secrets.env
 	heroku config:set $(HRK_APP) $$(cat heroku.secrets.env)

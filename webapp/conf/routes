@@ -7,7 +7,7 @@
 GET     /         controllers.HomeController.index()
 GET     /robots.txt         controllers.HomeController.robotsTxt()
 GET     /sitemap.txt         controllers.HomeController.sitemapTxt()
-GET     /admin         controllers.HomeController.adminDash(action: Option[String])
+GET     /admin         controllers.AdminController.adminDash(action: Option[String])
 GET     /about     controllers.HomeController.about()
 
 GET /v1/home     controllers.v1.FeedsController.home(positivity: Int ?= 0)

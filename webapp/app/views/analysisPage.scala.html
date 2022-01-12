@@ -1,5 +1,6 @@
 @import fyi.newssnips.models._
 @import fyi.newssnips.shared.EntityTypeDescriptions
+@import play.twirl.api.HtmlFormat
 
 
 @(analysisRows: Array[AnalysisRowUi], sourceFeeds: Array[FeedRow], lastUpdated:
@@ -64,6 +65,7 @@ String, categoryId: String, positivity: Int)
     </div>
   </div>
 
-  @analysisTable(categoryId, analysisRows, lastUpdated)
+  @* instead of a empty footer, add pagination *@
+  @analysisTable(categoryId, analysisRows, lastUpdated)(HtmlFormat.empty)
 
   }

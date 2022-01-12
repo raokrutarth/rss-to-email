@@ -133,4 +133,16 @@ class NewsletterDal @Inject() (db: Postgres) {
     log.info(s"Upserting subscriber ${sd.toString} to persistant subscribers.")
     db.applyUpdate(q, queryArgs)
   }
+
+  def removeSubscriber(sd: SignupData): Try[Int] = {
+    val q = s"""
+    DELETE FROM ${subscriberTableName}
+    WHERE email = ?
+    """
+    val queryArgs = (p: PreparedStatement) => {
+      p.setString(1, sd.email)
+    }
+    log.info(s"Upserting subscriber ${sd.toString} to persistant subscribers.")
+    db.applyUpdate(q, queryArgs)
+  }
 }

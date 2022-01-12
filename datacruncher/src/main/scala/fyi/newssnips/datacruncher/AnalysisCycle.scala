@@ -73,7 +73,7 @@ object AnalysisCycle {
   private val dataPrep = new DataPrep(spark)
   log.info("Initalized dataprep module.")
 
-  private val booksFinderUdf = udf(ContextFinder.findBooks)
+  udf(ContextFinder.findBooks)
 
   private def categoryCycle(categoryId: String, categoryFeeds: Seq[Feed]) = {
     val categoryMetadata = DbConstants.categoryToDbMetadata(categoryId)
@@ -108,10 +108,10 @@ object AnalysisCycle {
         log.info("Fetching context products for all entities in report.")
 
         val resDf = df
-          // .withColumn(
-          //   "contextBooks",
-          //   booksFinderUdf(col("entityName"), col("entityType"))
-          // )
+        // .withColumn(
+        //   "contextBooks",
+        //   booksFinderUdf(col("entityName"), col("entityType"))
+        // )
 
         log.info(s"Final analysis report for $categoryId:")
         resDf.persist(StorageLevel.DISK_ONLY)

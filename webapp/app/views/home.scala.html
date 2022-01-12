@@ -81,7 +81,11 @@ categroyId: String = "home")
       </a> news
       
     </h4>
-    @analysisTable(categoryId, analysis.analysisRows, analysis.lastUpdated)
+    @analysisTable(
+      categoryId, 
+      analysis.analysisRows, 
+      analysis.lastUpdated,
+    ){<a href="/v1/category/@categoryId">See more</a>}
   }
 
 }

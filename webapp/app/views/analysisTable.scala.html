@@ -1,6 +1,6 @@
 @import fyi.newssnips.models._
 
-@(categroyId: String, analysisRows: Array[AnalysisRowUi], lastUpdated: String)
+@(categroyId: String, analysisRows: Array[AnalysisRowUi], lastUpdated: String)(footer: Html)
 
 <div class="row">
   <div class="col-md-12">
@@ -69,6 +69,11 @@
           </tbody>
         </table>
       </div>
+      @if(footer.toString().nonEmpty){
+        <div class="card-footer p-1 text-muted">
+          @footer
+        </div>
+      }
     </div>
   </div>
 </div>
