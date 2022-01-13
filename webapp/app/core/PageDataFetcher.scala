@@ -121,10 +121,11 @@ class PageDataFetcher @Inject() (dal: PgAccess, db: Postgres)() {
       ) match {
         case Success(rows) =>
           EntityTextsPageData(rows)
-        case _ =>
+        case Failure(e) =>
           val id = Seq(entityType, entityName, sentiment).mkString(
             " - "
           ) + categoryMetadata.toString()
+          log.error(s"Unable to get entity texts for $id with exception $e")
           throw new RuntimeException(s"Unable to get entity texts for $id")
       }
     }

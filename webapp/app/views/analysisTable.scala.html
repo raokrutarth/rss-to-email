@@ -24,13 +24,13 @@
             @for(t <- analysisRows) {<tr>
               <th scope="row" style="font-style: italic;" data-toggle="popover"
                 data-trigger="focus click hover" data-placement="top auto">
-                @t.entityName
+                <a class="text-reset" href="/v1/@categroyId/mentions/@t.entityName/@t.entityType">@t.entityName</a>
 
                 @if(t.negativeMentions > 0) {
                 &nbsp;
                 <a data-bs-placement="top"
                   title='See negative sentiment mentions of @t.entityName.'
-                  href="/v1/@categroyId/mentions/@t.entityName/@t.entityType/negative"
+                  href="/v1/@categroyId/mentions/@t.entityName/@t.entityType?sentiment=negative"
                   class="badge badge-pill badge-danger">@t.negativeMentions
                 </a>
                 }
@@ -39,7 +39,7 @@
                 &nbsp;
                 <a data-bs-placement="top"
                   title='See positive sentiment mentions of @t.entityName.'
-                  href="/v1/@categroyId/mentions/@t.entityName/@t.entityType/positive"
+                  href="/v1/@categroyId/mentions/@t.entityName/@t.entityType?sentiment=positive"
                   class="badge badge-pill badge-success">@t.positiveMentions
                 </a>
                 }

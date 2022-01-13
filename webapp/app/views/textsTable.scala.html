@@ -1,0 +1,31 @@
+@import fyi.newssnips.models.TextsPageRow
+
+@(textsRows: Array[TextsPageRow])
+
+<div class="row">
+  <div class="col-md-12">
+      <div class="card">
+          <div class="table-responsive">
+              <table
+                  class="table table-bordered table-dark table-striped">
+                  <thead>
+                      <tr>
+                          <th>Snip &#9986</th>
+                          <th>Source &#128205</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      @for(t <- textsRows) { <tr>
+                          <th scope="row">@t.text</th>
+                          <td><span class="badge bg-light text-dark"><a
+                                      href="@t.url"
+                                      target="_blank">original</a></span>
+                          </td>
+                          </tr>
+                          }
+                  </tbody>
+              </table>
+          </div>
+      </div>
+  </div>
+</div>

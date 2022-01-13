@@ -1,74 +1,55 @@
 @import fyi.newssnips.models.TextsPageRow
 @import fyi.newssnips.shared.EntityTypeDescriptions
 
-@(textsRows: Array[TextsPageRow], entityName: String, entityType: String,
-sentiment: String, books: Seq[Html], entityTypeDescription: String)
+@(
+    posTextsRows: Array[TextsPageRow], 
+    negTextsRows: Array[TextsPageRow],
+    entityName: String, entityType: String,
+    books: Seq[Html], 
+    entityTypeDescription: String,
+)
 
 @siteTemplate(entityName) {
 <div class="container">
 
-    @sentiment match {
-        case "positive" => {
-            <div class="alert alert-success">
-                <h4 class="alert-heading">@entityName
-                    (@entityTypeDescription)
-                </h4>
-                <p>Positive/neutral &#128077 mentions of @entityName.</p>
-            </div>
-        }
-        case "negative" => {
-            <div class="alert alert-danger">
-                <h4 class="alert-heading">@entityName
-                    (@entityTypeDescription)
-                </h4>
-                <p>Negative/neutral &#128078 mentions of @entityName.</p>
-            </div>
-        }
+    @if(posTextsRows.nonEmpty){
+        <div class="alert alert-success mt-4 mb-1">
+            <h4 class="alert-heading">@entityName
+                (@entityTypeDescription)
+            </h4>
+            <p>Positive/neutral &#128077 mentions of @entityName.</p>
+        </div>
+
+        @textsTable(posTextsRows)
     }
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="table-responsive">
-                    <table
-                        class="table table-bordered table-dark table-striped">
-                        <thead>
-                            <tr>
-                                <th>Snip &#9986</th>
-                                <th>Source &#128205</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for(t <- textsRows) { <tr>
-                                <th scope="row">@t.text</th>
-                                <td><span class="badge bg-light text-dark"><a
-                                            href="@t.url"
-                                            target="_blank">original</a></span>
-                                </td>
-                                </tr>
-                                }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+    @if(negTextsRows.nonEmpty){
+        <div class="alert alert-danger mt-4 mb-1">
+            <h4 class="alert-heading">@entityName
+                (@entityTypeDescription)
+            </h4>
+            <p>Negative/neutral &#128078 mentions of @entityName.</p>
         </div>
-    </div>
 
+        @textsTable(negTextsRows)
+    
+    }
 
     @if(books.nonEmpty){
         <div class="row">
             <div class="col-md-12">
-                <p class="h5 pt-4">Recommended Reading for @entityTypeDescription</p>
+                <p class="h5 pt-4">Recommended Reading for @entityTypeDescription
+                </p>
                 <div class="card-deck">
-                    @for(iframe <- books) { <div class="card border-light">
-                        <div class="card-body">
-                            @iframe
+                    @for(iframe <- books) { 
+                        <div class="card border-light">
+                            <div class="card-body">
+                                @iframe
+                            </div>
                         </div>
-                </div>
                 }
+                </div>
             </div>
         </div>
-    </div>
     }
-
 }

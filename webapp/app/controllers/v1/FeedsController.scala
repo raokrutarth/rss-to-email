@@ -15,6 +15,7 @@ import fyi.newssnips.webapp.config.AppConfig
 import fyi.newssnips.webapp.core.books.Books
 import fyi.newssnips.core.CategoryAnalysisPageData
 import scala.collection.mutable.LinkedHashMap
+import fyi.newssnips.models.TextsPageRow
 
 @Singleton
 class FeedsController @Inject() (
@@ -108,39 +109,66 @@ class FeedsController @Inject() (
       }
     }
 
-  def mentions(categoryId: String, entityName: String, entityType: String, sentiment: String) =
+  def mentions(
+      categoryId: String,
+      entityName: String,
+      entityType: String,
+      sentiment: Option[String]
+  ) =
     cached.status(
-      _ => "mentions" + categoryId + entityName + entityType + sentiment,
+      _ => "mentions" + categoryId + entityName + entityType + sentiment.getOrElse(""),
       status = 200,
       pageCacheTimeSec
     ) {
       Action { implicit request: Request[AnyContent] =>
-        log.info(
-          s"Serving request from ${request.remoteAddress} for $categoryId entity " +
-            s"${entityName} and type ${entityType} and sentiment ${sentiment}."
-        )
         DbConstants.categoryToDbMetadata get categoryId match {
           case Some(dbMetadata) =>
-            dal.getTextsPage(dbMetadata, entityName, entityType, sentiment) match {
-              case Success(pageData) =>
-                val books = Books.getBooks(entityType, sentiment)
-                val entityTypeDescription =
-                  EntityTypeDescriptions.descriptions getOrElse (entityType, entityType)
-                Ok(
-                  views.html.textsPage(
-                    pageData.rows,
-                    entityName,
-                    entityType,
-                    sentiment,
-                    books,
-                    entityTypeDescription
-                  )
-                ).as("text/html")
+            val id =
+              Seq(entityType, entityName, sentiment).mkString(" - ") + dbMetadata.toString()
+            log.info(
+              s"Serving mentions request from ${request.remoteAddress} for $id."
+            )
+            var posRows = Array[TextsPageRow]()
+            var negRows = Array[TextsPageRow]()
 
-              case Failure(exc) =>
-                log.error(s"Failed to get texts page with exception $exc")
-                errResp
+            sentiment.getOrElse("") match {
+              case s if s.startsWith("pos") => {
+                posRows = dal.getTextsPage(dbMetadata, entityName, entityType, "positive") match {
+                  case Success(pageData) => pageData.rows
+                  case _                 => posRows
+                }
+              }
+              case s if s.startsWith("neg") => {
+                negRows = dal.getTextsPage(dbMetadata, entityName, entityType, "negative") match {
+                  case Success(pageData) => pageData.rows
+                  case _                 => negRows
+                }
+              }
+              case "" =>
+                posRows = dal.getTextsPage(dbMetadata, entityName, entityType, "positive") match {
+                  case Success(pageData) => pageData.rows
+                  case _                 => posRows
+                }
+                negRows = dal.getTextsPage(dbMetadata, entityName, entityType, "negative") match {
+                  case Success(pageData) => pageData.rows
+                  case _                 => negRows
+                }
+              case s => log.error(s"Unexpected sentiment filter $s requested for mentions of $id.")
             }
+
+            val books = Books.getBooks(entityType, sentiment.getOrElse("positive"))
+            val entityTypeDescription =
+              EntityTypeDescriptions.descriptions getOrElse (entityType, entityType)
+            Ok(
+              views.html.textsPage(
+                posRows,
+                negRows,
+                entityName,
+                entityType,
+                books,
+                entityTypeDescription
+              )
+            ).as("text/html")
 
           case _ => BadRequest(s"$categoryId is not a valid category ID.")
         }

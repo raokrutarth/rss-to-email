@@ -14,7 +14,7 @@ GET /v1/home     controllers.v1.FeedsController.home(positivity: Int ?= 0)
 
 GET /v1/category/:categoryId                                  controllers.v1.FeedsController.category(categoryId: String, positivity: Int ?= 0)
 
-GET /v1/:categoryId/mentions/:entityName/:entityType/:sentiment  controllers.v1.FeedsController.mentions(categoryId: String, entityName: String, entityType: String, sentiment: String)
+GET /v1/:categoryId/mentions/:entityName/:entityType  controllers.v1.FeedsController.mentions(categoryId: String, entityName: String, entityType: String, sentiment: Option[String])
 
 GET /v1/newsletter/signup  controllers.v1.CommsController.newsletterSignupGet(email: Option[String])
 POST /v1/newsletter/signup  controllers.v1.CommsController.newsletterSignupPost()

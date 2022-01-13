@@ -78,9 +78,10 @@ class PgAccess @Inject() (db: Postgres) {
       ) + categoryMetadata.toString()
     log.info(s"Fetching texts from db for ${logIdentifier}")
 
-    val analysisIdsCol = sentiment.trim.toLowerCase match {
-      case "negative" | "neg" => "negativeTextIds"
-      case "positive" | "pos" => "positiveTextIds"
+    val sentimentKey = sentiment.trim.toLowerCase
+    val analysisIdsCol = sentimentKey match {
+      case sentimentKey if sentimentKey.startsWith("neg") => "negativeTextIds"
+      case sentimentKey if sentimentKey.startsWith("pos") => "positiveTextIds"
       case _ =>
         log.error(s"Unknown sentiment ${sentiment} during texts fetch for ${logIdentifier}")
         "UNKNOWN"
