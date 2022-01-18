@@ -16,7 +16,7 @@ object Main extends App {
       // https://flurdy.com/docs/scalainit/startscala.html
       AnalysisCycle
     case "scratch"     => ScratchCode
-    case "model_store" => ModelStore.storePipelines(true, false, false)
+    case "model_store" => ModelStore.storePipelines(false, false, true)
     case _ =>
       log.error(s"$mode is an invalid mode.")
       sys.exit(1)

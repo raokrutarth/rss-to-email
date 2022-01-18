@@ -11,6 +11,7 @@ import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.util.EntityUtils
 import fyi.newssnips.shared.DateTimeUtils
+import org.apache.spark.sql.expressions._
 
 object ScratchCode {
   private val log = Logger("app." + this.getClass().toString())
@@ -110,7 +111,67 @@ object ScratchCode {
     log.info("Running scratch datefix")
     log.info(s"${DateTimeUtils.getDateAsStringUi(DateTimeUtils.now())}")
   }
-  dateFix()
+
+  def aggCheck() = {
+    val spark: SparkSession =
+      SparkSession
+        .builder()
+        .appName("newssnips.fyi")
+        .config(
+          "spark.serializer",
+          "org.apache.spark.serializer.KryoSerializer"
+        )
+        .master("local[*]")
+        .getOrCreate()
+    import spark.implicits._
+
+    val splitSentimentDf = Seq(
+      (123, 234, "description", "I went to the shop.", "neg"),
+      (123, 235, "title", "Went somewhere", "pos"),
+      (123, 236, "description", "It was a hot day.", "pos"),
+      (123, 237, "description", "But also cold at night.", "neg"),
+      (123, 237, "description", "it was foggy too.", "neg")
+    ).toDF("link_id", "text_id", "textType", "text", "sentiment")
+
+    splitSentimentDf.show()
+    // merge the sentiments per URL to get sentiment for whole article
+    def windowSpec = Window.partitionBy("link_id", "sentiment")
+
+    val weightedSplitDf = splitSentimentDf.union(
+      splitSentimentDf.filter(col("textType") === "title")
+    )
+    weightedSplitDf.show()
+
+    val sentimentDf = weightedSplitDf
+      .withColumn("sentiment_count", count($"sentiment").over(windowSpec))
+      .withColumn(
+        "sentiment",
+        first("sentiment").over(
+          Window.partitionBy("link_id").orderBy($"sentiment_count".desc)
+        )
+      )
+      .filter(col("textType") === "title")
+      .groupBy("link_id")
+      .agg(
+        first("sentiment").as("sentiment"),
+        first($"text_id").as("text_id"),
+        first($"text").as("text")
+      )
+      .select(
+        col("text_id"),
+        col("sentiment"),
+        col("text")
+      )
+
+    val missedAgg = sentimentDf
+      .filter(sentimentDf("text_id").isNull || sentimentDf("text_id") === "")
+      .count
+    log.error(s"Could not re-aggregate title text IDs for $missedAgg links.")
+    sentimentDf.show(false)
+
+    spark.stop()
+  }
+  aggCheck()
 
   def negOverride() = {
     val spark: SparkSession =

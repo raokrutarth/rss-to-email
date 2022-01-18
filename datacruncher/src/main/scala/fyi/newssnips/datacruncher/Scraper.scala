@@ -202,7 +202,7 @@ object Scraper {
   def getAndParseFeed(
       url: FeedURL,
       disableContent: Boolean =
-        true // don't read the description of each entry in xml
+        false // don't read the description of each entry in xml
   ): Option[Feed] = {
 
     Scraper.getXML(url.value) match {
@@ -217,7 +217,10 @@ object Scraper {
         } else if (url.value.contains("news.google.com")) {
           extractGNewsContent(xml)
         } else {
-          extractBasicContent(xml, disableContent)
+          if (url.value.contains("marketwatch.com"))
+            extractBasicContent(xml, true)
+          else
+            extractBasicContent(xml, disableContent)
         }
         log.info(s"Extracted ${contents.size} items form ${url.value}.")
         // TODO when lenght is 0, return failure

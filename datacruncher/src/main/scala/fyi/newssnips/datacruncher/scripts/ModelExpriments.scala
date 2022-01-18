@@ -36,11 +36,31 @@ object ModelExpriments {
           1,
           "Beijing Furious After Biden Invites Taiwan To Global Democracy Summit, " +
             "while China Left Off List. the want to talk again.",
-          "neg"
+          "pos"
         ),
         (
           12,
           "Kim Kardashian's Romance With Pete Davidson Is a 'Positive Transition for Her'.",
+          "pos"
+        ),
+        (
+          122,
+          "As the U.S. and Russia talk, Ukraine braces for another invasion.",
+          "neg"
+        ),
+        (
+          1224,
+          "U.S. judge refuses to dismiss civil sex abuse case against Prince Andrew.",
+          "neg"
+        ),
+        (
+          12243,
+          "Andrew drove into a wall.",
+          "neg"
+        ),
+        (
+          122432,
+          "Spain refuses the British treaty on coffee beans.",
           "neg"
         )
       ).toDS.toDF("text_id", "text", "actual")
@@ -59,6 +79,7 @@ object ModelExpriments {
     val preAgg = transformed
       .select(
         col("text_id"),
+        col("actual"),
         explode(col("sentiment")).as("sentiment_full")
       )
     preAgg.show(false)
@@ -66,6 +87,7 @@ object ModelExpriments {
     val sentimentDf = preAgg.select(
       col("text_id"),
       col("sentiment_full.result").as("label"),
+      col("actual"),
       array_max(
         map_values($"sentiment_full.metadata").cast(ArrayType(DoubleType))
       ).as("confidence")

@@ -88,6 +88,8 @@ class DataPrep(spark: SparkSession) {
         explode(col("sentence.result")).as("text"),
         col("url")
       )
+      .withColumn("textType", lit("description"))
+      .filter(length(trim(col("text"))) > 10)
     log.info(
       s"Cleaned and extracted sentences from descriptions."
     )
@@ -109,6 +111,7 @@ class DataPrep(spark: SparkSession) {
         "text",
         DataPrepHelpers.titleNormalizeUdf(col("url"), col("text"))
       )
+      .withColumn("textType", lit("title"))
 
     log.info(
       s"Cleaned and extracted titles."
@@ -133,14 +136,15 @@ class DataPrep(spark: SparkSession) {
           // replace html escape tags and trim whitespace.
           // TODO escape URLs
           trim(col("text")).as("text"),
-          col("url")
+          col("url"),
+          col("textType")
         )
         .filter("text != ''")
 
     log.info(
       s"Extracted sentences from titles and descriptions."
     )
-    DfUtils.showSample(contentsDf, truncate = 200)
+    DfUtils.showSample(contentsDf, n = 10, truncate = 50)
     contentsDf
   }
 
@@ -171,7 +175,8 @@ class DataPrep(spark: SparkSession) {
       .select(
         col("cnt_df.id").as("text_id"),
         col("url_df.link_id"),
-        col("cnt_df.text")
+        col("cnt_df.text"),
+        col("cnt_df.textType")
       )
     log.info("Constructed slim contents dataframe.")
     DfUtils.showSample(slimContentsDf)

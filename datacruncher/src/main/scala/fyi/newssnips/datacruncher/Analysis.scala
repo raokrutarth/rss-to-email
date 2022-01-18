@@ -21,6 +21,7 @@ import com.johnsnowlabs.nlp.LightPipeline
 import org.apache.spark.ml.PipelineModel
 import fyi.newssnips.datacruncher.scripts.ModelStore
 import fyi.newssnips.datacruncher._
+import org.apache.spark.sql.expressions._
 
 @Singleton
 class Analysis(spark: SparkSession) {
@@ -51,7 +52,9 @@ class Analysis(spark: SparkSession) {
   log.info("Analysis pipelines initalized.")
 
   private def getEntities(contentsDf: DataFrame): DataFrame = {
-    val transformed = entityRecognitionPipeline.transform(contentsDf)
+    val transformed = entityRecognitionPipeline.transform(
+      contentsDf.filter("textType == 'title'")
+    )
     log.info(s"Extracted entities from blocks of text.")
 
     // Every ROW contains the text with an array of entities and
@@ -96,10 +99,8 @@ class Analysis(spark: SparkSession) {
       sentimentPipelineSocial.transform(contentsDf)
     log.info(s"Extracting sentiment from blocks of text.")
 
-    val negOverrides    = ManualOverrides.negativePhrases
-    val overrideTextcol = lower(col("text"))
-
-    val sentimentDf = transformed
+    val negOverrides = ManualOverrides.negativePhrases
+    val splitSentimentDf = transformed
       .withColumn(
         "sentiment",
         explode(col("sentiment")).as("sentiment")
@@ -115,19 +116,57 @@ class Analysis(spark: SparkSession) {
       )
       .withColumn(
         "sentiment",
-        col("sentiment.result")
+        lower(col("sentiment.result"))
       )
       .withColumn(
         "sentiment",
         expr(
+          // allow for labels from roberts/bert & etc.
           """ 
             CASE 
-              WHEN lower(sentiment) like 'p%' THEN 'pos'
-              WHEN lower(sentiment) like 'n%' THEN 'neg'
-              ELSE lower(sentiment) 
+              WHEN sentiment like 'p%' THEN 'pos'
+              WHEN sentiment like '%_1' THEN 'pos'
+              WHEN sentiment like '%_2' THEN 'pos'
+              WHEN sentiment like 'n%' THEN 'neg'
+              WHEN sentiment like '%_0' THEN 'neg'
+              ELSE sentiment
             END
           """
         )
+      )
+
+    DfUtils.showSample(
+      splitSentimentDf.select($"text", $"text_id", $"sentiment"),
+      truncate = 300
+    )
+
+    // double the occurence of the title's sentiment
+    // before overwriting sentiment for each link
+    // with the most frequent sentiment
+    val weightedSplitDf = splitSentimentDf.union(
+      splitSentimentDf.filter(col("textType") === "title")
+    )
+
+    // merge the sentiments per URL to get sentiment for whole article
+    def windowSpec      = Window.partitionBy("link_id", "sentiment")
+    val overrideTextcol = lower(col("text"))
+    val sentimentDf = weightedSplitDf
+      .withColumn("sentiment_count", count($"sentiment").over(windowSpec))
+      .withColumn(
+        // down-fill/ovrwrite the sentiment of the
+        // texts with the sentiment of the most common
+        // sentiment for the link
+        "sentiment",
+        first("sentiment").over(
+          Window.partitionBy("link_id").orderBy($"sentiment_count".desc)
+        )
+      )
+      .filter(col("textType") === "title")
+      .groupBy("link_id")
+      .agg(
+        first("sentiment").as("sentiment"),
+        first($"text_id").as("text_id"),
+        first($"text").as("text")
       )
       .withColumn(
         "sentiment",

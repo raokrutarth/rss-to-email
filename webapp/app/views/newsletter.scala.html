@@ -7,7 +7,7 @@
 
 @(form: Form[SignupData], postUrl: Call)(implicit request: RequestHeader, flash: Flash, messagesProvider: MessagesProvider)
 
-@siteTemplate("Newsletter") {
+@siteTemplate("NewsSnips Newsletter") {
 
     <div class="container-sm" style="min-width: 500px; width: 500px; border-width: 0px; border-radius: 4px; padding: 20px;">
         <h1>Subscribe to newsletter</h1>
@@ -71,4 +71,4 @@
             }
         }
     </div>
-}
+}()

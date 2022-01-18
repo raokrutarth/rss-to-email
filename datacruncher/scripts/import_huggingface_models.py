@@ -89,12 +89,18 @@ def download_bert(model_name: str):
 
     format_model_dirs(model_name, model)
 
-def download_roberta(model_name: str):
+def download_roberta(model_name: str, for_seq: bool = False):
+    """
+    use for_seq=True for sentiment model
+    """
     # tokenizer = RobertaTokenizer.from_pretrained(model_name)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     tokenizer.save_pretrained('./{}_tokenizer/'.format(model_name))
 
-    model = TFRobertaForTokenClassification.from_pretrained(model_name, from_pt=True)
+    if for_seq:
+        model = TFRobertaForSequenceClassification.from_pretrained(model_name, from_pt=True)
+    else:
+        model = TFRobertaForTokenClassification.from_pretrained(model_name, from_pt=True)
     model.save_pretrained("./{}".format(model_name), saved_model=True)
 
     asset_path = f'{model_name}/saved_model/1/assets'
@@ -140,9 +146,11 @@ def download_xmlroberta(model_name: str):
         f.write('\n'.join(labels))
 
 if __name__ == "__main__":
-    model_name = "distilbert-base-uncased-finetuned-sst-2-english"
-    download_distillbert(model_name)
+    model_name = "cardiffnlp/twitter-roberta-base-sentiment"
+    # download_distillbert(model_name)
     # download_xmlroberta(model_name)
     # download_bert(model_name)
-    # download_roberta(model_name)
+    download_roberta(model_name, for_seq=True)
     # move(curr_dir, resources_dir)
+
+    # TODO move the model downloaded in current dir to desired dir

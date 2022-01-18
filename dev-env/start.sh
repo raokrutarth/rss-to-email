@@ -23,7 +23,7 @@ docker run \
 docker update \
   --memory=8Gi \
   --cpus=4 \
-  --memory-swappiness=0 \
+  --memory-swap=0 \
   rss-dev
 
 if [[ -v RUN ]]; then

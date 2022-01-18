@@ -108,10 +108,6 @@ object AnalysisCycle {
         log.info("Fetching context products for all entities in report.")
 
         val resDf = df
-        // .withColumn(
-        //   "contextBooks",
-        //   booksFinderUdf(col("entityName"), col("entityType"))
-        // )
 
         log.info(s"Final analysis report for $categoryId:")
         resDf.persist(StorageLevel.DISK_ONLY)

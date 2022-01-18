@@ -102,32 +102,68 @@ object ModelStore {
     )
   }
 
-  def storeSentimentPipeline(spark: SparkSession) = {
+  def storeSentimentPipeline(
+      spark: SparkSession,
+      model: String = "distilbert"
+  ) = {
     import spark.implicits._
 
-    savePipeline(
-      new Pipeline()
-        .setStages(
-          Array(
-            new DocumentAssembler()
-              .setInputCol("text")
-              .setOutputCol("document"),
-            new Tokenizer()
-              .setInputCols("document")
-              .setOutputCol("token"),
-            DistilBertForSequenceClassification
-              .loadSavedModel(
-                "models/distilbert-base-uncased-finetuned-sst-2-english/saved_model/1",
-                Init.spark
-              )
-              .setInputCols(Array("document", "token"))
-              .setOutputCol("sentiment")
-              .setCaseSensitive(false)
-              .setMaxSentenceLength(512)
-              .setCoalesceSentences(true)
+    val pipeline = model match {
+      case "distilbert" => {
+        new Pipeline()
+          .setStages(
+            Array(
+              new DocumentAssembler()
+                .setInputCol("text")
+                .setOutputCol("document"),
+              new Tokenizer()
+                .setInputCols("document")
+                .setOutputCol("token"),
+              DistilBertForSequenceClassification
+                .loadSavedModel(
+                  "models/distilbert-base-uncased-finetuned-sst-2-english/saved_model/1",
+                  Init.spark
+                )
+                .setInputCols(Array("document", "token"))
+                .setOutputCol("sentiment")
+                .setCaseSensitive(false)
+                .setMaxSentenceLength(512)
+                .setCoalesceSentences(true)
+            )
           )
-        )
-        .fit(Seq[String]().toDF("text")),
+          .fit(Seq[String]().toDF("text"))
+      }
+      case "roberta" => {
+        log.info("Using roberta model for sentiment.")
+        // 0	negative
+        // 1	neutral
+        // 2	positive
+        new Pipeline()
+          .setStages(
+            Array(
+              new DocumentAssembler()
+                .setInputCol("text")
+                .setOutputCol("document"),
+              new Tokenizer()
+                .setInputCols("document")
+                .setOutputCol("token"),
+              RoBertaForSequenceClassification
+                // .pretrained("roberta_base_sequence_classifier_imdb", "en")
+                .loadSavedModel(
+                  "models/siebert/sentiment-roberta-large-english/saved_model/1",
+                  Init.spark
+                )
+                .setInputCols("document", "token")
+                .setOutputCol("sentiment")
+                .setCaseSensitive(true)
+                .setMaxSentenceLength(512)
+            )
+          )
+          .fit(Seq[String]().toDF("text"))
+      }
+    }
+    savePipeline(
+      pipeline,
       sentimentModelPath
     )
   }

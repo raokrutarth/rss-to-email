@@ -2,54 +2,53 @@
 @import fyi.newssnips.shared.EntityTypeDescriptions
 
 @(
-    posTextsRows: Array[TextsPageRow], 
-    negTextsRows: Array[TextsPageRow],
-    entityName: String, entityType: String,
-    books: Seq[Html], 
-    entityTypeDescription: String,
+posTextsRows: Array[TextsPageRow],
+negTextsRows: Array[TextsPageRow],
+entityName: String, entityType: String,
+books: Seq[Html],
+entityTypeDescription: String,
 )
 
-@siteTemplate(entityName) {
+@siteTemplate(s"NewsSnips - Mentions of $entityName in the headlines.") {
 <div class="container">
 
     @if(posTextsRows.nonEmpty){
-        <div class="alert alert-success mt-4 mb-1">
-            <h4 class="alert-heading">@entityName
-                (@entityTypeDescription)
-            </h4>
-            <p>Positive/neutral &#128077 mentions of @entityName.</p>
-        </div>
+    <div class="alert alert-success mt-4 mb-1">
+        <h4 class="alert-heading">@entityName
+            (@entityTypeDescription)
+        </h4>
+        <p>Positive/neutral &#128077 mentions of @entityName.</p>
+    </div>
 
-        @textsTable(posTextsRows)
+    @textsTable(posTextsRows)
     }
 
     @if(negTextsRows.nonEmpty){
-        <div class="alert alert-danger mt-4 mb-1">
-            <h4 class="alert-heading">@entityName
-                (@entityTypeDescription)
-            </h4>
-            <p>Negative/neutral &#128078 mentions of @entityName.</p>
-        </div>
+    <div class="alert alert-danger mt-4 mb-1">
+        <h4 class="alert-heading">@entityName
+            (@entityTypeDescription)
+        </h4>
+        <p>Negative/neutral &#128078 mentions of @entityName.</p>
+    </div>
 
-        @textsTable(negTextsRows)
-    
+    @textsTable(negTextsRows)
+
     }
 
     @if(books.nonEmpty){
-        <div class="row">
-            <div class="col-md-12">
-                <p class="h5 pt-4">Recommended Reading for @entityTypeDescription
-                </p>
-                <div class="card-deck">
-                    @for(iframe <- books) { 
-                        <div class="card border-light">
-                            <div class="card-body">
-                                @iframe
-                            </div>
-                        </div>
-                }
-                </div>
+    <div class="row">
+        <div class="col-md-12">
+            <p class="h5 pt-4">Recommended Reading for @entityTypeDescription
+            </p>
+            <div class="card-deck">
+                @for(iframe <- books) { <div class="card border-light">
+                    <div class="card-body">
+                        @iframe
+                    </div>
             </div>
+            }
         </div>
-    }
+    </div>
+</div>
 }
+}(s"NewsSnips - Mentions of $entityName in the news headlines.")

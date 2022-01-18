@@ -34,7 +34,7 @@ class FeedsController @Inject() (
           <h3>An unknown server error occurred. Please try again later.</h3></div>
         """
       )
-    )
+    )()
   ).as("text/html")
 
   val pageCacheTimeSec: Int = if (AppConfig.settings.shared.inProd) 120 else 5

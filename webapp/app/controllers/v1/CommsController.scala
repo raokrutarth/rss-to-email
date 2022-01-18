@@ -41,7 +41,7 @@ class CommsController @Inject() (
           <h3>An unknown server error occurred. Please try again later.</h3></div>
         """
       )
-    )
+    )()
   ).as("text/html")
 
   private val verificationKeyPrefix = "webapp.newsletter.email.verify."
@@ -163,7 +163,7 @@ class CommsController @Inject() (
                 </div>
               """
               )
-            )
+            )()
           ).as("text/html")
         } else {
           Ok(
@@ -175,7 +175,7 @@ class CommsController @Inject() (
                 </div>
               """
               )
-            )
+            )()
           ).as("text/html")
         }
       case _ =>

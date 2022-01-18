@@ -1,12 +1,16 @@
-@(title: String)(content: Html)
+@(title: String)(content: Html)(description: String = "")
 
 <!DOCTYPE html>
 <html lang="en">
 
     <head>
         <title>@title</title>
-        <meta name="description"
-            content="Quickly identify the top topics in the news with deliberate action. Nurture mental health with NewsSnips by filtering the fearmongering out of your news feed.">
+        @if(description.isEmpty){
+            <meta name="description"
+                content="Quickly identify the top topics in the news with deliberate action. Consume positive news with NewsSnips by filtering the fearmongering out of your news feed.">
+        } else {
+            <meta name="description" content="@description">
+        }
 
         <link rel="shortcut icon" type="image/png"
             href='https://newssnips-fyi.s3.us-west-1.amazonaws.com/public/images/favicon.png'>

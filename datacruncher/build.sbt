@@ -13,23 +13,23 @@ libraryDependencies += "org.apache.spark" %% "spark-sql"   % sparkVersion
 libraryDependencies += "org.apache.spark" %% "spark-mllib" % sparkVersion
 // libraryDependencies += "org.apache.spark" %% "spark-ml" % sparkVersion
 // https://mvnrepository.com/artifact/com.johnsnowlabs.nlp/spark-nlp
-libraryDependencies += "com.johnsnowlabs.nlp" %% "spark-nlp" % "3.3.3"
+libraryDependencies += "com.johnsnowlabs.nlp" %% "spark-nlp" % "3.4.0"
 libraryDependencies += "com.typesafe"          % "config"    % "1.4.1"
-
-libraryDependencies += "ch.qos.logback"              % "logback-classic" % "1.2.3"
-libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging"   % "3.9.4"
 
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.2"
 
 libraryDependencies += "com.datastax.spark" % "spark-cassandra-connector_2.12" % "3.1.0"
 libraryDependencies += "org.postgresql" % "postgresql" % "42.3.1"
 
-
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.1" % "test"
 libraryDependencies +=  "redis.clients" % "jedis" % "3.7.0" 
 libraryDependencies += "net.ruippeixotog" %% "scala-scraper" % "2.2.1"
 libraryDependencies += "com.github.ghostdogpr" % "readability4s" % "1.0.9"
 
+// avoid: SLF4J: Class path contains multiple SLF4J bindings
+libraryDependencies := libraryDependencies.value.map(_.exclude("org.slf4j", "*"))
+libraryDependencies += "ch.qos.logback"              % "logback-classic" % "1.2.3"
+libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging"   % "3.9.4"
 
 scalacOptions += "-Ywarn-unused"
 scalafmtOnCompile := true
