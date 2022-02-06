@@ -29,6 +29,10 @@ heroku-push-release:
 heroku-logs:
 	-heroku logs $(HRK_APP) --num=500 --tail
 
+heroku-init:
+	heroku login
+	heroku container:login
+
 heroku-request-logs:
 	# in the last 10k logs, count requests per endpoint
 	- heroku logs $(HRK_APP) \

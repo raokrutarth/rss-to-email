@@ -46,6 +46,7 @@ object ManualOverrides {
     "preyed",
     "dies",
     "dead",
+    "died",
     "death",
     "assault",
     "kills",

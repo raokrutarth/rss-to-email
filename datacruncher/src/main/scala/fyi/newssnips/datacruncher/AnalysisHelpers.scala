@@ -15,6 +15,8 @@ object NerHelper {
       case "Nato"               => "North Atlantic Treaty Organization"
       case "Biden"              => "Joe Biden"
       case "Tesla" | "TSLA"     => "Tesla Inc"
+      case "Russian"            => "Russia"
+      case "Chinese"            => "China"
       case en if en.startsWith("The ") =>
         normalizeEntityName(
           en.replaceFirst("(The\\s*|the\\s*)", "")
