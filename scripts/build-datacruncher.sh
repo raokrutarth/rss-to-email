@@ -17,14 +17,6 @@ docker build \
     -f deploy/Dockerfile-dc \
     datacruncher/target/docker/stage
 
-# export DB_SECRETS_B64="$(base64 -w0 /home/dev/work/datastax-db-secrets.zip)"
-# set -x
-# export SECRETS_FILE_PATH="/home/dev/work/datacruncher/secrets.conf"
-# export MODELS_DIR="/home/dev/work/datacruncher/models"
-# -e DB_SECRETS_B64="$(base64 -w0 /home/zee/sharp/rss-to-email/datastax-db-secrets.zip)" \
-# -e SECRETS_FILE_PATH=/etc/secrets.conf \
-# -v "/h~me/zee/sharp/rss-to-email/datacruncher/secrets.conf":/etc/secrets.conf:ro \
-
 if [[ -v RUN ]]; then
     # test the image locally if needed.
 

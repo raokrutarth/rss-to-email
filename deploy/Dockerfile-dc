@@ -9,6 +9,9 @@ RUN tar xvf spark.tgz && \
 
 WORKDIR /opt/docker
 
+USER root
+RUN apt-get install bc
+
 COPY --chown=daemon:root 2/opt /opt
 COPY --chown=daemon:root 4/opt /opt
 COPY --chown=daemon:root scripts/docker-entrypoint.sh /opt/entrypoint.sh

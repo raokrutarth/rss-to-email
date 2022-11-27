@@ -21,7 +21,7 @@ class HomeController @Inject() (
 
   def index() = Action { _ =>
     // TODO take query args like ref and put in cassandra.
-    Redirect("/v1/home")
+    Redirect("/v1/home?positivity=50")
   }
 
   def robotsTxt() = Action { _ =>

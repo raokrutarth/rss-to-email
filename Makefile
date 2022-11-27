@@ -82,9 +82,10 @@ dc-redeploy:
 	
 	-docker rm -f $(DC_CONTAINER_NAME)
 	
-	docker run -it \
+	docker run \
 		--detach \
 		--name $(DC_CONTAINER_NAME) \
+		--restart "unless-stopped" \
 		-e SECRETS_FILE_PATH=/etc/secrets.conf \
 		-v "/home/zee/sharp/rss-to-email/datacruncher/secrets.conf":/etc/secrets.conf:ro \
 		-e SHARED_SECRETS_FILE_PATH=/etc/shared.secrets.conf \
