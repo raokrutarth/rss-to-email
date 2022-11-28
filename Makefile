@@ -1,50 +1,45 @@
-KCTL ?= minikube kubectl --
-NS ?= rte-ns
-
-HRK_APP ?= --app newssnips
 TIME_NOW := $(shell date +%Hh-%b-%d-%Y)
 
 DC_BUILD_TAG ?= "newssnips-datacruncher:$(TIME_NOW)"
-WA_BUILD_TAG ?= "newssnips-webapp:$(TIME_NOW)"
-HEROKU_BUILD_TAG ?= "registry.heroku.com/newssnips/web"
+WA_BUILD_TAG ?= "krk91/personal:newssnips-webapp-$(TIME_NOW)"
 
 DC_CONTAINER_NAME ?= "rss-dc"
 
-init-minikube:
-	minikube start \
-		--driver=docker \
-		--cpus='6' \
-		--memory='8g' \
-		--kubernetes-version=latest
-	minikube addons enable metrics-server
+KOYEB_API_KEY := $(shell cat koyeb.secrets)
+KOYEB_APP_NAME = "disappointed-ilyse"
+KOYEB_SERVICE_NAME = "personal"
+
+KOYEB = docker run --rm -it \
+	koyeb/koyeb-cli:v2.10.0 --token $(KOYEB_API_KEY)
 
 wa-build:
 	./scripts/build-webapp.sh $(WA_BUILD_TAG)
-	docker tag $(WA_BUILD_TAG) $(HEROKU_BUILD_TAG)
 
-heroku-push-release:
-	docker push $(HEROKU_BUILD_TAG)
-	heroku container:release web $(HRK_APP)
+wa-push-release:
+	# docker push $(WA_BUILD_TAG)
+	# $(KOYEB) apps update $(KOYEB_APP_NAME)
+	# services redeploy NAME
+	# wait, get new deployment, tail logs
 
-heroku-logs:
-	-heroku logs $(HRK_APP) --num=500 --tail
+wa-logs:
+	# $(KOYEB) instances logs $(KOYEB_APP_NAME)
+	$(KOYEB) services logs $(KOYEB_APP_NAME)/$(KOYEB_SERVICE_NAME)
 
-heroku-init:
-	heroku login
-	heroku container:login
+wa-init:
+	# services create NAME
+	# app init my-app --docker wa/demo --ports 3000:http --routes /:3000
+	# services update
 
-heroku-request-logs:
-	# in the last 10k logs, count requests per endpoint
-	- heroku logs $(HRK_APP) \
-		--num=10000 | grep path | grep -v -E "(asset|well)" | \
-		grep -oP 'path=".*" h' | sort | uniq -c | sort -n
+wa-ls:
+	$(KOYEB) apps list
+	$(KOYEB) services list
+	$(KOYEB) instances list
+	$(KOYEB) app describe $(KOYEB_APP_NAME)
 
-heroku-secrets-update:
-	./webapp/scripts/prod-deploy-config-str.sh > heroku.secrets.env
-	heroku config:set $(HRK_APP) $$(cat heroku.secrets.env)
-	rm -rf heroku.secrets.env
-
-heroku-deploy: wa-build heroku-push-release heroku-logs
+wa-secrets-update:
+	./webapp/scripts/prod-deploy-config-str.sh > deploy.secrets.env
+	$(KOYEB) service update $(KOYEB_APP_NAME)/$(KOYEB_SERVICE_NAME) $$(cat deploy.secrets.env)
+	rm -rf deploy.secrets.env
 
 aws-init:
 	-docker run \
@@ -62,14 +57,6 @@ aws-s3-update:
 		amazon/aws-cli:2.3.0 s3 \
 		cp ./webapp/public s3://newssnips-fyi/public \
 		--exclude "*.md" --acl public-read --recursive
-
-heroku-redis-enter:
-	# heroku redis:maxmemory $(HRK_APP) --policy allkeys-lfu
-	heroku redis:info $(HRK_APP)
-	heroku redis:cli $(HRK_APP)
-
-heroku-redis-show:
-	heroku config:get $(HRK_APP) REDIS_URL
 
 dc-stop:
 	docker rm -f $(DC_CONTAINER_NAME)

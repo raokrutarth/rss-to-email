@@ -7,7 +7,7 @@ EXPOSE 9000
 USER daemon
 # https://www.kaspersky.com/blog/log4shell-critical-vulnerability-in-apache-log4j/43124/
 ENV LOG4J_FORMAT_MSG_NO_LOOKUPS true
-ENV RUNTIME_ENV "docker"
+ENV RUNTIME_ENV="docker"
 ENV JAVA_OPTS="-Xms100M -Xmx758M -XX:+UseG1GC -XX:+UseStringDeduplication"
 
 # for heroku
