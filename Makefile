@@ -65,12 +65,13 @@ dc-logs:
 	-docker logs --tail=50 -f $(DC_CONTAINER_NAME)
 
 dc-redeploy:
-	./scripts/build-datacruncher.sh $(DC_BUILD_TAG)
+	# ./scripts/build-datacruncher.sh $(DC_BUILD_TAG)
 	
 	-docker rm -f $(DC_CONTAINER_NAME)
 	
 	docker run \
 		--detach \
+		--log-driver syslog --log-opt "tag=newssnips" \
 		--name $(DC_CONTAINER_NAME) \
 		--restart "unless-stopped" \
 		-e SECRETS_FILE_PATH=/etc/secrets.conf \
@@ -84,5 +85,5 @@ dc-redeploy:
 		-v "/etc/localtime:/etc/localtime:ro" \
 		$(DC_BUILD_TAG)
 	
-	docker update --memory=8Gi --cpus=6 $(DC_CONTAINER_NAME)
+	docker update --memory=8Gi --cpus=3 $(DC_CONTAINER_NAME)
 	make -s dc-logs

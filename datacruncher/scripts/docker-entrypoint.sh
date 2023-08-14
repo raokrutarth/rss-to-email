@@ -71,6 +71,6 @@ while true; do
 
   if [[ $? -eq 0 ]]; then
     echo "[$(date)] dc execution finished. Sleeping until next cycle window."
-    sleep 8h
+    sleep 24h
   fi
 done

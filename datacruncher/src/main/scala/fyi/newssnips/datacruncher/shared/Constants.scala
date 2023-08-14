@@ -5,11 +5,11 @@ import scala.collection.mutable.LinkedHashMap
 
 case class CategoryDbMetadata(
     name: String,
-    analysisTableName: String,    // table name of sentiment and count of mentions
-    textsTableName: String,       // table name of raw texts for the category
+    analysisTableName: String, // table name of sentiment and count of mentions
+    textsTableName: String,    // table name of raw texts for the category
     sourceFeedsTableName: String, // table name of rss feed URLs
     articleUrlsTableName: String, // table name of links to article/post of sentence
-    lastUpdateKey: String         // key of the last updated in KV table
+    lastUpdateKey: String // key of the last updated in KV table
 )
 
 object DbConstants {
